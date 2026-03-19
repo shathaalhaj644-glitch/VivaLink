@@ -4,19 +4,12 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
 
 public class HospitalsHomeActivity extends AppCompatActivity {
-
     private TextView tvHospitalTitle, tvRequestStatus;
     private Button btnNewRequest;
     private DatabaseReference mRef;
@@ -26,7 +19,6 @@ public class HospitalsHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospitals_home);
 
-        // ربط العناصر
         tvHospitalTitle = findViewById(R.id.tvHospitalTitle);
         tvRequestStatus = findViewById(R.id.tvRequestStatus);
         btnNewRequest = findViewById(R.id.btnNewRequest);
@@ -37,6 +29,7 @@ public class HospitalsHomeActivity extends AppCompatActivity {
         }
 
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // التأكد من أن المسار هو Hospitals
         mRef = FirebaseDatabase.getInstance().getReference("Hospitals").child(uid);
 
         loadHospitalData();
@@ -51,11 +44,14 @@ public class HospitalsHomeActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String hospitalName = snapshot.child("hospital_name").getValue(String.class);
-                    String requestStatus = snapshot.child("request_status").getValue(String.class);
+                    // التعديل هنا: استخدام "name" بدلاً من "hospital_name"
+                    String hospitalName = snapshot.child("name").getValue(String.class);
+                    String city = snapshot.child("city").getValue(String.class);
 
                     tvHospitalTitle.setText("مستشفى: " + (hospitalName != null ? hospitalName : "غير معروف"));
-                    tvRequestStatus.setText("حالة الطلبات: " + (requestStatus != null ? requestStatus : "لا يوجد"));
+                    tvRequestStatus.setText("الموقع: " + (city != null ? city : "غير محدد"));
+                } else {
+                    tvHospitalTitle.setText("بيانات المستشفى غير موجودة");
                 }
             }
 

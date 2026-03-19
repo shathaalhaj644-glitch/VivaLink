@@ -19,7 +19,7 @@ public class DonorsHelper {
 
     // إضافة متبرع جديد ✅
     public Task<Void> addDonor(Donors donor) {
-        return dbRef.child(donor.getDonorId()).setValue(donor);
+        return dbRef.child(donor.getName()).setValue(donor);
     }
 
     // جلب كل المتبرعين ✅

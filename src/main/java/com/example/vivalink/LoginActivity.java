@@ -7,30 +7,29 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.vivalink.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmailOrPhone, etPassword;
-    private Button btnLogin;
+    private Button btnLogin, btnGoToSignUp;
     private FirebaseAuth mAuth;
-    private DatabaseReference mRef;
+    private DatabaseReference mRootRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // 1. تعريف العناصر والفايربيس
         mAuth = FirebaseAuth.getInstance();
-        mRef = FirebaseDatabase.getInstance().getReference("Users");
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+
         etEmailOrPhone = findViewById(R.id.etLoginEmailOrPhone);
         etPassword = findViewById(R.id.etLoginPassword);
         btnLogin = findViewById(R.id.btnSubmitLogin);
+        btnGoToSignUp = findViewById(R.id.btnGoToSignUp);
 
-        // 2. عند الضغط على زر الدخول
         btnLogin.setOnClickListener(v -> {
             String input = etEmailOrPhone.getText().toString().trim();
             String pass = etPassword.getText().toString().trim();
@@ -40,18 +39,21 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // إذا المدخل إيميل سجّل دخول مباشرة، إذا رقم هاتف ابحث عن الإيميل أولاً
             if (input.contains("@")) {
                 signIn(input, pass);
             } else {
                 findEmailByPhone(input, pass);
             }
         });
+
+        btnGoToSignUp.setOnClickListener(v -> {
+            startActivity(new Intent(this, DonorSignUpActivity.class));
+        });
     }
 
-    // البحث عن الإيميل باستخدام رقم الهاتف
     private void findEmailByPhone(String phone, String pass) {
-        mRef.orderByChild("phoneNumber").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
+        // البحث في قسم المتبرعين أولاً
+        mRootRef.child("Donors").orderByChild("phone").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -67,7 +69,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // تسجيل الدخول الفعلي (Firebase Auth)
     private void signIn(String email, String pass) {
         mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -78,22 +79,34 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // التحقق من صلاحية المستخدم (Role) وتوجيهه للشاشة الصحيحة
     private void checkUserRole(String uid) {
-        mRef.child(uid).child("role").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                String role = snapshot.getValue(String.class);
-                Intent intent;
-                if ("donor".equals(role)) intent = new Intent(LoginActivity.this, DonorsHomeActivity.class);
-                else if ("hospital".equals(role)) intent = new Intent(LoginActivity.this, HospitalsHomeActivity.class);
-                else if ("staff".equals(role)) intent = new Intent(LoginActivity.this, BloodBankStaffHomeActivity.class);
-                else intent = new Intent(LoginActivity.this, MainActivity.class);
+        // فحص الجداول الثلاثة بناءً على الـ JSON المرفوع
+        String[] nodes = {"Donors", "Hospitals", "BloodBankStaff"};
 
-                startActivity(intent);
-                finish();
-            }
-            @Override public void onCancelled(DatabaseError error) {}
-        });
+        for (String node : nodes) {
+            mRootRef.child(node).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String role = snapshot.child("role").getValue(String.class);
+                        Intent intent = null;
+
+                        if ("Donor".equalsIgnoreCase(role)) {
+                            intent = new Intent(LoginActivity.this, DonorsHomeActivity.class);
+                        } else if ("hospital".equalsIgnoreCase(role)) {
+                            intent = new Intent(LoginActivity.this, HospitalsHomeActivity.class);
+                        } else if ("BankStaff".equalsIgnoreCase(role)) {
+                            intent = new Intent(LoginActivity.this, BloodBankStaffHomeActivity.class);
+                        }
+
+                        if (intent != null) {
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                }
+                @Override public void onCancelled(DatabaseError error) {}
+            });
+        }
     }
 }

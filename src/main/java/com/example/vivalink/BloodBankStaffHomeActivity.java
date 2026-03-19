@@ -1,12 +1,10 @@
-package com.example.vivalink; // تأكدي من اسم الباكج تبعك
+package com.example.vivalink;
 
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
@@ -22,14 +20,13 @@ public class BloodBankStaffHomeActivity extends AppCompatActivity {
         tvStaffWelcome = findViewById(R.id.tvStaffWelcome);
         tvStaffDetails = findViewById(R.id.tvStaffDetails);
 
-        // فحص إذا في مستخدم مسجل دخول
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            Toast.makeText(this, "لم يتم العثور على مستخدم مسجل دخول", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "لم يتم العثور على مستخدم", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        // الدخول المباشر لنود الموظفين باستخدام الـ UID
+        // التأكد من أن المسار هو BloodBankStaff كما في الـ JSON
         mRef = FirebaseDatabase.getInstance().getReference("BloodBankStaff").child(currentUid);
 
         loadStaffData();
@@ -40,14 +37,15 @@ public class BloodBankStaffHomeActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // سحب البيانات مباشرة بدون Loop
-                    String name = snapshot.child("full_name").getValue(String.class);
-                    String pos = snapshot.child("position").getValue(String.class);
+                    // التعديل هنا: استخدام "name" و "role" و "city"
+                    String name = snapshot.child("name").getValue(String.class);
+                    String role = snapshot.child("role").getValue(String.class);
+                    String city = snapshot.child("city").getValue(String.class);
 
-                    tvStaffWelcome.setText("أهلاً بك، " + (name != null && !name.isEmpty() ? name : "موظف"));
-                    tvStaffDetails.setText("المسمى الوظيفي: " + (pos != null && !pos.isEmpty() ? pos : "غير محدد"));
+                    tvStaffWelcome.setText("أهلاً بك، " + (name != null ? name : "موظف"));
+                    tvStaffDetails.setText("الدور: " + (role != null ? role : "Staff") + " | المدينة: " + city);
                 } else {
-                    Toast.makeText(BloodBankStaffHomeActivity.this, "بيانات الموظف غير موجودة", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(BloodBankStaffHomeActivity.this, "بيانات الموظف غير موجودة في القاعدة", Toast.LENGTH_SHORT).show();
                 }
             }
 
