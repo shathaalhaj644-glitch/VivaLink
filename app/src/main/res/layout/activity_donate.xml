@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    android:layoutDirection="rtl">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="حجز موعد تبرع"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="30dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="اختر المستشفى:"/>
+    <Spinner
+        android:id="@+id/spinnerHospitals"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btnSelectDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="اختر التاريخ"
+        android:backgroundTint="#888"/>
+    <TextView
+        android:id="@+id/tvSelectedDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="التاريخ: لم يتم الاختيار"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btnSelectTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="اختر الوقت"
+        android:backgroundTint="#888"/>
+    <TextView
+        android:id="@+id/tvSelectedTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="الوقت: لم يتم الاختيار"
+        android:layout_marginBottom="30dp"/>
+
+    <Button
+        android:id="@+id/btnConfirmDonate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="تأكيد حجز الموعد"
+        android:backgroundTint="#C62828"/>
+
+</LinearLayout>

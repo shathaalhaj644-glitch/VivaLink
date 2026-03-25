@@ -1,0 +1,8 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    // هاد السطر بكون موجود أصلاً، لا تغيري إصدار الـ 8.3.2
+    alias(libs.plugins.android.application) apply false
+
+    // هاد السطر اللي بضيف الفايربيس للنسخة الجديدة
+    id 'com.google.gms.google-services' version '4.4.4' apply false
+}

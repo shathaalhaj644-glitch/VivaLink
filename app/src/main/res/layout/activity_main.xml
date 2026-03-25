@@ -1,0 +1,59 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <!-- عنوان التطبيق -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VivaLink"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="#D32F2F"
+            android:layout_marginBottom="12dp"
+            android:letterSpacing="0.05"/>
+
+        <!-- نص ترحيبي -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="أهلاً بك! يرجى تسجيل الدخول أو إنشاء حساب."
+            android:textSize="16sp"
+            android:textColor="#555555"
+            android:layout_marginBottom="40dp"
+            android:gravity="center"
+            android:textAlignment="center"/>
+
+        <!-- زر تسجيل الدخول -->
+        <Button
+            android:id="@+id/btnMainLogin"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="تسجيل الدخول"
+            android:backgroundTint="#D32F2F"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:elevation="4dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- زر إنشاء حساب (للمتبرعين فقط) -->
+        <Button
+            android:id="@+id/btnMainSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="إنشاء حساب (للمتبرعين فقط)"
+            android:backgroundTint="#D32F2F"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:elevation="4dp"/>
+    </LinearLayout>
+</ScrollView>
+
