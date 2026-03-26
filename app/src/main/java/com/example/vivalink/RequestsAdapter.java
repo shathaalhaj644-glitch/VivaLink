@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
@@ -22,23 +21,20 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         this.listener = listener;
     }
 
-    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_blood_requests, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         BloodRequests req = list.get(position);
 
-        holder.tvBlood.setText(req.getBloodType());
-        holder.tvHospital.setText(req.getHospitalName());
-        holder.tvCity.setText("📍 " + req.getCity());
-        holder.tvDept.setText("🏥 " + req.getDepartment());
-        holder.tvUnits.setText("🩸 وحدات: " + req.getUnits());
-        holder.tvTime.setText("⏰ " + req.getTime());
+        holder.tvBlood.setText(req.getBloodType() != null ? req.getBloodType() : "--");
+        holder.tvHospital.setText(req.getHospitalName() != null ? req.getHospitalName() : "غير محدد");
+        holder.tvCity.setText("📍 " + (req.getCity() != null ? req.getCity() : "غير محدد"));
+        holder.tvUnits.setText("🩸 عدد الوحدات: " + (req.getUnits() != null ? req.getUnits() : "0"));
 
         holder.btnDonate.setOnClickListener(v -> {
             if (listener != null) listener.onDonateClick(req);
@@ -46,20 +42,18 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     }
 
     @Override
-    public int getItemCount() { return list.size(); }
+    public int getItemCount() { return list != null ? list.size() : 0; }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvBlood, tvHospital, tvCity, tvDept, tvUnits, tvTime;
+        TextView tvBlood, tvHospital, tvCity, tvUnits;
         Button btnDonate;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
             tvBlood = itemView.findViewById(R.id.tvBloodTypeItem);
             tvHospital = itemView.findViewById(R.id.tvHospitalItem);
             tvCity = itemView.findViewById(R.id.tvCityItem);
-            tvDept = itemView.findViewById(R.id.tvDepartmentItem);
             tvUnits = itemView.findViewById(R.id.tvUnitsItem);
-            tvTime = itemView.findViewById(R.id.tvTimeItem);
             btnDonate = itemView.findViewById(R.id.btnDonateItem);
         }
     }

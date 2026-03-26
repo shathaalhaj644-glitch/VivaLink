@@ -1,6 +1,8 @@
 package com.example.vivalink;
 
+import android.content.Intent; // ضفت هاد الاستيراد للانتقال بين الصفحات
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.*;
@@ -85,7 +87,6 @@ public class DonorSignUpActivity extends AppCompatActivity {
         }
         if (city.isEmpty()) { etCity.setError("يرجى إدخال اسم المدينة"); return; }
 
-        // شرط كلمة المرور (رقم، حرف كبير، حرف صغير، رمز)
         String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
         if (!Pattern.matches(passwordPattern, password)) {
             etPassword.setError("كلمة السر يجب أن تكون 8 خانات، وتحتوي على حرف كبير وصغير ورقم ورمز"); return;
@@ -112,8 +113,22 @@ public class DonorSignUpActivity extends AppCompatActivity {
 
                 mRef.child(uid).setValue(donorMap).addOnCompleteListener(saveTask -> {
                     if (saveTask.isSuccessful()) {
-                        Toast.makeText(this, "تم إنشاء الحساب بنجاح ✅", Toast.LENGTH_SHORT).show();
+                        // --- التعديل الجوهري هنا ---
+
+                        // 1. تسجيل الخروج فوراً لكسر الدخول التلقائي
+                        mAuth.signOut();
+
+                        // 2. رسالة تنبيه للمستخدم
+                        Toast.makeText(this, "تم إنشاء الحساب بنجاح! سجل دخولك الآن ✅", Toast.LENGTH_LONG).show();
+
+                        // 3. الانتقال لصفحة تسجيل الدخول (LoginActivity)
+                        Intent intent = new Intent(DonorSignUpActivity.this, LoginActivity.class);
+                        startActivity(intent);
+
+                        // 4. إغلاق صفحة التسجيل
                         finish();
+
+                        // --- نهاية التعديل ---
                     }
                 });
             } else {

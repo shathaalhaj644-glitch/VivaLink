@@ -1,24 +1,26 @@
 package com.example.vivalink;
 
 public class BloodRequests {
-    private String requestId;
-    private String hospitalName;
     private String bloodType;
+    private String hospitalName;
     private String city;
     private String department;
     private String units;
     private String time;
+    private String status; // الحقل اللي كان ناقص
+    private String requestId;
 
-    // ضروري جداً لـ Firebase
     public BloodRequests() {}
 
+    public String getBloodType() { return bloodType; }
+    public String getHospitalName() { return hospitalName; }
+    public String getCity() { return city; }
+    public String getDepartment() { return department; }
+    public String getUnits() { return units; }
+    public String getTime() { return time; }
+    public String getStatus() { return status; }
     public String getRequestId() { return requestId; }
-    public void setRequestId(String requestId) { this.requestId = requestId; }
 
-    public String getHospitalName() { return hospitalName != null ? hospitalName : "غير معروف"; }
-    public String getBloodType() { return bloodType != null ? bloodType : "--"; }
-    public String getCity() { return city != null ? city : ""; }
-    public String getDepartment() { return department != null ? department : ""; }
-    public String getUnits() { return units != null ? units : "0"; }
-    public String getTime() { return time != null ? time : ""; }
+    public void setStatus(String status) { this.status = status; }
+    public void setRequestId(String requestId) { this.requestId = requestId; }
 }
