@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#FDFDFD">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,10 +15,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="إنشاء حساب متبرع"
-            android:textSize="24sp"
+            android:textSize="26sp"
             android:textStyle="bold"
             android:textColor="#D32F2F"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="32dp"/>
 
         <EditText
             android:id="@+id/etFullName"
@@ -26,8 +26,8 @@
             android:layout_height="55dp"
             android:hint="الاسم الكامل (English)"
             android:inputType="textPersonName"
-            android:drawableStart="@android:drawable/ic_menu_edit"
-            android:drawablePadding="10dp"
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
             android:layout_marginBottom="12dp"/>
 
         <EditText
@@ -36,8 +36,8 @@
             android:layout_height="55dp"
             android:hint="البريد الإلكتروني"
             android:inputType="textEmailAddress"
-            android:drawableStart="@android:drawable/ic_dialog_email"
-            android:drawablePadding="10dp"
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
             android:layout_marginBottom="12dp"/>
 
         <EditText
@@ -46,88 +46,77 @@
             android:layout_height="55dp"
             android:hint="رقم الهاتف (10 أرقام)"
             android:inputType="phone"
-            android:drawableStart="@android:drawable/ic_menu_call"
-            android:drawablePadding="10dp"
-            android:layout_marginBottom="12dp"/>
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
+            android:layout_marginBottom="20dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="اختر فصيلة الدم:"
-            android:textColor="#333333"
+            android:text="فصيلة الدم:"
             android:layout_marginBottom="5dp"/>
         <Spinner
             android:id="@+id/spBloodType"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:entries="@array/blood_types"
-            android:layout_marginBottom="12dp"
-            android:background="@android:drawable/btn_dropdown"/>
+            android:layout_marginBottom="15dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="اختر المدينة:"
-            android:textColor="#333333"
+            android:text="المدينة:"
             android:layout_marginBottom="5dp"/>
-        <Spinner
-            android:id="@+id/spCity"
+        <EditText
+            android:id="@+id/etCity"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:entries="@array/cities"
-            android:layout_marginBottom="15dp"
-            android:background="@android:drawable/btn_dropdown"/>
+            android:layout_height="55dp"
+            android:hint="اختر المدينة"
+            android:inputType="text"
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
+            android:layout_marginBottom="20dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="هل تعاني من أمراض مزمنة؟"
             android:textStyle="bold"
-            android:layout_marginBottom="5dp"/>
+            android:layout_marginBottom="8dp"/>
         <RadioGroup
             android:id="@+id/rgHasDisease"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="15dp">
-            <RadioButton
-                android:id="@+id/rbDiseaseYes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="نعم"
-                android:layout_marginEnd="20dp"/>
-            <RadioButton
-                android:id="@+id/rbDiseaseNo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="لا"
-                android:checked="true"/>
+            android:layout_marginBottom="10dp">
+            <RadioButton android:id="@+id/rbDiseaseYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نعم" android:layout_marginEnd="20dp"/>
+            <RadioButton android:id="@+id/rbDiseaseNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="لا" android:checked="true"/>
         </RadioGroup>
+
+        <EditText
+            android:id="@+id/etDiseaseName"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:hint="ما هو المرض؟"
+            android:visibility="gone"
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
+            android:layout_marginBottom="15dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="تاريخ التبرع:"
             android:textStyle="bold"
-            android:layout_marginBottom="5dp"/>
+            android:layout_marginBottom="8dp"/>
         <RadioGroup
             android:id="@+id/rgDonationStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="10dp">
-            <RadioButton
-                android:id="@+id/rbNeverDonated"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="لم أتبرع قط"
-                android:layout_marginEnd="10dp"
-                android:checked="true"/>
-            <RadioButton
-                android:id="@+id/rbDonatedBefore"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="تبرعت سابقاً"/>
+            <RadioButton android:id="@+id/rbNeverDonated" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="لم أتبرع قط" android:checked="true" android:layout_marginEnd="10dp"/>
+            <RadioButton android:id="@+id/rbDonatedBefore" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="تبرعت سابقاً"/>
         </RadioGroup>
 
         <EditText
@@ -137,7 +126,9 @@
             android:hint="تاريخ آخر تبرع (DD/MM/YYYY)"
             android:inputType="date"
             android:visibility="gone"
-            android:layout_marginBottom="12dp"/>
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
+            android:layout_marginBottom="20dp"/>
 
         <EditText
             android:id="@+id/etPassword"
@@ -145,8 +136,8 @@
             android:layout_height="55dp"
             android:hint="كلمة المرور"
             android:inputType="textPassword"
-            android:drawableStart="@android:drawable/ic_lock_lock"
-            android:drawablePadding="10dp"
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
             android:layout_marginBottom="12dp"/>
 
         <EditText
@@ -155,18 +146,29 @@
             android:layout_height="55dp"
             android:hint="تأكيد كلمة المرور"
             android:inputType="textPassword"
-            android:drawableStart="@android:drawable/ic_lock_lock"
-            android:drawablePadding="10dp"
+            android:background="@android:drawable/editbox_background"
+            android:paddingStart="15dp"
             android:layout_marginBottom="24dp"/>
 
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="إنشاء الحساب"
+            android:text="إنشاء حساب جديد"
             android:backgroundTint="#D32F2F"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnBackToLogin"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="لديك حساب بالفعل؟"
+            android:backgroundTint="#757575"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"/>
+
     </LinearLayout>
 </ScrollView>
