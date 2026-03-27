@@ -84,11 +84,11 @@
                     android:textSize="15sp" />
 
                 <TextView
-                    android:id="@+id/tvUrgentCity"
+                    android:id="@+id/tvUnits"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="15dp"
-                    android:text="الموقع: --"
+                    android:text="عدد الوحدات: --"
                     android:textColor="#FFFFFF"
                     android:textSize="15sp" />
 

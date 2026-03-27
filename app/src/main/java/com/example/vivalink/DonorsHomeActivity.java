@@ -12,10 +12,15 @@ import com.google.firebase.database.*;
 
 public class DonorsHomeActivity extends AppCompatActivity {
 
-    private TextView tvWelcomeDonor;
-    // تم حذف tvDonationCount و tvLastDonationDate لأنهم مش بالـ XML
+    // نصوص الترحيب والإحصائيات
+    private TextView tvWelcomeDonor, tvDonationCount, tvLastDonationDate;
+
+    // نصوص كرت الطلب العاجل
     private TextView tvUrgentHospital, tvUrgentBlood, tvUrgentUnits;
+
+    // الأزرار
     private Button btnViewRequests, btnGoToProfile, btnGoToDonate;
+
     private DatabaseReference dbRef;
     private String userId, userCity;
     private BloodRequests currentUrgentRequest;
@@ -32,7 +37,8 @@ public class DonorsHomeActivity extends AppCompatActivity {
             dbRef = FirebaseDatabase.getInstance().getReference();
             loadDonorData();
         } else {
-            navigateToLogin();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
             return;
         }
 
@@ -42,16 +48,19 @@ public class DonorsHomeActivity extends AppCompatActivity {
     private void initViews() {
         try {
             tvWelcomeDonor = findViewById(R.id.tvWelcomeDonor);
-            tvUrgentHospital = findViewById(R.id.tvHospitalName); // ID المستشفى بالـ XML
-            tvUrgentBlood = findViewById(R.id.tvBloodType);     // ID الفصيلة بالـ XML
-            tvUrgentUnits = findViewById(R.id.tvUnits);         // ID عدد الوحدات بالـ XML
+            tvDonationCount = findViewById(R.id.tvDonationCount);
+            tvLastDonationDate = findViewById(R.id.tvLastDonationDate);
+
+            tvUrgentHospital = findViewById(R.id.tvHospitalName);
+            tvUrgentBlood = findViewById(R.id.tvBloodType);
+            tvUrgentUnits = findViewById(R.id.tvUnits);
 
             btnViewRequests = findViewById(R.id.btnViewRequests);
-            btnGoToProfile = findViewById(R.id.btnGoToProfile); // تم تعديل الـ ID ليتطابق مع الـ XML
+            btnGoToProfile = findViewById(R.id.btnGoToProfile);
             btnGoToDonate = findViewById(R.id.btnGoToDonate);
 
         } catch (Exception e) {
-            Log.e("Vivalink_Error", "initViews: " + e.getMessage());
+            Log.e("Vivalink_Error", "Error in initViews: " + e.getMessage());
         }
     }
 
@@ -59,25 +68,30 @@ public class DonorsHomeActivity extends AppCompatActivity {
         if (btnViewRequests != null)
             btnViewRequests.setOnClickListener(v -> startActivity(new Intent(this, RequestsActivity.class)));
 
-        // حل مشكلة زر البروفايل
         if (btnGoToProfile != null)
             btnGoToProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
 
+        // --- تعديل المشكلة الأولى: السماح بالدخول حتى لو لم يوجد طلب ---
         if (btnGoToDonate != null) {
             btnGoToDonate.setOnClickListener(v -> {
+                Intent intent = new Intent(this, DonateActivity.class);
                 if (currentUrgentRequest != null) {
-                    Intent intent = new Intent(this, DonateActivity.class);
-                    // تمرير كل البيانات المطلوبة عشان ما تطلع null في صفحة التبرع
+                    // إذا وجد طلب، نرسل البيانات
                     intent.putExtra("bloodType", currentUrgentRequest.getBloodType());
                     intent.putExtra("hospitalName", currentUrgentRequest.getHospitalName());
                     intent.putExtra("city", currentUrgentRequest.getCity());
                     intent.putExtra("department", currentUrgentRequest.getDepartment());
                     intent.putExtra("units", currentUrgentRequest.getUnits());
                     intent.putExtra("time", currentUrgentRequest.getTime());
-                    startActivity(intent);
+                    intent.putExtra("status", currentUrgentRequest.getStatus());
                 } else {
-                    Toast.makeText(this, "لا يوجد طلب عاجل حالياً", Toast.LENGTH_SHORT).show();
+                    // إذا لم يوجد طلب، نرسل بيانات فارغة مرتبة لمنع الـ null
+                    intent.putExtra("bloodType", "--");
+                    intent.putExtra("hospitalName", "لا يوجد طلبات حالياً");
+                    intent.putExtra("city", userCity != null ? userCity : "--");
+                    intent.putExtra("units", "0");
                 }
+                startActivity(intent);
             });
         }
     }
@@ -90,10 +104,17 @@ public class DonorsHomeActivity extends AppCompatActivity {
                     String name = snapshot.child("fullName").getValue(String.class);
                     userCity = snapshot.child("city").getValue(String.class);
 
+                    Object count = snapshot.child("donationCount").getValue();
+                    String lastDate = snapshot.child("lastDonation").getValue(String.class);
+
                     if (tvWelcomeDonor != null)
                         tvWelcomeDonor.setText("👋 أهلاً بك، " + (name != null ? name : "متبرع"));
 
-                    // تحميل الطلبات العاجلة بناءً على مدينة المتبرع (الفلترة)
+                    if (tvDonationCount != null)
+                        tvDonationCount.setText(String.valueOf(count != null ? count : "0"));
+                    if (tvLastDonationDate != null)
+                        tvLastDonationDate.setText(lastDate != null ? lastDate : "--");
+
                     if (userCity != null) {
                         loadUrgentRequestNearMe(userCity);
                     }
@@ -104,6 +125,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
     }
 
     private void loadUrgentRequestNearMe(String city) {
+        // --- تعديل المشكلة الثانية: التأكد من عرض أي طلب في المدينة وتصفير القديم ---
         Query urgentQuery = dbRef.child("Requests").orderByChild("city").equalTo(city).limitToFirst(1);
         urgentQuery.addValueEventListener(new ValueEventListener() {
             @Override
@@ -112,23 +134,23 @@ public class DonorsHomeActivity extends AppCompatActivity {
                     for (DataSnapshot data : snapshot.getChildren()) {
                         currentUrgentRequest = data.getValue(BloodRequests.class);
                         if (currentUrgentRequest != null) {
-                            if (tvUrgentHospital != null) tvUrgentHospital.setText(currentUrgentRequest.getHospitalName());
-                            if (tvUrgentBlood != null) tvUrgentBlood.setText(currentUrgentRequest.getBloodType());
-                            // تعديل عرض الموقع ليظهر عدد الوحدات بدلاً منه
-                            if (tvUrgentUnits != null) tvUrgentUnits.setText(currentUrgentRequest.getUnits());
+                            if (tvUrgentHospital != null)
+                                tvUrgentHospital.setText("المستشفى: " + currentUrgentRequest.getHospitalName());
+                            if (tvUrgentBlood != null)
+                                tvUrgentBlood.setText("الفصيلة المطلوبة: " + currentUrgentRequest.getBloodType());
+                            if (tvUrgentUnits != null)
+                                tvUrgentUnits.setText("الوحدات المطلوبة: " + currentUrgentRequest.getUnits());
                         }
                     }
                 } else {
-                    // في حال عدم وجود طلبات في نفس المدينة
+                    // تصفير الطلب الحالي لكي لا تنتقل بيانات قديمة بالخطأ
+                    currentUrgentRequest = null;
                     if (tvUrgentHospital != null) tvUrgentHospital.setText("لا توجد طلبات في " + city);
+                    if (tvUrgentBlood != null) tvUrgentBlood.setText("الفصيلة المطلوبة: --");
+                    if (tvUrgentUnits != null) tvUrgentUnits.setText("عدد الوحدات: 0");
                 }
             }
             @Override public void onCancelled(DatabaseError error) {}
         });
-    }
-
-    private void navigateToLogin() {
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
     }
 }

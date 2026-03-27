@@ -1,6 +1,6 @@
 package com.example.vivalink;
 
-import android.content.Intent; // ضفت هاد الاستيراد للانتقال بين الصفحات
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -14,7 +14,8 @@ import java.util.regex.Pattern;
 
 public class DonorSignUpActivity extends AppCompatActivity {
 
-    private EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword, etLastDonation, etCity, etDiseaseName;
+    // ضفت etDonationCount هنا
+    private EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword, etLastDonation, etDonationCount, etCity, etDiseaseName;
     private Spinner spBloodType;
     private RadioGroup rgHasDisease, rgDonationStatus;
     private RadioButton rbDiseaseYes, rbNeverDonated;
@@ -31,17 +32,21 @@ public class DonorSignUpActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference("Donors");
 
-        // إخفاء وإظهار الحقول بناءً على الاختيارات
-        rgDonationStatus.setOnCheckedChangeListener((group, checkedId) ->
-                etLastDonation.setVisibility(checkedId == R.id.rbNeverDonated ? View.GONE : View.VISIBLE));
+        // تعديل: إظهار وإخفاء حقل التاريخ وحقل "عدد التبرعات" معاً
+        rgDonationStatus.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbNeverDonated) {
+                etLastDonation.setVisibility(View.GONE);
+                etDonationCount.setVisibility(View.GONE); // إخفاء عدد التبرعات
+            } else {
+                etLastDonation.setVisibility(View.VISIBLE);
+                etDonationCount.setVisibility(View.VISIBLE); // إظهار عدد التبرعات
+            }
+        });
 
         rgHasDisease.setOnCheckedChangeListener((group, checkedId) ->
                 etDiseaseName.setVisibility(checkedId == R.id.rbDiseaseYes ? View.VISIBLE : View.GONE));
 
-        // زر إنشاء الحساب
         btnRegister.setOnClickListener(v -> registerUser());
-
-        // زر العودة (السكني)
         btnBackToLogin.setOnClickListener(v -> finish());
     }
 
@@ -55,6 +60,10 @@ public class DonorSignUpActivity extends AppCompatActivity {
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
         spBloodType = findViewById(R.id.spBloodType);
         etLastDonation = findViewById(R.id.etLastDonation);
+
+        // ربط حقل عدد التبرعات (تأكدي من إضافة هذا الـ ID في الـ XML عندك)
+        etDonationCount = findViewById(R.id.etDonationCount);
+
         rgHasDisease = findViewById(R.id.rgHasDisease);
         rbDiseaseYes = findViewById(R.id.rbDiseaseYes);
         rgDonationStatus = findViewById(R.id.rgDonationStatus);
@@ -71,11 +80,28 @@ public class DonorSignUpActivity extends AppCompatActivity {
         String password = etPassword.getText().toString().trim();
         String confirmPass = etConfirmPassword.getText().toString().trim();
 
-        String lastDonation = rbNeverDonated.isChecked() ? "لم أتبرع من قبل" : etLastDonation.getText().toString().trim();
+        // منطق التاريخ وعدد التبرعات
+        String lastDonation;
+        String donationCount;
+
+        if (rbNeverDonated.isChecked()) {
+            lastDonation = "لم أتبرع من قبل";
+            donationCount = "0";
+        } else {
+            lastDonation = etLastDonation.getText().toString().trim();
+            donationCount = etDonationCount.getText().toString().trim();
+
+            // فحص بسيط عشان ما يترك عدد التبرعات فاضي إذا اختار "نعم"
+            if (donationCount.isEmpty()) {
+                etDonationCount.setError("يرجى إدخال عدد مرات التبرع");
+                return;
+            }
+        }
+
         String hasDisease = rbDiseaseYes.isChecked() ? "نعم" : "لا";
         String diseaseName = rbDiseaseYes.isChecked() ? etDiseaseName.getText().toString().trim() : "سليم";
 
-        // التحقق (Validation) بالعربي
+        // التحقق (Validation)
         if (fullName.isEmpty() || !Pattern.matches("^[a-zA-Z\\s]{5,}$", fullName)) {
             etFullName.setError("الاسم يجب أن يكون بالإنجليزية و 5 حروف على الأقل"); return;
         }
@@ -89,7 +115,7 @@ public class DonorSignUpActivity extends AppCompatActivity {
 
         String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
         if (!Pattern.matches(passwordPattern, password)) {
-            etPassword.setError("كلمة السر يجب أن تكون 8 خانات، وتحتوي على حرف كبير وصغير ورقم ورمز"); return;
+            etPassword.setError("كلمة السر ضعيفة"); return;
         }
 
         if (!password.equals(confirmPass)) {
@@ -108,27 +134,18 @@ public class DonorSignUpActivity extends AppCompatActivity {
                 donorMap.put("hasDiseases", hasDisease);
                 donorMap.put("diseaseName", diseaseName);
                 donorMap.put("lastDonation", lastDonation);
-                donorMap.put("donationCount", "0");
+
+                // تخزين عدد التبرعات المدخل بدلاً من "0" ثابتة
+                donorMap.put("donationCount", donationCount);
+
                 donorMap.put("role", "Donor");
 
                 mRef.child(uid).setValue(donorMap).addOnCompleteListener(saveTask -> {
                     if (saveTask.isSuccessful()) {
-                        // --- التعديل الجوهري هنا ---
-
-                        // 1. تسجيل الخروج فوراً لكسر الدخول التلقائي
                         mAuth.signOut();
-
-                        // 2. رسالة تنبيه للمستخدم
                         Toast.makeText(this, "تم إنشاء الحساب بنجاح! سجل دخولك الآن ✅", Toast.LENGTH_LONG).show();
-
-                        // 3. الانتقال لصفحة تسجيل الدخول (LoginActivity)
-                        Intent intent = new Intent(DonorSignUpActivity.this, LoginActivity.class);
-                        startActivity(intent);
-
-                        // 4. إغلاق صفحة التسجيل
+                        startActivity(new Intent(DonorSignUpActivity.this, LoginActivity.class));
                         finish();
-
-                        // --- نهاية التعديل ---
                     }
                 });
             } else {

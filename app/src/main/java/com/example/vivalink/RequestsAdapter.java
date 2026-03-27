@@ -34,7 +34,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         holder.tvBlood.setText(req.getBloodType() != null ? req.getBloodType() : "--");
         holder.tvHospital.setText(req.getHospitalName() != null ? req.getHospitalName() : "غير محدد");
         holder.tvCity.setText("📍 " + (req.getCity() != null ? req.getCity() : "غير محدد"));
-        holder.tvUnits.setText("🩸 عدد الوحدات: " + (req.getUnits() != null ? req.getUnits() : "0"));
+        holder.tvUnits.setText("🩸الوحدات المطلوبة: " + (req.getUnits() != null ? req.getUnits() : "0"));
 
         holder.btnDonate.setOnClickListener(v -> {
             if (listener != null) listener.onDonateClick(req);

@@ -41,33 +41,49 @@ public class DonateActivity extends AppCompatActivity {
     }
 
     private void displayPassedData() {
-        // فحص getIntent لمنع الكراش
         if (getIntent() != null) {
-            // استخراج البيانات مع وضع قيمة بديلة في حال كانت null لمنع ظهور كلمة "null"
             String blood = getIntent().getStringExtra("bloodType");
             String hospital = getIntent().getStringExtra("hospitalName");
             String city = getIntent().getStringExtra("city");
             String dept = getIntent().getStringExtra("department");
             String units = getIntent().getStringExtra("units");
-            String time = getIntent().getStringExtra("time");
-            String status = getIntent().getStringExtra("status");
 
-            // العرض في الـ TextViews
-            tvBloodType.setText("❤️ فصيلة الدم: " + (blood != null ? blood : "--"));
-            tvHospitalName.setText("🏥 اسم المستشفى: " + (hospital != null ? hospital : "غير محدد"));
-            tvLocation.setText("📍 الموقع: " + (city != null ? city : "غير محدد"));
-            tvDepartment.setText("🚨 القسم: " + (dept != null ? dept : "الطوارئ"));
-            tvUnits.setText("🩸 عدد الوحدات المطلوبة: " + (units != null ? units : "0"));
+            // الفحص: هل البيانات المرسلة تدل على عدم وجود طلب؟
+            if (hospital == null || hospital.equals("لا يوجد طلبات حالياً") || hospital.isEmpty()) {
 
-            if (tvTimeDisplay != null) {
-                tvTimeDisplay.setText("⏰ الوقت: " + (time != null ? time : "--"));
-            }
-            if (tvStatusDisplay != null) {
-                tvStatusDisplay.setText("📊 الحالة: " + (status != null ? status : "قيد الانتظار"));
+                // 1. نظهر جملة واحدة فقط في أول TextView
+                tvHospitalName.setText("لا يوجد طلبات حالياً");
+                tvHospitalName.setGravity(android.view.Gravity.CENTER); // لجعل النص في المنتصف (اختياري)
+
+                // 2. نخفي باقي الحقول تماماً من المربع السكني عشان ما يضل عناوين فاضية
+                tvBloodType.setVisibility(android.view.View.GONE);
+                tvLocation.setVisibility(android.view.View.GONE);
+                tvDepartment.setVisibility(android.view.View.GONE);
+                tvUnits.setVisibility(android.view.View.GONE);
+
+                // 3. تعطيل الزر
+                btnConfirmDonation.setEnabled(false);
+                btnConfirmDonation.setAlpha(0.5f);
+
+            } else {
+                // في حال وجود طلب حقيقي: نرجع كل شيء ظاهر ونعرض البيانات
+                tvHospitalName.setVisibility(android.view.View.VISIBLE);
+                tvBloodType.setVisibility(android.view.View.VISIBLE);
+                tvLocation.setVisibility(android.view.View.VISIBLE);
+                tvDepartment.setVisibility(android.view.View.VISIBLE);
+                tvUnits.setVisibility(android.view.View.VISIBLE);
+
+                tvHospitalName.setText("🏥 اسم المستشفى: " + hospital);
+                tvBloodType.setText("❤️ فصيلة الدم: " + (blood != null ? blood : "--"));
+                tvLocation.setText("📍 الموقع: " + (city != null ? city : "غير محدد"));
+                tvDepartment.setText("🚨 القسم: " + (dept != null && !dept.isEmpty() ? dept : "--"));
+                tvUnits.setText("🩸 الوحدات المطلوبة: " + (units != null ? units : "0"));
+
+                btnConfirmDonation.setEnabled(true);
+                btnConfirmDonation.setAlpha(1.0f);
             }
         }
     }
-
     private void handleDonation() {
         String p1 = etPhone.getText().toString().trim();
         String p2 = etConfirmPhone.getText().toString().trim();
