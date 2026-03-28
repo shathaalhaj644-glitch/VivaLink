@@ -16,7 +16,7 @@
         android:padding="20dp">
 
         <TextView
-            android:id="@+id/tvBloodTypeItem"
+            android:id="@+id/tvBloodType"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@android:drawable/btn_default"
@@ -28,7 +28,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvHospitalItem"
+            android:id="@+id/tvHospitalName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -38,7 +38,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvCityItem"
+            android:id="@+id/tvLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="📍 المدينة"
@@ -46,7 +46,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/tvDepartmentItem"
+            android:id="@+id/tvDepartment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -54,7 +54,7 @@
             android:textColor="#666666" />
 
         <TextView
-            android:id="@+id/tvUnitsItem"
+            android:id="@+id/tvUnits"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -62,12 +62,13 @@
             android:textColor="#666666" />
 
         <TextView
-            android:id="@+id/tvTimeItem"
+            android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="⏰ الوقت"
-            android:textColor="#666666" />
+            android:textColor="#E62020"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnDonateItem"

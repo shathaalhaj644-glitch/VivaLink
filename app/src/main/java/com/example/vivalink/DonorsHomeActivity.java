@@ -82,7 +82,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                     intent.putExtra("city", currentUrgentRequest.getCity());
                     intent.putExtra("department", currentUrgentRequest.getDepartment());
                     intent.putExtra("units", currentUrgentRequest.getUnits());
-                    intent.putExtra("time", currentUrgentRequest.getTime());
+                    intent.putExtra("time", currentUrgentRequest.getTimestamp());
                     intent.putExtra("status", currentUrgentRequest.getStatus());
                 } else {
                     // إذا لم يوجد طلب، نرسل بيانات فارغة مرتبة لمنع الـ null
