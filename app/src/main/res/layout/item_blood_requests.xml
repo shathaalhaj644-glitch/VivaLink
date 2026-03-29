@@ -38,7 +38,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvLocation"
+            android:id="@+id/tvCity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="📍 المدينة"
@@ -58,17 +58,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="🩸 عدد الوحدات: 0"
+            android:text="🩸عدد الوحدات : 0"
             android:textColor="#666666" />
 
-        <TextView
-            android:id="@+id/tvTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="⏰ الوقت"
-            android:textColor="#E62020"
-            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnDonateItem"

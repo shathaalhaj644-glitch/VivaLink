@@ -19,14 +19,25 @@
             android:paddingBottom="15dp"/>
 
         <!-- المعلومات الشخصية -->
-        <EditText android:id="@+id/etName" android:hint="الاسم الكامل"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <EditText android:id="@+id/etEmail" android:hint="البريد الإلكتروني"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <EditText android:id="@+id/etPhone" android:hint="رقم الهاتف"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <EditText android:id="@+id/etCity" android:hint="المدينة"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/etName"
+            android:hint="الاسم الكامل"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/etEmail"
+            android:hint="البريد الإلكتروني"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/etPhone"
+            android:hint="رقم الهاتف"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/etCity"
+            android:hint="المدينة"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <!-- الحالة الصحية -->
         <TextView
@@ -41,19 +52,41 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-            <RadioButton android:id="@+id/rbYes" android:text="نعم"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <RadioButton android:id="@+id/rbNo" android:text="لا"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+            <RadioButton
+                android:id="@+id/rbYes"
+                android:text="نعم"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <RadioButton
+                android:id="@+id/rbNo"
+                android:text="لا"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </RadioGroup>
 
         <!-- سجل التبرع -->
         <TextView
-            android:id="@+id/tvDonationHistory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="سجل التبرع"
+            android:textStyle="bold"
             android:paddingTop="20dp"
-            android:text="لم أقم بالتبرع من قبل"/>
+            android:paddingBottom="10dp"/>
+
+        <EditText
+            android:id="@+id/etLastDonation"
+            android:hint="تاريخ آخر تبرع"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"/>
+
+        <CheckBox
+            android:id="@+id/cbNeverDonated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="لم أتبرع من قبل"/>
 
         <!-- زر الحفظ -->
         <Button
@@ -66,5 +99,6 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:layout_marginTop="20dp"/>
+
     </LinearLayout>
 </ScrollView>

@@ -30,10 +30,11 @@ public class RequestsActivity extends AppCompatActivity {
         rvRequests.setAdapter(adapter);
 
         if (mAuth.getCurrentUser() != null) {
-            loadUserCityAndRequests();
+            loadUserCityAndRequests(); // ✅ الاسم الصحيح
         }
     }
 
+    // ✅ هاي الدالة كانت ناقصة عندك
     private void loadUserCityAndRequests() {
         String uid = mAuth.getCurrentUser().getUid();
         FirebaseDatabase.getInstance().getReference("Donors").child(uid)
@@ -42,13 +43,47 @@ public class RequestsActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot snapshot) {
                         if (snapshot.exists()) {
                             String userCity = snapshot.child("city").getValue(String.class);
-                            if (userCity != null) fetchRequestsByCity(userCity);
+                            String userBlood = snapshot.child("bloodType").getValue(String.class);
+
+                            if (userCity != null && userBlood != null) {
+                                fetchRequestsByCityAndBlood(userCity, userBlood);
+                            }
                         }
                     }
-                    @Override public void onCancelled(DatabaseError error) {}
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {}
                 });
     }
 
+    // ✅ الفلترة الجديدة (مدينة + فصيلة دم)
+    private void fetchRequestsByCityAndBlood(String city, String bloodType) {
+
+        String combined = city + "_" + bloodType;
+
+        Query query = FirebaseDatabase.getInstance().getReference("Requests")
+                .orderByChild("city_bloodType")
+                .equalTo(combined);
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                requestList.clear();
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    BloodRequests req = data.getValue(BloodRequests.class);
+                    if (req != null) {
+                        req.setRequestId(data.getKey());
+                        requestList.add(req);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override public void onCancelled(DatabaseError error) {}
+        });
+    }
+
+    // (اختياري) خليتها زي ما هي، بس مش مستخدمة حالياً
     private void fetchRequestsByCity(String city) {
         Query cityQuery = FirebaseDatabase.getInstance().getReference("Requests")
                 .orderByChild("city").equalTo(city);
@@ -66,6 +101,7 @@ public class RequestsActivity extends AppCompatActivity {
                 }
                 adapter.notifyDataSetChanged();
             }
+
             @Override public void onCancelled(DatabaseError error) {}
         });
     }
@@ -76,7 +112,7 @@ public class RequestsActivity extends AppCompatActivity {
         intent.putExtra("hospitalName", request.getHospitalName());
         intent.putExtra("city", request.getCity());
         intent.putExtra("department", request.getDepartment());
-        intent.putExtra("units", request.getUnits());
+        intent.putExtra("units", String.valueOf(request.getUnits()));
         startActivity(intent);
     }
 }

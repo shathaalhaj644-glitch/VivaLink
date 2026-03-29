@@ -2,7 +2,6 @@ package com.example.vivalink;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.*;
@@ -14,9 +13,8 @@ import java.util.regex.Pattern;
 
 public class DonorSignUpActivity extends AppCompatActivity {
 
-    // ضفت etDonationCount هنا
-    private EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword, etLastDonation, etDonationCount, etCity, etDiseaseName;
-    private Spinner spBloodType;
+    private EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword, etLastDonation, etDonationCount, etDiseaseName;
+    private Spinner spBloodType, spCity;
     private RadioGroup rgHasDisease, rgDonationStatus;
     private RadioButton rbDiseaseYes, rbNeverDonated;
     private Button btnRegister, btnBackToLogin;
@@ -29,17 +27,21 @@ public class DonorSignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_donor_sign_up);
 
         initViews();
+
         mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference("Donors");
 
-        // تعديل: إظهار وإخفاء حقل التاريخ وحقل "عدد التبرعات" معاً
+        // تفعيل Spinner للمدن وفصائل الدم
+        setupSpinners();
+
+        // إظهار وإخفاء حقل التبرع
         rgDonationStatus.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbNeverDonated) {
                 etLastDonation.setVisibility(View.GONE);
-                etDonationCount.setVisibility(View.GONE); // إخفاء عدد التبرعات
+                etDonationCount.setVisibility(View.GONE);
             } else {
                 etLastDonation.setVisibility(View.VISIBLE);
-                etDonationCount.setVisibility(View.VISIBLE); // إظهار عدد التبرعات
+                etDonationCount.setVisibility(View.VISIBLE);
             }
         });
 
@@ -54,15 +56,14 @@ public class DonorSignUpActivity extends AppCompatActivity {
         etFullName = findViewById(R.id.etFullName);
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
-        etCity = findViewById(R.id.etCity);
         etDiseaseName = findViewById(R.id.etDiseaseName);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
-        spBloodType = findViewById(R.id.spBloodType);
         etLastDonation = findViewById(R.id.etLastDonation);
-
-        // ربط حقل عدد التبرعات (تأكدي من إضافة هذا الـ ID في الـ XML عندك)
         etDonationCount = findViewById(R.id.etDonationCount);
+
+        spBloodType = findViewById(R.id.spBloodType);
+        spCity = findViewById(R.id.spCity);
 
         rgHasDisease = findViewById(R.id.rgHasDisease);
         rbDiseaseYes = findViewById(R.id.rbDiseaseYes);
@@ -72,26 +73,38 @@ public class DonorSignUpActivity extends AppCompatActivity {
         btnBackToLogin = findViewById(R.id.btnBackToLogin);
     }
 
+    private void setupSpinners() {
+        // فصائل الدم
+        String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
+        ArrayAdapter<String> bloodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, bloodTypes);
+        bloodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spBloodType.setAdapter(bloodAdapter);
+
+        // المدن الفلسطينية
+        String[] cities = {"نابلس", "طولكرم", "رام الله", "بيت لحم", "الخليل", "البيرة", "جنين", "سلفيت", "أريحا", "طوباس", "قلقيلية"};
+        ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, cities);
+        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spCity.setAdapter(cityAdapter);
+    }
+
     private void registerUser() {
         String fullName = etFullName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
-        String city = etCity.getText().toString().trim();
+        String city = spCity.getSelectedItem().toString();
+        String bloodType = spBloodType.getSelectedItem().toString();
         String password = etPassword.getText().toString().trim();
         String confirmPass = etConfirmPassword.getText().toString().trim();
 
-        // منطق التاريخ وعدد التبرعات
         String lastDonation;
         String donationCount;
 
         if (rbNeverDonated.isChecked()) {
-            lastDonation = "لم أتبرع من قبل";
+            lastDonation = "لم أقم بالتبرع من قبل";
             donationCount = "0";
         } else {
             lastDonation = etLastDonation.getText().toString().trim();
             donationCount = etDonationCount.getText().toString().trim();
-
-            // فحص بسيط عشان ما يترك عدد التبرعات فاضي إذا اختار "نعم"
             if (donationCount.isEmpty()) {
                 etDonationCount.setError("يرجى إدخال عدد مرات التبرع");
                 return;
@@ -101,7 +114,7 @@ public class DonorSignUpActivity extends AppCompatActivity {
         String hasDisease = rbDiseaseYes.isChecked() ? "نعم" : "لا";
         String diseaseName = rbDiseaseYes.isChecked() ? etDiseaseName.getText().toString().trim() : "سليم";
 
-        // التحقق (Validation)
+        // Validation
         if (fullName.isEmpty() || !Pattern.matches("^[a-zA-Z\\s]{5,}$", fullName)) {
             etFullName.setError("الاسم يجب أن يكون بالإنجليزية و 5 حروف على الأقل"); return;
         }
@@ -111,17 +124,16 @@ public class DonorSignUpActivity extends AppCompatActivity {
         if (!Pattern.matches("^[0-9]{10}$", phone)) {
             etPhone.setError("رقم الهاتف يجب أن يتكون من 10 أرقام"); return;
         }
-        if (city.isEmpty()) { etCity.setError("يرجى إدخال اسم المدينة"); return; }
 
         String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
         if (!Pattern.matches(passwordPattern, password)) {
             etPassword.setError("كلمة السر ضعيفة"); return;
         }
-
         if (!password.equals(confirmPass)) {
             etConfirmPassword.setError("كلمتا المرور غير متطابقتين"); return;
         }
 
+        // إنشاء المستخدم
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 String uid = mAuth.getCurrentUser().getUid();
@@ -131,13 +143,11 @@ public class DonorSignUpActivity extends AppCompatActivity {
                 donorMap.put("email", email);
                 donorMap.put("phone", phone);
                 donorMap.put("city", city);
+                donorMap.put("bloodType", bloodType);
                 donorMap.put("hasDiseases", hasDisease);
                 donorMap.put("diseaseName", diseaseName);
                 donorMap.put("lastDonation", lastDonation);
-
-                // تخزين عدد التبرعات المدخل بدلاً من "0" ثابتة
                 donorMap.put("donationCount", donationCount);
-
                 donorMap.put("role", "Donor");
 
                 mRef.child(uid).setValue(donorMap).addOnCompleteListener(saveTask -> {

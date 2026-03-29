@@ -79,10 +79,10 @@
                         android:layout_marginBottom="5dp"/>
 
                     <TextView
-                        android:id="@+id/tvLocation"
+                        android:id="@+id/tvCity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="الموقع: --"
+                        android:text="المدينة: --"
                         android:textColor="#2A2A2A"
                         android:textSize="16sp"
                         android:gravity="end"

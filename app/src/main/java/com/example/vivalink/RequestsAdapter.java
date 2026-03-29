@@ -42,7 +42,6 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.tvLocation.setText("📍 " + request.getCity());
         holder.tvDepartment.setText("🏥 " + request.getDepartment());
         holder.tvUnits.setText("🩸 عدد الوحدات: " + request.getUnits());
-        holder.tvTime.setText("⏰ " + request.getTime());
 
         // ✅ تفعيل زر "تبرع الآن" باستخدام الـ Listener الممرر من الـ Activity
         holder.btnDonate.setOnClickListener(v -> {
@@ -65,10 +64,9 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
             super(itemView);
             tvBloodType = itemView.findViewById(R.id.tvBloodType);
             tvHospital = itemView.findViewById(R.id.tvHospitalName);
-            tvLocation = itemView.findViewById(R.id.tvLocation);
+            tvLocation = itemView.findViewById(R.id.tvCity);
             tvDepartment = itemView.findViewById(R.id.tvDepartment);
             tvUnits = itemView.findViewById(R.id.tvUnits);
-            tvTime = itemView.findViewById(R.id.tvTime);
             btnDonate = itemView.findViewById(R.id.btnDonateItem);
         }
     }

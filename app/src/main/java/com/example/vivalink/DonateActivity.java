@@ -36,7 +36,7 @@ public class DonateActivity extends AppCompatActivity {
     private void initViews() {
         tvBloodType = findViewById(R.id.tvBloodType);
         tvHospitalName = findViewById(R.id.tvHospitalName);
-        tvLocation = findViewById(R.id.tvLocation);
+        tvLocation = findViewById(R.id.tvCity);
         tvDepartment = findViewById(R.id.tvDepartment);
         tvUnits = findViewById(R.id.tvUnits);
         tvTimeDisplay = findViewById(R.id.tvTimeDisplay);
@@ -89,7 +89,7 @@ public class DonateActivity extends AppCompatActivity {
                 showViews();
                 tvHospitalName.setText("🏥 " + hospital);
                 tvBloodType.setText("❤️ فصيلة الدم: " + (blood != null ? blood : "--"));
-                tvLocation.setText("📍 الموقع: " + (city != null ? city : "غير محدد"));
+                tvLocation.setText("📍 المدينة: " + (city != null ? city : "غير محدد"));
                 tvDepartment.setText("🚨 القسم: " + (dept != null ? dept : "--"));
                 tvUnits.setText("🩸 الوحدات: " + (units != null ? units : "0"));
             }
