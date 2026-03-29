@@ -9,14 +9,11 @@ public class BloodRequests {
     private String status;
     private String requestId;
 
-    // 1. تغيير نوع الوقت من String إلى long لاستقبال الـ Timestamp من الفايربيس
-    private long timestamp;
+    // 1. تغيير الاسم من timestamp لـ time وتغيير النوع لـ String
+    private String time;
 
-    // 2. حقل الفلترة المركبة (مدينة_زمرة) لضمان عدم ظهور زمر دم مختلفة
+    // 2. حقل الفلترة المركبة
     private String city_bloodType;
-
-    // متغير داخلي (غير موجود في القاعدة) لعرض النص النهائي مثل "منذ 5 دقائق"
-    private String timeDisplay;
 
     // مشيد فارغ مطلوب للفايربيس
     public BloodRequests() {}
@@ -29,14 +26,12 @@ public class BloodRequests {
     public String getUnits() { return units; }
     public String getStatus() { return status; }
     public String getRequestId() { return requestId; }
-    public long getTimestamp() { return timestamp; }
+    public String getTime() { return time; } // تعديل الـ Getter
     public String getCity_bloodType() { return city_bloodType; }
-    public String getTimeDisplay() { return timeDisplay; }
 
-    // Setters (مهمة جداً لعملية الـ Mapping)
+    // Setters
     public void setStatus(String status) { this.status = status; }
     public void setRequestId(String requestId) { this.requestId = requestId; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public void setTime(String time) { this.time = time; } // تعديل الـ Setter
     public void setCity_bloodType(String city_bloodType) { this.city_bloodType = city_bloodType; }
-    public void setTimeDisplay(String timeDisplay) { this.timeDisplay = timeDisplay; }
 }

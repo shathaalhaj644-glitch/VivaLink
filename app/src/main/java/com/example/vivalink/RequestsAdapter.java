@@ -3,6 +3,7 @@ package com.example.vivalink;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,12 +12,14 @@ import java.util.List;
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.RequestViewHolder> {
 
     private List<BloodRequests> requestList;
-    private OnRequestClickListener listener;
+    private OnRequestClickListener listener; // تعريف الـ Listener للضغط
 
+    // الواجهة (Interface) ليتوافق مع الـ showDonateDialog في الـ Activity
     public interface OnRequestClickListener {
         void onRequestClick(BloodRequests request);
     }
 
+    // ✅ التعديل: الـ Constructor صار يستقبل وسيطين (القائمة + الـ Listener)
     public RequestsAdapter(List<BloodRequests> requestList, OnRequestClickListener listener) {
         this.requestList = requestList;
         this.listener = listener;
@@ -33,16 +36,20 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         BloodRequests request = requestList.get(position);
 
-        holder.tvHospital.setText("🏥 " + request.getHospitalName());
+        // عرض البيانات في الـ Item
         holder.tvBloodType.setText(request.getBloodType());
+        holder.tvHospital.setText(request.getHospitalName());
         holder.tvLocation.setText("📍 " + request.getCity());
-        holder.tvDepartment.setText("🚨 " + request.getDepartment());
-        holder.tvUnits.setText("🩸 " + request.getUnits());
+        holder.tvDepartment.setText("🏥 " + request.getDepartment());
+        holder.tvUnits.setText("🩸 عدد الوحدات: " + request.getUnits());
+        holder.tvTime.setText("⏰ " + request.getTime());
 
-        // عرض الوقت الذكي
-        holder.tvTime.setText(getSmartTimeAgo(request.getTimestamp()));
-
-        holder.itemView.setOnClickListener(v -> listener.onRequestClick(request));
+        // ✅ تفعيل زر "تبرع الآن" باستخدام الـ Listener الممرر من الـ Activity
+        holder.btnDonate.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onRequestClick(request);
+            }
+        });
     }
 
     @Override
@@ -50,52 +57,19 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         return requestList.size();
     }
 
-    private String getSmartTimeAgo(long timestamp) {
-        long now = System.currentTimeMillis();
-        long diff = now - timestamp;
-
-        // استخدام Math.abs لضمان الحساب الصحيح حتى لو توقيت الموبايل مش دقيق 100%
-        long absDiff = Math.abs(diff);
-        long minutes = absDiff / (1000 * 60);
-        long hours = minutes / 60;
-        long days = hours / 24;
-
-        // 1. إذا كان الفرق أقل من دقيقة
-        if (minutes < 1) {
-            return "الآن";
-        }
-        // 2. إذا كان الفرق أقل من ساعة (مثلاً: منذ 15 دقيقة)
-        else if (minutes < 60) {
-            return "منذ " + minutes + " دقيقة";
-        }
-        // 3. إذا كان الفرق أقل من يوم (مثلاً: منذ ساعة و 15 دقيقة)
-        else if (hours < 24) {
-            long remainingMinutes = minutes % 60;
-            String hourText = (hours == 1) ? "ساعة" : (hours == 2) ? "ساعتين" : hours + " ساعات";
-
-            if (remainingMinutes == 0) return "منذ " + hourText;
-            return "منذ " + hourText + " و " + remainingMinutes + " دقيقة";
-        }
-        // 4. الأيام
-        else {
-            if (days == 1) return "منذ يوم";
-            if (days == 2) return "منذ يومين";
-            if (days > 7) return "منذ فترة";
-            return "منذ " + days + " أيام";
-        }
-    }
-
     public static class RequestViewHolder extends RecyclerView.ViewHolder {
-        TextView tvHospital, tvBloodType, tvLocation, tvDepartment, tvUnits, tvTime;
+        TextView tvBloodType, tvHospital, tvLocation, tvDepartment, tvUnits, tvTime;
+        Button btnDonate;
 
         public RequestViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvHospital = itemView.findViewById(R.id.tvHospitalName);
             tvBloodType = itemView.findViewById(R.id.tvBloodType);
+            tvHospital = itemView.findViewById(R.id.tvHospitalName);
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvDepartment = itemView.findViewById(R.id.tvDepartment);
             tvUnits = itemView.findViewById(R.id.tvUnits);
             tvTime = itemView.findViewById(R.id.tvTime);
+            btnDonate = itemView.findViewById(R.id.btnDonateItem);
         }
     }
 }
