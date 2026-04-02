@@ -1,18 +1,18 @@
-package com.example.vivalink; // تأكدي إن هاد السطر يطابق مكان الملف عندك
+package com.example.vivalink;
 
 public class Users {
-    // تعريف البيانات الأساسية للمستخدم
+
     public String fullName;
     public String email;
     public String phoneNumber;
-    public String bloodGroup; // فصيلة الدم
-    public String id;         // معرف المستخدم في فايربيس (UID)
+    public String bloodGroup;
+    public String id;
 
-    // 1. Constructor فاضي (ضروري جداً لعمل مكتبة Firebase Database)
+
     public Users() {
     }
 
-    // 2. Constructor لتعبئة البيانات عند تسجيل مستخدم جديد
+
     public Users(String id, String fullName, String email, String phoneNumber, String bloodGroup) {
         this.id = id;
         this.fullName = fullName;
@@ -21,7 +21,7 @@ public class Users {
         this.bloodGroup = bloodGroup;
     }
 
-    // 3. Getters & Setters (اختياري بس يفضل وجودهم للاحترافية)
+
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 

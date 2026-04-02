@@ -10,40 +10,34 @@ public class UsersHelper {
     private DatabaseReference dbRef;
 
     public UsersHelper() {
-        // إنشاء مرجع لجدول المستخدمين في Firebase تحت اسم "Users"
+
         dbRef = FirebaseDatabase.getInstance().getReference("Users");
     }
 
-    // --- 1. عمليات قاعدة البيانات الأساسية (CRUD) ---
 
-    // إضافة مستخدم جديد ✅
     public Task<Void> addUser(Users user) {
         return dbRef.child(user.getId()).setValue(user);
     }
 
-    // جلب كل المستخدمين ✅
     public Query getAllUsers() {
         return dbRef;
     }
 
-    // جلب مستخدم محدد باستخدام الـ ID ✅
+
     public Query getUserById(String userId) {
         return dbRef.child(userId);
     }
 
-    // تحديث بيانات المستخدم بالكامل ✅
     public Task<Void> updateUser(String userId, Users updatedUser) {
         return dbRef.child(userId).setValue(updatedUser);
     }
 
-    // حذف مستخدم ✅
+
     public Task<Void> deleteUser(String userId) {
         return dbRef.child(userId).removeValue();
     }
 
-    // --- 2. عمليات البحث المتقدم (Advanced Search) ---
 
-    // البحث عن مستخدمين حسب البريد الإلكتروني 📧
     public Query getUserByEmail(String email) {
         return dbRef.orderByChild("email").equalTo(email);
     }

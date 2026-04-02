@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                         if ("Donor".equalsIgnoreCase(role)) {
                             intent = new Intent(LoginActivity.this, DonorsHomeActivity.class);
                         } else if ("hospital".equalsIgnoreCase(role)) {
-                            intent = new Intent(LoginActivity.this, HospitalsHomeActivity.class);
+                            intent = new Intent(LoginActivity.this, HospitalHomeActivity.class);
                         } else if ("BankStaff".equalsIgnoreCase(role)) {
                             intent = new Intent(LoginActivity.this, BloodBankStaffHomeActivity.class);
                         }
