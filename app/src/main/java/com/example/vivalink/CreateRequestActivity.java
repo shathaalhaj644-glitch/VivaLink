@@ -3,6 +3,7 @@ package com.example.vivalink;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
@@ -10,68 +11,97 @@ import java.util.Calendar;
 
 public class CreateRequestActivity extends AppCompatActivity {
 
-    EditText et_bloodType, et_city, et_hospitalName, et_units, et_status, et_department;
+    // التغيير المهم: تعريفهم كـ TextView ليطابق الـ XML
+    TextView et_city, et_hospitalName;
+    EditText et_units, et_department;
+    Spinner sp_bloodType;
     Button btn_create_request;
+    TextView tvPageTitle;
     DatabaseReference db;
+    String requestId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_request);
 
-        et_bloodType = findViewById(R.id.et_bloodType);
+        // ربط العناصر
+        tvPageTitle = findViewById(R.id.tvPageTitle);
         et_city = findViewById(R.id.et_city);
         et_hospitalName = findViewById(R.id.et_hospitalName);
         et_units = findViewById(R.id.et_units);
-        et_status = findViewById(R.id.et_status);
         et_department = findViewById(R.id.et_department);
+        sp_bloodType = findViewById(R.id.sp_bloodType);
         btn_create_request = findViewById(R.id.btn_create_request);
 
+        // إعداد قائمة فصائل الدم
+        String[] bloodTypes = {"+A", "-A", "+B", "-B", "+AB", "-AB", "+O", "-O"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, bloodTypes);
+        sp_bloodType.setAdapter(adapter);
+
         db = FirebaseDatabase.getInstance().getReference("Requests");
+
+        // جلب بيانات المستشفى تلقائياً
+        fetchHospitalProfile();
+
+        // فحص إذا كان تعديل
+        requestId = getIntent().getStringExtra("requestId");
+        if (requestId != null) {
+            tvPageTitle.setText("تعديل الطلب");
+            btn_create_request.setText("تحديث الطلب");
+            et_units.setText(getIntent().getStringExtra("units"));
+            et_department.setText(getIntent().getStringExtra("dept"));
+        }
 
         btn_create_request.setOnClickListener(v -> saveRequest());
     }
 
-    private void saveRequest() {
-        String blood = et_bloodType.getText().toString().trim();
-        String unitsStr = et_units.getText().toString().trim();
-        String city = et_city.getText().toString().trim();
-        String hospitalName = et_hospitalName.getText().toString().trim();
-        String status = et_status.getText().toString().trim();
-        String department = et_department.getText().toString().trim();
+    private void fetchHospitalProfile() {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid != null) {
+            FirebaseDatabase.getInstance().getReference("Hospitals").child(uid)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                String name = snapshot.child("hospitalName").getValue(String.class);
+                                String city = snapshot.child("city").getValue(String.class);
+                                // تأكدي أن الأسماء في الفايربيس هي hospitalName و city
+                                if (et_hospitalName != null) et_hospitalName.setText(name);
+                                if (et_city != null) et_city.setText(city);
+                            }
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {}
+                    });
+        }
+    }
 
-        if (TextUtils.isEmpty(blood) || TextUtils.isEmpty(unitsStr)) {
-            Toast.makeText(this, "يرجى إكمال البيانات الأساسية", Toast.LENGTH_SHORT).show();
+    private void saveRequest() {
+        String blood = sp_bloodType.getSelectedItem().toString();
+        String unitsStr = et_units.getText().toString().trim();
+        String cityStr = et_city.getText().toString().trim();
+        String hospStr = et_hospitalName.getText().toString().trim();
+        String deptStr = et_department.getText().toString().trim();
+
+        if (TextUtils.isEmpty(unitsStr) || TextUtils.isEmpty(deptStr)) {
+            Toast.makeText(this, "يرجى تعبئة كافة الحقول", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String id = db.push().getKey();
         String hId = FirebaseAuth.getInstance().getUid();
         String date = Calendar.getInstance().getTime().toString();
+        String currentId = (requestId != null) ? requestId : db.push().getKey();
 
-        // التعديل الجوهري هنا: مررنا unitsStr مباشرة كـ String
-        // ولم نستخدم Integer.parseInt لتجنب الـ Incompatible types error
         HospitalRequestModel request = new HospitalRequestModel(
-                id,
-                blood,
-                city,
-                hospitalName,
-                unitsStr, // تم التعديل هنا لتكون String
-                status,
-                department,
-                date,
-                hId
+                currentId, blood, cityStr, hospStr, unitsStr, "مفتوح", deptStr, date, hId
         );
 
-        if (id != null) {
-            db.child(id).setValue(request).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(this, "تمت الإضافة بنجاح ✅", Toast.LENGTH_SHORT).show();
-                    finish(); // العودة لصفحة قائمة الطلبات وتحديثها تلقائياً
-                } else {
-                    Toast.makeText(this, "فشل في الإضافة: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+        db.child(currentId).setValue(request).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(this, "تم الحفظ بنجاح ✅", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 }

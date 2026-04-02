@@ -7,85 +7,111 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class HospitalHomeActivity extends AppCompatActivity {
 
-    private TextView tvHospitalName, tvHospitalLocation, valTotalRequests, valPending;
-    // إضافة الزر الجديد هنا
+    private TextView tvHospitalName, tvHospitalLocation, valTotalRequests, valPending, valDonors;
     private CardView btnCreateRequestCard, btnViewDonorsCard, btnSettingsCard;
     private DatabaseReference dbRef;
-    private String currentHospitalId;
+    private String currentHospitalUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_home);
 
-        currentHospitalId = FirebaseAuth.getInstance().getUid();
-        dbRef = FirebaseDatabase.getInstance().getReference();
-
-        // ربط العناصر (تأكد من مطابقة الـ ID مع الـ XML للزر الجديد)
+        // 1. ربط العناصر بالـ XML
         tvHospitalName = findViewById(R.id.tvHospitalName);
         tvHospitalLocation = findViewById(R.id.tvHospitalLocation);
         valTotalRequests = findViewById(R.id.valTotalRequests);
         valPending = findViewById(R.id.valPending);
+        valDonors = findViewById(R.id.valDonors);
 
         btnCreateRequestCard = findViewById(R.id.btnCreateRequestCard);
         btnViewDonorsCard = findViewById(R.id.btnViewDonorsCard);
-        btnSettingsCard = findViewById(R.id.btnSettingsCard); // ربط زر الإعدادات
+        btnSettingsCard = findViewById(R.id.btnSettingsCard);
 
-        if (currentHospitalId != null) {
-            loadHospitalData();
+        currentHospitalUid = FirebaseAuth.getInstance().getUid();
+        dbRef = FirebaseDatabase.getInstance().getReference();
+
+        if (currentHospitalUid != null) {
+            loadStats();
         }
 
-        // الانتقال لصفحة الطلبات
+        // 2. التنقل بين الصفحات
         btnCreateRequestCard.setOnClickListener(v -> {
-            startActivity(new Intent(HospitalHomeActivity.this, HospitalRequestsActivity.class));
+            startActivity(new Intent(this, HospitalRequestsActivity.class));
         });
 
-        // الانتقال لصفحة المتبرعين
         btnViewDonorsCard.setOnClickListener(v -> {
-            startActivity(new Intent(HospitalHomeActivity.this, HospitalDonorsActivity.class));
+            startActivity(new Intent(this, HospitalDonorsActivity.class));
         });
 
-        // الانتقال لصفحة الإعدادات (الإضافة الجديدة)
         btnSettingsCard.setOnClickListener(v -> {
-            startActivity(new Intent(HospitalHomeActivity.this, HospitalSettingsActivity.class));
+            startActivity(new Intent(this, HospitalSettingsActivity.class));
         });
     }
 
-    private void loadHospitalData() {
-        if (currentHospitalId == null) return;
-
-        dbRef.child("Hospitals").child(currentHospitalId).addValueEventListener(new ValueEventListener() {
+    private void loadStats() {
+        // جلب اسم المستشفى وموقعه
+        dbRef.child("Hospitals").child(currentHospitalUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    tvHospitalName.setText(snapshot.child("hospitalName").getValue(String.class));
+                    String name = snapshot.child("hospitalName").getValue(String.class);
                     String city = snapshot.child("city").getValue(String.class);
-                    tvHospitalLocation.setText(city != null ? city + " 📍" : "نابلس 📍");
-                    fetchStatistics();
+                    tvHospitalName.setText(name);
+                    tvHospitalLocation.setText(city + " 📍");
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
-        });
-    }
 
-    private void fetchStatistics() {
-        dbRef.child("Requests").orderByChild("hospitalId").equalTo(currentHospitalId)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        valTotalRequests.setText(String.valueOf(snapshot.getChildrenCount()));
-                        long pendingCount = 0;
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            String st = ds.child("status").getValue(String.class);
-                            if (st != null && "Pending".equalsIgnoreCase(st)) pendingCount++;
-                        }
-                        valPending.setText(String.valueOf(pendingCount));
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // دالة ضرورية لمنع أخطاء الـ Abstract Method
+            }
+        });
+
+        // عد الطلبات (إجمالي + المفتوحة فقط)
+        dbRef.child("Requests").orderByChild("hospitalId").equalTo(currentHospitalUid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int total = (int) snapshot.getChildrenCount();
+                int openCount = 0;
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    // فحص الحالة إذا كانت "مفتوح"
+                    String status = ds.child("status").getValue(String.class);
+                    if ("مفتوح".equals(status)) {
+                        openCount++;
                     }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
-                });
+                }
+
+                valTotalRequests.setText(String.valueOf(total));
+                valPending.setText(String.valueOf(openCount));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // دالة ضرورية لمنع أخطاء الـ Abstract Method
+            }
+        });
+
+        // عد المتبرعين
+        dbRef.child("Donors").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                valDonors.setText(String.valueOf(snapshot.getChildrenCount()));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // دالة ضرورية لمنع أخطاء الـ Abstract Method
+            }
+        });
     }
 }
