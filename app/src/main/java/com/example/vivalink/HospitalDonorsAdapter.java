@@ -1,48 +1,65 @@
 package com.example.vivalink;
 
 import android.content.Context;
-import android.view.*;
+import android.content.Intent;
+import android.net.Uri;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
-public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAdapter.VH> {
-    Context context;
-    List<HospitalDonorsModel> list;
+public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAdapter.DonorVH> {
+    private Context context;
+    private List<HospitalDonorsModel> donorList;
 
-    public HospitalDonorsAdapter(Context context, List<HospitalDonorsModel> list) {
+    public HospitalDonorsAdapter(Context context, List<HospitalDonorsModel> donorList) {
         this.context = context;
-        this.list = list;
+        this.donorList = donorList;
     }
 
     @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public DonorVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(context).inflate(R.layout.item_hospital_donors, parent, false);
-        return new VH(v);
+        return new DonorVH(v);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH holder, int position) {
-        HospitalDonorsModel donor = list.get(position);
-        holder.name.setText(donor.getFullName());
-        holder.blood.setText(donor.getBloodType());
-        holder.phone.setText(donor.getPhone());
-        holder.city.setText(donor.getCity());
+    public void onBindViewHolder(@NonNull DonorVH holder, int position) {
+        HospitalDonorsModel donor = donorList.get(position);
+
+        holder.tvName.setText(donor.getFullName());
+        holder.tvCity.setText(donor.getCity() + " 📍");
+        holder.tvBloodType.setText(donor.getBloodType());
+        holder.tvDetails.setText("عدد التبرعات: " + donor.getDonationCount() + " | آخر تاريخ: " + donor.getLastDonation());
+
+        holder.btnCall.setOnClickListener(v -> {
+            if (donor.getPhone() != null) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + donor.getPhone()));
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
-    public int getItemCount() { return list.size(); }
+    public int getItemCount() { return donorList.size(); }
 
-    class VH extends RecyclerView.ViewHolder {
-        TextView name, blood, phone, city;
-        public VH(@NonNull View v) {
+    public static class DonorVH extends RecyclerView.ViewHolder {
+        TextView tvName, tvCity, tvBloodType, tvDetails;
+        ImageButton btnCall;
+
+        public DonorVH(@NonNull View v) {
             super(v);
-            name = v.findViewById(R.id.tv_donor_name);
-            blood = v.findViewById(R.id.tv_donor_blood);
-            phone = v.findViewById(R.id.tv_donor_phone);
-            city = v.findViewById(R.id.tv_donor_city);
+            tvName = v.findViewById(R.id.tvDonorName);
+            tvCity = v.findViewById(R.id.tvDonorCity);
+            tvBloodType = v.findViewById(R.id.tvBloodType);
+            tvDetails = v.findViewById(R.id.tvDonationInfo);
+            btnCall = v.findViewById(R.id.btnCall);
         }
     }
 }

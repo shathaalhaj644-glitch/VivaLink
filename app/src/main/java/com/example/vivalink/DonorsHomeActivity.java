@@ -3,14 +3,16 @@ package com.example.vivalink;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+
+import java.util.ArrayList;
 
 public class DonorsHomeActivity extends AppCompatActivity {
 
@@ -24,14 +26,13 @@ public class DonorsHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donors_home);
 
-        // ربط العناصر مع الـ XML
+        // ربط العناصر
         tvWelcomeDonor = findViewById(R.id.tvWelcomeDonor);
         tvHospitalName = findViewById(R.id.tvHospitalName);
         tvBloodType = findViewById(R.id.tvBloodType);
         tvUnits = findViewById(R.id.tvUnits);
         tvLastDonationDate = findViewById(R.id.tvLastDonationDate);
         tvDonationCount = findViewById(R.id.tvDonationCount);
-
         btnGoToDonate = findViewById(R.id.btnGoToDonate);
         btnViewRequests = findViewById(R.id.btnViewRequests);
         btnGoToProfile = findViewById(R.id.btnGoToProfile);
@@ -44,70 +45,47 @@ public class DonorsHomeActivity extends AppCompatActivity {
             loadUrgentRequest();
         }
 
-        // زر التبرع الآن
-        btnGoToDonate.setOnClickListener(v -> {
-            Toast.makeText(this, "الانتقال لصفحة التبرع", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(DonorsHomeActivity.this, DonateActivity.class));
-        });
+        // الأزرار والتنقل
+        btnGoToDonate.setOnClickListener(v -> startActivity(new Intent(this, DonateActivity.class)));
+        btnViewRequests.setOnClickListener(v -> startActivity(new Intent(this, RequestsActivity.class)));
 
-        // زر عرض جميع الطلبات
-        btnViewRequests.setOnClickListener(v -> {
-            startActivity(new Intent(DonorsHomeActivity.this, RequestsActivity.class));
-        });
-
-        // زر الرئيسية
-        btnGoToProfile.setOnClickListener(v -> {
-            startActivity(new Intent(DonorsHomeActivity.this, DonorsHomeActivity.class));
-        });
+        // تعديل: الانتقال لصفحة البروفايل (تأكدي من اسم الملف عندك)
+        btnGoToProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
     }
 
     private void loadDonorData() {
         dbRef.child("Donors").child(currentDonorId).addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String fullName = snapshot.child("fullName").getValue(String.class);
-                    String lastDonation = snapshot.child("lastDonation").getValue(String.class);
-                    Long donationCount = snapshot.child("donationCount").getValue(Long.class);
+                    String name = snapshot.child("fullName").getValue(String.class);
+                    String last = snapshot.child("lastDonation").getValue(String.class);
+                    Object count = snapshot.child("donationCount").getValue();
 
-                    tvWelcomeDonor.setText("👋 أهلاً " + fullName + "! تبرعك قد ينقذ حياة");
-                    tvLastDonationDate.setText(lastDonation != null ? lastDonation : "--");
-                    tvDonationCount.setText(donationCount != null ? String.valueOf(donationCount) : "0");
-
-                    Log.d("DonorsHome", "Donor: " + fullName + " | LastDonation: " + lastDonation + " | Count: " + donationCount);
+                    tvWelcomeDonor.setText("👋 أهلاً " + name + "!");
+                    tvLastDonationDate.setText(last != null ? last : "--");
+                    tvDonationCount.setText(count != null ? String.valueOf(count) : "0");
                 }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("DonorsHome", "خطأ في تحميل بيانات المتبرع: " + error.getMessage());
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private void loadUrgentRequest() {
-        dbRef.child("Requests").orderByChild("status").equalTo("طارئة جداً")
-                .limitToFirst(1) // نجيب أول طلب عاجل
+        // 🔥 الحل: نجيب آخر طلب تم إضافته لضمان ظهوره دائماً
+        dbRef.child("Requests").limitToLast(1)
                 .addValueEventListener(new ValueEventListener() {
                     @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
+                        if (snapshot.exists() && snapshot.hasChildren()) {
                             for (DataSnapshot ds : snapshot.getChildren()) {
-                                String hospitalName = ds.child("hospitalName").getValue(String.class);
-                                String bloodType = ds.child("bloodType").getValue(String.class);
-                                String units = ds.child("units").getValue(String.class);
-
-                                tvHospitalName.setText("المستشفى: " + (hospitalName != null ? hospitalName : "--"));
-                                tvBloodType.setText("الفصيلة المطلوبة: " + (bloodType != null ? bloodType : "--"));
-                                tvUnits.setText("عدد الوحدات: " + (units != null ? units : "--"));
-
-                                Log.d("DonorsHome", "Urgent Request: " + hospitalName + " | " + bloodType + " | " + units);
+                                tvHospitalName.setText("المستشفى: " + ds.child("hospitalName").getValue(String.class));
+                                tvBloodType.setText("الفصيلة المطلوبة: " + ds.child("bloodType").getValue(String.class));
+                                tvUnits.setText("عدد الوحدات: " + ds.child("units").getValue(String.class));
                             }
                         } else {
-                            tvHospitalName.setText("لا يوجد طلبات عاجلة حالياً");
-                            tvBloodType.setText("الفصيلة المطلوبة: --");
-                            tvUnits.setText("عدد الوحدات: --");
+                            tvHospitalName.setText("لا يوجد طلبات حالياً");
                         }
                     }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("DonorsHome", "خطأ في تحميل الطلبات العاجلة: " + error.getMessage());
-                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 }
