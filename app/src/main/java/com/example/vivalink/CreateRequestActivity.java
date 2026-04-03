@@ -11,7 +11,6 @@ import java.util.Calendar;
 
 public class CreateRequestActivity extends AppCompatActivity {
 
-
     TextView et_city, et_hospitalName;
     EditText et_units, et_department;
     Spinner sp_bloodType;
@@ -25,7 +24,6 @@ public class CreateRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_request);
 
-
         tvPageTitle = findViewById(R.id.tvPageTitle);
         et_city = findViewById(R.id.et_city);
         et_hospitalName = findViewById(R.id.et_hospitalName);
@@ -34,15 +32,13 @@ public class CreateRequestActivity extends AppCompatActivity {
         sp_bloodType = findViewById(R.id.sp_bloodType);
         btn_create_request = findViewById(R.id.btn_create_request);
 
-        // إعداد قائمة فصائل الدم
-        String[] bloodTypes = {"+A", "-A", "+B", "-B", "+AB", "-AB", "+O", "-O"};
+        String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, bloodTypes);
         sp_bloodType.setAdapter(adapter);
 
         db = FirebaseDatabase.getInstance().getReference("Requests");
 
         fetchHospitalProfile();
-
 
         requestId = getIntent().getStringExtra("requestId");
         if (requestId != null) {
@@ -66,19 +62,19 @@ public class CreateRequestActivity extends AppCompatActivity {
                                 String name = snapshot.child("hospitalName").getValue(String.class);
                                 String city = snapshot.child("city").getValue(String.class);
 
-                                if (et_hospitalName != null) et_hospitalName.setText(name);
-                                if (et_city != null) et_city.setText(city);
+                                et_hospitalName.setText(name);
+                                et_city.setText(city);
                             }
                         }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {}
+                        @Override public void onCancelled(@NonNull DatabaseError error) {}
                     });
         }
     }
 
     private void saveRequest() {
+
         String blood = sp_bloodType.getSelectedItem().toString();
-        String unitsStr = et_units.getText().toString().trim();
+        String unitsStr = et_units.getText().toString().trim() + " وحدات";
         String cityStr = et_city.getText().toString().trim();
         String hospStr = et_hospitalName.getText().toString().trim();
         String deptStr = et_department.getText().toString().trim();
@@ -88,12 +84,24 @@ public class CreateRequestActivity extends AppCompatActivity {
             return;
         }
 
+        // 🔥 أهم سطر
+        String combined = cityStr + "_" + blood;
+
         String hId = FirebaseAuth.getInstance().getUid();
         String date = Calendar.getInstance().getTime().toString();
         String currentId = (requestId != null) ? requestId : db.push().getKey();
 
         HospitalRequestModel request = new HospitalRequestModel(
-                currentId, blood, cityStr, hospStr, unitsStr, "مفتوح", deptStr, date, hId
+                currentId,
+                blood,
+                cityStr,
+                hospStr,
+                unitsStr,
+                "عاجل",
+                deptStr,
+                date,
+                hId,
+                combined // 🔥 الحل
         );
 
         db.child(currentId).setValue(request).addOnCompleteListener(task -> {

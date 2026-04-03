@@ -1,6 +1,7 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -9,18 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class HospitalEditProfileActivity extends AppCompatActivity {
 
-    // التأكد من أن هذه الأسماء تطابق الـ IDs في الـ XML تماماً
     private EditText etHospitalName, etCity, etEmail, etPhone;
     private Button btnSaveChanges;
     private ImageView btnBack;
@@ -33,7 +29,7 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_edit_profile);
 
-        // ربط العناصر - لاحظي استخدام الأسماء الجديدة الموحدة
+        // ربط العناصر
         etHospitalName = findViewById(R.id.etHospitalName);
         etCity = findViewById(R.id.etCity);
         etEmail = findViewById(R.id.etEmail);
@@ -41,20 +37,24 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         btnBack = findViewById(R.id.btnBack);
 
+        // 🔥 جلب UID
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUserId = FirebaseAuth.getInstance().getUid();
-            dbRef = FirebaseDatabase.getInstance().getReference("Hospitals").child(currentUserId);
+            dbRef = FirebaseDatabase.getInstance()
+                    .getReference("Hospitals")
+                    .child(currentUserId);
 
-            // جلب البيانات لعرضها قبل التعديل
             loadData();
         }
 
         btnBack.setOnClickListener(v -> finish());
+
         btnSaveChanges.setOnClickListener(v -> updateData());
     }
 
+    // ✅ جلب البيانات
     private void loadData() {
-        dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.addValueEventListener(new ValueEventListener() { // 🔥 مهم
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -64,19 +64,25 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
                     etPhone.setText(snapshot.child("phone").getValue(String.class));
                 }
             }
+
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(HospitalEditProfileActivity.this, "خطأ في جلب البيانات", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
+    // ✅ تحديث البيانات (الحل النهائي)
     private void updateData() {
         String name = etHospitalName.getText().toString().trim();
         String city = etCity.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
-        if (name.isEmpty() || city.isEmpty() || email.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(this, "يرجى ملئ جميع الحقول", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(city) ||
+                TextUtils.isEmpty(email) || TextUtils.isEmpty(phone)) {
+
+            Toast.makeText(this, "يرجى تعبئة جميع الحقول", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -86,9 +92,13 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         map.put("email", email);
         map.put("phone", phone);
 
-        dbRef.updateChildren(map).addOnSuccessListener(aVoid -> {
-            Toast.makeText(this, "تم تحديث البيانات بنجاح", Toast.LENGTH_SHORT).show();
-            finish();
-        });
+        dbRef.updateChildren(map)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "تم تحديث البيانات بنجاح ✅", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "فشل التحديث ❌", Toast.LENGTH_SHORT).show();
+                });
     }
 }
