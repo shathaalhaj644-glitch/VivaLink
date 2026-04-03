@@ -24,6 +24,7 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     @NonNull
     @Override
     public DonorVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // تأكدي أن اسم الملف هو item_donor (أو الاسم الذي سميتِ به ملف الـ XML للكرت)
         View v = LayoutInflater.from(context).inflate(R.layout.item_hospital_donors, parent, false);
         return new DonorVH(v);
     }
@@ -32,13 +33,20 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     public void onBindViewHolder(@NonNull DonorVH holder, int position) {
         HospitalDonorsModel donor = donorList.get(position);
 
+        // 1. عرض البيانات في الحقول الجديدة
         holder.tvName.setText(donor.getFullName());
-        holder.tvCity.setText(donor.getCity() + " 📍");
+        holder.tvCity.setText("📍 " + donor.getCity());
         holder.tvBloodType.setText(donor.getBloodType());
-        holder.tvDetails.setText("عدد التبرعات: " + donor.getDonationCount() + " | آخر تاريخ: " + donor.getLastDonation());
 
+        // عرض عدد التبرعات وتاريخ آخر تبرع بشكل منفصل تحت بعض
+        holder.tvDonationCount.setText("🩸 عدد التبرعات: " + donor.getDonationCount());
+
+        String lastDate = donor.getLastDonation();
+        holder.tvLastDonation.setText("📅 آخر تبرع: " + (lastDate != null && !lastDate.isEmpty() ? lastDate : "لا يوجد"));
+
+        // 2. برمجة زر الاتصال (باللون الأخضر في التصميم)
         holder.btnCall.setOnClickListener(v -> {
-            if (donor.getPhone() != null) {
+            if (donor.getPhone() != null && !donor.getPhone().isEmpty()) {
                 Intent intent = new Intent(Intent.ACTION_DIAL);
                 intent.setData(Uri.parse("tel:" + donor.getPhone()));
                 context.startActivity(intent);
@@ -50,15 +58,17 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     public int getItemCount() { return donorList.size(); }
 
     public static class DonorVH extends RecyclerView.ViewHolder {
-        TextView tvName, tvCity, tvBloodType, tvDetails;
+        TextView tvName, tvCity, tvBloodType, tvDonationCount, tvLastDonation;
         ImageButton btnCall;
 
         public DonorVH(@NonNull View v) {
             super(v);
+            // ربط الـ IDs الجديدة من ملف الـ XML
             tvName = v.findViewById(R.id.tvDonorName);
             tvCity = v.findViewById(R.id.tvDonorCity);
             tvBloodType = v.findViewById(R.id.tvBloodType);
-            tvDetails = v.findViewById(R.id.tvDonationInfo);
+            tvDonationCount = v.findViewById(R.id.tvDonationCount); // تأكدي من وجوده في XML
+            tvLastDonation = v.findViewById(R.id.tvLastDonation);   // تأكدي من وجوده في XML
             btnCall = v.findViewById(R.id.btnCall);
         }
     }

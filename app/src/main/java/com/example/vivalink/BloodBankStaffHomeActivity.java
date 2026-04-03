@@ -37,7 +37,7 @@ public class BloodBankStaffHomeActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // التعديل هنا: استخدام "name" و "role" و "city"
+
                     String name = snapshot.child("name").getValue(String.class);
                     String role = snapshot.child("role").getValue(String.class);
                     String city = snapshot.child("city").getValue(String.class);

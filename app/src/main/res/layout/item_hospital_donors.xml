@@ -3,73 +3,83 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="10dp"
     app:cardCornerRadius="20dp"
-    app:cardElevation="0dp"
-    app:cardBackgroundColor="#FFF9F9">
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFF0F3"> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:gravity="center_vertical"
+    android:layoutDirection="rtl">
+
+    <TextView
+        android:id="@+id/tvBloodType"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:background="@android:drawable/btn_default"
+        android:backgroundTint="#FFDADA"
+        android:gravity="center"
+        android:text="A+"
+        android:textColor="#D32F2F"
+        android:textStyle="bold"
+        android:textSize="22sp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical"
-        android:layoutDirection="rtl">
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="16dp">
 
         <TextView
-            android:id="@+id/tvBloodType"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:background="#FFDADA"
-            android:gravity="center"
-            android:text="A+"
-            android:textColor="#E64A41"
-            android:textStyle="bold"
-            android:textSize="20sp" />
-
-        <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/tvDonorName"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginHorizontal="15dp">
+            android:text="اسم المتبرع"
+            android:textColor="#333333"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvDonorName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="اسم المتبرع"
-                android:textColor="#333333"
-                android:textSize="17sp"
-                android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tvDonorCity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="نابلس 📍"
+            android:textColor="#666666"
+            android:textSize="15sp"
+            android:layout_marginTop="2dp" />
 
-            <TextView
-                android:id="@+id/tvDonorCity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="المدينة"
-                android:textColor="#888888"
-                android:textSize="13sp"
-                android:drawableStart="@android:drawable/ic_menu_mylocation"
-                android:drawablePadding="5dp" />
+        <TextView
+            android:id="@+id/tvDonationCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🩸 عدد التبرعات: 5"
+            android:textColor="#888888"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp" />
 
-            <TextView
-                android:id="@+id/tvDonationInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🩸عدد التبرعات: 0 | 📅 آخر تبرع: N/A"
-                android:textSize="11sp"
-                android:textColor="#AAAAAA"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/btnCall"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:background="#FFEAEA"
-            android:src="@android:drawable/stat_sys_phone_call"
-            app:tint="#E64A41" />
-
+        <TextView
+            android:id="@+id/tvLastDonation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📅 آخر تبرع: 2026-03-15"
+            android:textColor="#888888"
+            android:textSize="13sp"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/btnCall"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@android:drawable/screen_background_light_transparent"
+        android:backgroundTint="#E8F5E9"
+        android:src="@android:drawable/ic_menu_call"
+        app:tint="#2E7D32"
+        android:padding="10dp"
+        android:scaleType="centerInside" />
+
+</LinearLayout>
 </androidx.cardview.widget.CardView>

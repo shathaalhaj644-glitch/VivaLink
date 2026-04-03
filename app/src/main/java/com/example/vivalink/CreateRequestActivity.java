@@ -11,7 +11,7 @@ import java.util.Calendar;
 
 public class CreateRequestActivity extends AppCompatActivity {
 
-    // التغيير المهم: تعريفهم كـ TextView ليطابق الـ XML
+
     TextView et_city, et_hospitalName;
     EditText et_units, et_department;
     Spinner sp_bloodType;
@@ -25,7 +25,7 @@ public class CreateRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_request);
 
-        // ربط العناصر
+
         tvPageTitle = findViewById(R.id.tvPageTitle);
         et_city = findViewById(R.id.et_city);
         et_hospitalName = findViewById(R.id.et_hospitalName);
@@ -41,10 +41,9 @@ public class CreateRequestActivity extends AppCompatActivity {
 
         db = FirebaseDatabase.getInstance().getReference("Requests");
 
-        // جلب بيانات المستشفى تلقائياً
         fetchHospitalProfile();
 
-        // فحص إذا كان تعديل
+
         requestId = getIntent().getStringExtra("requestId");
         if (requestId != null) {
             tvPageTitle.setText("تعديل الطلب");
@@ -66,7 +65,7 @@ public class CreateRequestActivity extends AppCompatActivity {
                             if (snapshot.exists()) {
                                 String name = snapshot.child("hospitalName").getValue(String.class);
                                 String city = snapshot.child("city").getValue(String.class);
-                                // تأكدي أن الأسماء في الفايربيس هي hospitalName و city
+
                                 if (et_hospitalName != null) et_hospitalName.setText(name);
                                 if (et_city != null) et_city.setText(city);
                             }

@@ -1,17 +1,17 @@
 package com.example.vivalink;
 
 public class BloodBankStaff {
-    private String staffId;          // PK
-    private String userId;           // FK لربطه بجدول الـ Users
-    private String bankId;           // FK لربطه بجدول الـ BloodBanks
-    private String fullName;         // الاسم الكامل
-    private String employeeNumber;   // رقم الموظف
-    private String position;         // المسمى الوظيفي
+    private String staffId;
+    private String userId;
+    private String bankId;
+    private String fullName;
+    private String employeeNumber;
+    private String position;
 
-    // Constructor فارغ (مطلوب للفايربيس)
+
     public BloodBankStaff() {}
 
-    // Constructor كامل
+
     public BloodBankStaff(String staffId, String userId, String bankId,
                           String fullName, String employeeNumber, String position) {
         this.staffId = staffId;

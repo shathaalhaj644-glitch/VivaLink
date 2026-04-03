@@ -27,7 +27,7 @@ public class ChangePasswardActivity extends AppCompatActivity {
             String nPass = new_password.getText().toString();
             String cPass = confirm_password.getText().toString();
 
-            // شروط كلمة المرور القوية
+
             String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
 
             if (!nPass.equals(cPass)) {

@@ -15,9 +15,9 @@
         android:background="#FFF5F5"
         android:hint="ابحث باسم المتبرع..."
         android:paddingHorizontal="15dp"
-        android:drawableStart="@android:drawable/ic_menu_search"
         android:drawablePadding="10dp"
         android:textColorHint="#D32F2F"
+        android:textColor="#333333"
         android:textSize="14sp" />
 
     <HorizontalScrollView
@@ -35,37 +35,30 @@
             <Button
                 android:id="@+id/btnAll"
                 android:layout_width="wrap_content"
-                android:layout_height="38dp"
+                android:layout_height="40dp"
                 android:text="الكل"
                 android:backgroundTint="#D32F2F"
                 android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.AppCompat.Button.Small"/>
+                android:layout_marginEnd="8dp" />
 
-            <Button android:id="@+id/btnAPlus" android:layout_width="55dp" android:layout_height="38dp" android:text="A+" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnAMinus" android:layout_width="55dp" android:layout_height="38dp" android:text="A-" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnBPlus" android:layout_width="55dp" android:layout_height="38dp" android:text="B+" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnBMinus" android:layout_width="55dp" android:layout_height="38dp" android:text="B-" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnOPlus" android:layout_width="55dp" android:layout_height="38dp" android:text="O+" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnOMinus" android:layout_width="55dp" android:layout_height="38dp" android:text="O-" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnABPlus" android:layout_width="60dp" android:layout_height="38dp" android:text="AB+" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
-            <Button android:id="@+id/btnABMinus" android:layout_width="60dp" android:layout_height="38dp" android:text="AB-" android:backgroundTint="#FFEBEE" android:textColor="#D32F2F" android:layout_marginEnd="8dp" style="@style/Widget.AppCompat.Button.Small"/>
+            <Button android:id="@+id/btnAPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="A+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnAMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="A-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnBPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="B+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnBMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="B-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnOPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="O+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnOMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="O-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnABPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="AB+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnABMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="AB-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#EEEEEE"
-        android:layout_marginHorizontal="16dp" />
-
     <TextView
         android:id="@+id/tvEmptyMessage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
+        android:padding="20dp"
         android:text="لا يوجد متبرعين حالياً لهذه الفصيلة 🩸"
         android:textColor="#AAAAAA"
         android:visibility="gone" />

@@ -1,51 +1,93 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:background="#F5F5F5">
+    android:background="#F5F5F5"
+    android:fillViewport="true">
 
-    <EditText
-        android:id="@+id/etHospitalName"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="اسم المستشفى"
-        android:background="#EEEEEE"
-        android:padding="10dp"/>
+        android:orientation="vertical"
+        android:layoutDirection="rtl">
 
-    <EditText
-        android:id="@+id/etCity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="المدينة"
-        android:background="#EEEEEE"
-        android:padding="10dp"
-        android:layout_marginTop="10dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="#E64A41">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="إعدادات الحساب"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#FFFFFF" /> </RelativeLayout>
 
-    <EditText
-        android:id="@+id/etEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="البريد الإلكتروني"
-        android:background="#EEEEEE"
-        android:padding="10dp"
-        android:layout_marginTop="10dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-    <EditText
-        android:id="@+id/etPhone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="رقم الهاتف"
-        android:background="#EEEEEE"
-        android:padding="10dp"
-        android:layout_marginTop="10dp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اسم المستشفى" android:textColor="#E64A41" android:textStyle="bold" />
+            <EditText
+                android:id="@+id/etHospitalName"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="اسم المستشفى"
+                android:layout_marginBottom="15dp"
+                android:paddingLeft="10dp"
+                android:background="@android:drawable/edit_text"/>
 
-    <Button
-        android:id="@+id/btnSaveChanges"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="حفظ التغييرات"
-        android:textColor="#FFFFFF"
-        android:background="#E64A41"
-        android:layout_marginTop="20dp"/>
-</LinearLayout>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="المدينة" android:textColor="#E64A41" android:textStyle="bold" />
+            <EditText
+                android:id="@+id/etCity"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="المدينة"
+                android:layout_marginBottom="15dp"
+                android:paddingLeft="10dp"
+                android:background="@android:drawable/edit_text"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="البريد الإلكتروني" android:textColor="#E64A41" android:textStyle="bold" />
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="الإيميل"
+                android:layout_marginBottom="15dp"
+                android:paddingLeft="10dp"
+                android:background="@android:drawable/edit_text"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="رقم الهاتف" android:textColor="#E64A41" android:textStyle="bold" />
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="رقم الهاتف"
+                android:layout_marginBottom="25dp"
+                android:paddingLeft="10dp"
+                android:background="@android:drawable/edit_text"/>
+
+            <Button
+                android:id="@+id/btnSaveChanges"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:backgroundTint="#E64A41"
+                android:text="حفظ التغييرات"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

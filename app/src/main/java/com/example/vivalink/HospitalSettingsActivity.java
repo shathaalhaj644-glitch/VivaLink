@@ -4,35 +4,90 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.*;
 
 public class HospitalSettingsActivity extends AppCompatActivity {
 
-    private TextView tvHospitalName, tvCity, tvEmail;
-    private Button btnEditProfile, btnChangePassword;
+    private TextView tvHospitalNameTop, tvHospitalCityTop, tvHospitalEmailTop;
+    private TextView tvDetailsName, tvDetailsCity, tvDetailsEmail;
+    private Button btnEditProfile, btnChangePassword, btnLogout;
+
+    private DatabaseReference dbRef;
+    private String hospitalId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_settings);
 
-        tvHospitalName = findViewById(R.id.tvHospitalName);
-        tvCity = findViewById(R.id.tvCity);
-        tvEmail = findViewById(R.id.tvEmail);
+        // 🔥 ربط العناصر
+        tvHospitalNameTop = findViewById(R.id.tvHospitalNameTop);
+        tvHospitalCityTop = findViewById(R.id.tvHospitalCityTop); // 🔥 جديد
+        tvHospitalEmailTop = findViewById(R.id.tvHospitalEmailTop);
+
+        tvDetailsName = findViewById(R.id.tvDetailsName);
+        tvDetailsCity = findViewById(R.id.tvDetailsCity);
+        tvDetailsEmail = findViewById(R.id.tvDetailsEmail);
+
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnLogout = findViewById(R.id.btnLogout);
 
-        // مثال تعبئة بيانات (ممكن تجيبها من Firebase)
-        tvHospitalName.setText("مستشفى الاستشاري العربي");
-        tvCity.setText("رام الله");
-        tvEmail.setText("istishari_hosp@gmail.com");
+        hospitalId = FirebaseAuth.getInstance().getUid();
 
+        if (hospitalId != null) {
+            dbRef = FirebaseDatabase.getInstance().getReference("Hospitals").child(hospitalId);
+            loadHospitalData();
+        }
+
+        // 🔴 تعديل بيانات
         btnEditProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalEditProfileActivity.class))
         );
 
+        // 🔴 تغيير كلمة المرور
         btnChangePassword.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalChangePassward.class))
         );
+
+        // 🔴 تسجيل الخروج (🔥 الحل هون)
+        btnLogout.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+
+            Intent intent = new Intent(HospitalSettingsActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
+    }
+
+    private void loadHospitalData() {
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (snapshot.exists()) {
+
+                    String name = snapshot.child("hospitalName").getValue(String.class);
+                    String city = snapshot.child("city").getValue(String.class);
+                    String email = snapshot.child("email").getValue(String.class);
+
+                    // 🔴 المستطيل الأول
+                    tvHospitalNameTop.setText(name != null ? name : "---");
+                    tvHospitalCityTop.setText(city != null ? city : "---"); // 🔥 جديد
+                    tvHospitalEmailTop.setText(email != null ? email : "---");
+
+                    // 🔴 التفاصيل
+                    tvDetailsName.setText(name != null ? name : "---");
+                    tvDetailsCity.setText(city != null ? city : "---");
+                    tvDetailsEmail.setText(email != null ? email : "---");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 }
