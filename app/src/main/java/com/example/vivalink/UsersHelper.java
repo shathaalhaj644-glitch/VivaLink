@@ -42,19 +42,17 @@ public class UsersHelper {
         return dbRef.orderByChild("email").equalTo(email);
     }
 
-    // البحث عن مستخدمين حسب رقم الهاتف 📱
+
     public Query getUserByPhone(String phoneNumber) {
         return dbRef.orderByChild("phoneNumber").equalTo(phoneNumber);
     }
 
-    // البحث عن مستخدمين حسب فصيلة الدم 🩸
+
     public Query getUsersByBloodGroup(String bloodGroup) {
         return dbRef.orderByChild("bloodGroup").equalTo(bloodGroup);
     }
 
-    // --- 3. منطق الفحص والتنسيق (Logic & Validation) ---
 
-    // التحقق من صحة بيانات المستخدم قبل رفعها ✅
     public static String validateUser(String fullName, String email, String phoneNumber, String bloodGroup) {
         if (fullName == null || fullName.trim().isEmpty()) return "اسم المستخدم مطلوب ✅";
         if (email == null || email.trim().isEmpty()) return "البريد الإلكتروني مطلوب ✅";
@@ -62,10 +60,10 @@ public class UsersHelper {
         if (bloodGroup == null || bloodGroup.trim().isEmpty() || bloodGroup.equals("اختر فصيلة الدم"))
             return "يرجى تحديد فصيلة الدم ✅";
 
-        return null; // البيانات سليمة
+return null;
     }
 
-    // دالة لتنسيق عرض فصيلة الدم بالعربي ✅
+
     public static String getBloodGroupLabel(String bloodGroup) {
         if (bloodGroup == null) return "غير معروف";
         switch (bloodGroup) {

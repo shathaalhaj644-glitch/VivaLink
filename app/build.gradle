@@ -5,18 +5,18 @@ plugins {
 
 android {
     namespace 'com.example.vivalink'
-    compileSdk 35 // حدثناه لـ 35 عشان يروح التنبيه
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.example.vivalink"
         minSdk 24
-        targetSdk 34 // خليه 34 عشان الاستقرار
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    // ... باقي الكود كما هو ...
+
 }
 
 dependencies {
@@ -24,7 +24,7 @@ dependencies {
     implementation libs.material
     implementation libs.constraintlayout
 
-    // تحديث نسخة الـ BoM
+
     implementation platform('com.google.firebase:firebase-bom:34.10.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-database'

@@ -25,7 +25,7 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        // ربط العناصر
+
         tvBloodType = findViewById(R.id.tvBloodType);
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
@@ -45,7 +45,7 @@ public class EditProfileActivity extends AppCompatActivity {
             loadUserData();
         }
 
-        // التحكم بالـ checkbox
+
         cbNeverDonated.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 etLastDonation.setText("");

@@ -20,7 +20,7 @@ public class HospitalRequestsActivity extends AppCompatActivity {
     List<HospitalRequestModel> list;
     DatabaseReference db;
 
-    // إذا استخدمتِ الـ FloatingActionButton في الـ XML، نغير النوع هنا
+
     FloatingActionButton btnAdd;
     String hospitalId;
 
@@ -29,7 +29,7 @@ public class HospitalRequestsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_requests);
 
-        // جلب الـ ID الخاص بالمستشفى الحالي
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             hospitalId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
@@ -37,27 +37,27 @@ public class HospitalRequestsActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         btnAdd = findViewById(R.id.btn_add_new_request);
 
-        // إعداد الـ RecyclerView
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         list = new ArrayList<>();
         adapter = new HospitalRequestsAdapter(this, list);
         recyclerView.setAdapter(adapter);
 
-        // الوصول لعقدة Requests
+
         db = FirebaseDatabase.getInstance().getReference("Requests");
 
         if (hospitalId != null) {
             loadRequests();
         }
 
-        // زر إضافة طلب جديد (تأكدي من اسم الكلاس CreateRequestActivity)
+
         btnAdd.setOnClickListener(v -> {
             startActivity(new Intent(this, CreateRequestActivity.class));
         });
     }
 
     private void loadRequests() {
-        // الفلترة: بنطلب من فايربيس يجيب فقط الطلبات اللي فيها hospitalId بيساوي الآي دي تبعنا
+
         db.orderByChild("hospitalId").equalTo(hospitalId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -65,7 +65,7 @@ public class HospitalRequestsActivity extends AppCompatActivity {
                 for (DataSnapshot data : snapshot.getChildren()) {
                     HospitalRequestModel model = data.getValue(HospitalRequestModel.class);
                     if (model != null) {
-                        model.requestId = data.getKey(); // تخزين الـ Key لاستخدامه في الحذف والتعديل
+                        model.requestId = data.getKey();
                         list.add(model);
                     }
                 }

@@ -10,7 +10,7 @@
         android:gravity="center"
         android:padding="24dp">
 
-        <!-- عنوان التطبيق -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
             android:layout_marginBottom="12dp"
             android:letterSpacing="0.05"/>
 
-        <!-- نص ترحيبي -->
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
             android:gravity="center"
             android:textAlignment="center"/>
 
-        <!-- زر تسجيل الدخول -->
+
         <Button
             android:id="@+id/btnMainLogin"
             android:layout_width="match_parent"
@@ -44,7 +44,7 @@
             android:elevation="4dp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- زر إنشاء حساب (للمتبرعين فقط) -->
+
         <Button
             android:id="@+id/btnMainSignUp"
             android:layout_width="match_parent"

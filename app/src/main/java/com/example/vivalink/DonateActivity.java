@@ -15,8 +15,7 @@ public class DonateActivity extends AppCompatActivity {
     private TextView tvBloodType, tvHospitalName, tvLocation, tvDepartment, tvUnits, tvTimeDisplay, btnBack;
     private EditText etPhone, etConfirmPhone;
     private Button btnConfirmDonation;
-    private String selectedTime = ""; // هذا المتغير سيحفظ الوقت مع (صباحاً/مساءً) لرفعه لقاعدة البيانات
-
+    private String selectedTime = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +26,7 @@ public class DonateActivity extends AppCompatActivity {
 
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
-        // عند الضغط على حقل الوقت يفتح الساعة
+
         tvTimeDisplay.setOnClickListener(v -> openTimePicker());
 
         btnConfirmDonation.setOnClickListener(v -> handleDonation());
@@ -52,24 +51,23 @@ public class DonateActivity extends AppCompatActivity {
         int hour = currentTime.get(Calendar.HOUR_OF_DAY);
         int minute = currentTime.get(Calendar.MINUTE);
 
-        // تم تغيير true إلى false لتفعيل نظام AM/PM
+
         TimePickerDialog timePicker = new TimePickerDialog(DonateActivity.this, (view, hourOfDay, selectedMinute) -> {
 
-            // تحديد الفترة (صباحاً أو مساءً)
+
             String am_pm = (hourOfDay < 12) ? "صباحاً" : "مساءً";
 
-            // تحويل الساعة من نظام 24 ساعة إلى نظام 12 ساعة
+
             int hourIn12Format = (hourOfDay > 12) ? hourOfDay - 12 : hourOfDay;
             if (hourIn12Format == 0) hourIn12Format = 12;
 
-            // تنسيق النص النهائي المخزن
+
             selectedTime = String.format(Locale.getDefault(), "%02d:%02d %s", hourIn12Format, selectedMinute, am_pm);
 
-            // عرض الوقت المختار للمستخدم
+
             tvTimeDisplay.setText("⏰ الوقت المختار: " + selectedTime);
 
-        }, hour, minute, false); // false تظهر خيارات AM/PM في الساعة
-
+        }, hour, minute, false);
         timePicker.setTitle("اختر وقت التبرع");
         timePicker.show();
     }
@@ -130,7 +128,7 @@ public class DonateActivity extends AppCompatActivity {
             return;
         }
 
-        // نجاح العملية وإظهار الوقت المختار مع الفترة (صباحاً/مساءً)
+
         Toast.makeText(this, "تم تأكيد موعدك الساعة " + selectedTime + " ✅", Toast.LENGTH_LONG).show();
         finish();
     }

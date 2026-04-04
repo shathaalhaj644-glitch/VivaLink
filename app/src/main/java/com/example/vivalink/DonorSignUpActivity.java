@@ -31,10 +31,10 @@ public class DonorSignUpActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference("Donors");
 
-        // تفعيل Spinner للمدن وفصائل الدم
+
         setupSpinners();
 
-        // إظهار وإخفاء حقل التبرع
+
         rgDonationStatus.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbNeverDonated) {
                 etLastDonation.setVisibility(View.GONE);
@@ -74,13 +74,13 @@ public class DonorSignUpActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // فصائل الدم
+
         String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> bloodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, bloodTypes);
         bloodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spBloodType.setAdapter(bloodAdapter);
 
-        // المدن الفلسطينية
+
         String[] cities = {"نابلس", "طولكرم", "رام الله", "بيت لحم", "الخليل", "البيرة", "جنين", "سلفيت", "أريحا", "طوباس", "قلقيلية"};
         ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, cities);
         cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -133,7 +133,7 @@ public class DonorSignUpActivity extends AppCompatActivity {
             etConfirmPassword.setError("كلمتا المرور غير متطابقتين"); return;
         }
 
-        // إنشاء المستخدم
+
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 String uid = mAuth.getCurrentUser().getUid();

@@ -23,9 +23,9 @@ public class HospitalSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_settings);
 
-        // 🔥 ربط العناصر
+
         tvHospitalNameTop = findViewById(R.id.tvHospitalNameTop);
-        tvHospitalCityTop = findViewById(R.id.tvHospitalCityTop); // 🔥 جديد
+        tvHospitalCityTop = findViewById(R.id.tvHospitalCityTop);
         tvHospitalEmailTop = findViewById(R.id.tvHospitalEmailTop);
 
         tvDetailsName = findViewById(R.id.tvDetailsName);
@@ -43,17 +43,17 @@ public class HospitalSettingsActivity extends AppCompatActivity {
             loadHospitalData();
         }
 
-        // 🔴 تعديل بيانات
+
         btnEditProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalEditProfileActivity.class))
         );
 
-        // 🔴 تغيير كلمة المرور
+
         btnChangePassword.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalChangePassward.class))
         );
 
-        // 🔴 تسجيل الخروج (🔥 الحل هون)
+
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
 
@@ -74,12 +74,12 @@ public class HospitalSettingsActivity extends AppCompatActivity {
                     String city = snapshot.child("city").getValue(String.class);
                     String email = snapshot.child("email").getValue(String.class);
 
-                    // 🔴 المستطيل الأول
+
                     tvHospitalNameTop.setText(name != null ? name : "---");
-                    tvHospitalCityTop.setText(city != null ? city : "---"); // 🔥 جديد
+                    tvHospitalCityTop.setText(city != null ? city : "---");
                     tvHospitalEmailTop.setText(email != null ? email : "---");
 
-                    // 🔴 التفاصيل
+
                     tvDetailsName.setText(name != null ? name : "---");
                     tvDetailsCity.setText(city != null ? city : "---");
                     tvDetailsEmail.setText(email != null ? email : "---");

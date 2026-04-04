@@ -30,11 +30,11 @@ public class RequestsActivity extends AppCompatActivity {
         rvRequests.setAdapter(adapter);
 
         if (mAuth.getCurrentUser() != null) {
-            loadUserCityAndRequests(); // ✅ الاسم الصحيح
+            loadUserCityAndRequests();
         }
     }
 
-    // ✅ هاي الدالة كانت ناقصة عندك
+
     private void loadUserCityAndRequests() {
         String uid = mAuth.getCurrentUser().getUid();
         FirebaseDatabase.getInstance().getReference("Donors").child(uid)
@@ -56,7 +56,7 @@ public class RequestsActivity extends AppCompatActivity {
                 });
     }
 
-    // ✅ الفلترة الجديدة (مدينة + فصيلة دم)
+
     private void fetchRequestsByCityAndBlood(String city, String bloodType) {
 
         String combined = city + "_" + bloodType;
@@ -83,7 +83,7 @@ public class RequestsActivity extends AppCompatActivity {
         });
     }
 
-    // (اختياري) خليتها زي ما هي، بس مش مستخدمة حالياً
+
     private void fetchRequestsByCity(String city) {
         Query cityQuery = FirebaseDatabase.getInstance().getReference("Requests")
                 .orderByChild("city").equalTo(city);

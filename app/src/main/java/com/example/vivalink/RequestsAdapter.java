@@ -12,14 +12,14 @@ import java.util.List;
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.RequestViewHolder> {
 
     private List<BloodRequests> requestList;
-    private OnRequestClickListener listener; // تعريف الـ Listener للضغط
+    private OnRequestClickListener listener;
 
-    // الواجهة (Interface) ليتوافق مع الـ showDonateDialog في الـ Activity
+
     public interface OnRequestClickListener {
         void onRequestClick(BloodRequests request);
     }
 
-    // ✅ التعديل: الـ Constructor صار يستقبل وسيطين (القائمة + الـ Listener)
+
     public RequestsAdapter(List<BloodRequests> requestList, OnRequestClickListener listener) {
         this.requestList = requestList;
         this.listener = listener;
@@ -36,14 +36,14 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         BloodRequests request = requestList.get(position);
 
-        // عرض البيانات في الـ Item
+
         holder.tvBloodType.setText(request.getBloodType());
         holder.tvHospital.setText(request.getHospitalName());
         holder.tvLocation.setText("📍 " + request.getCity());
         holder.tvDepartment.setText("🏥 " + request.getDepartment());
         holder.tvUnits.setText("🩸 عدد الوحدات: " + request.getUnits());
 
-        // ✅ تفعيل زر "تبرع الآن" باستخدام الـ Listener الممرر من الـ Activity
+
         holder.btnDonate.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onRequestClick(request);

@@ -29,7 +29,7 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_edit_profile);
 
-        // ربط العناصر
+
         etHospitalName = findViewById(R.id.etHospitalName);
         etCity = findViewById(R.id.etCity);
         etEmail = findViewById(R.id.etEmail);
@@ -37,7 +37,6 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         btnBack = findViewById(R.id.btnBack);
 
-        // 🔥 جلب UID
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUserId = FirebaseAuth.getInstance().getUid();
             dbRef = FirebaseDatabase.getInstance()
@@ -52,7 +51,7 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         btnSaveChanges.setOnClickListener(v -> updateData());
     }
 
-    // ✅ جلب البيانات
+
     private void loadData() {
         dbRef.addValueEventListener(new ValueEventListener() { // 🔥 مهم
             @Override
@@ -72,7 +71,7 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
         });
     }
 
-    // ✅ تحديث البيانات (الحل النهائي)
+
     private void updateData() {
         String name = etHospitalName.getText().toString().trim();
         String city = etCity.getText().toString().trim();

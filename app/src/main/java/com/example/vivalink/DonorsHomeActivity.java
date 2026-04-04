@@ -19,7 +19,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
     private DatabaseReference dbRef;
     private String currentDonorId;
 
-    // --- متغيرات لتخزين بيانات الطلب العاجل لبعتها لصفحة التبرع ---
+
     private String urgentBlood = "", urgentHospital = "", urgentCity = "", urgentDept = "", urgentUnits = "";
 
     @Override
@@ -27,7 +27,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donors_home);
 
-        // 1. ربط العناصر بالـ XML
+
         initViews();
 
         currentDonorId = FirebaseAuth.getInstance().getUid();
@@ -35,10 +35,10 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         if (currentDonorId != null) {
             loadDonorData();
-            loadUrgentRequest(); // جلب الطلب العاجل
+            loadUrgentRequest();
         }
 
-        // 2. برمجة زر "تبرع الآن" (إرسال البيانات عبر Intent)
+
         btnGoToDonate.setOnClickListener(v -> {
             if (!urgentHospital.isEmpty()) {
                 Intent intent = new Intent(DonorsHomeActivity.this, DonateActivity.class);
@@ -53,7 +53,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
             }
         });
 
-        // 3. باقي الأزرار
+
         btnViewRequests.setOnClickListener(v -> startActivity(new Intent(this, RequestsActivity.class)));
         btnGoToProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
     }
@@ -88,27 +88,27 @@ public class DonorsHomeActivity extends AppCompatActivity {
     }
 
     private void loadUrgentRequest() {
-        // جلب آخر طلب مضاف في قاعدة البيانات (Requests)
+
         dbRef.child("Requests").limitToLast(1)
                 .addValueEventListener(new ValueEventListener() {
                     @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists() && snapshot.hasChildren()) {
                             for (DataSnapshot ds : snapshot.getChildren()) {
-                                // تخزين البيانات في المتغيرات
+
                                 urgentHospital = ds.child("hospitalName").getValue(String.class);
                                 urgentBlood = ds.child("bloodType").getValue(String.class);
                                 urgentCity = ds.child("city").getValue(String.class);
                                 urgentDept = ds.child("department").getValue(String.class);
                                 urgentUnits = String.valueOf(ds.child("units").getValue());
 
-                                // عرض البيانات على واجهة الهوم
+
                                 tvHospitalName.setText("المستشفى: " + (urgentHospital != null ? urgentHospital : "غير محدد"));
                                 tvBloodType.setText("الفصيلة المطلوبة: " + (urgentBlood != null ? urgentBlood : "--"));
                                 tvUnits.setText("عدد الوحدات: " + (urgentUnits != null ? urgentUnits : "0"));
                             }
                         } else {
                             tvHospitalName.setText("لا يوجد طلبات حالياً");
-                            urgentHospital = ""; // تفريغ المتغير إذا لا يوجد طلبات
+                            urgentHospital = "";
                         }
                     }
                     @Override public void onCancelled(@NonNull DatabaseError error) {

@@ -10,40 +10,40 @@ public class DonationsHelper {
     private DatabaseReference dbRef;
 
     public DonationsHelper() {
-        // إنشاء مرجع لجدول التبرعات في Firebase تحت اسم "Donations"
+
         dbRef = FirebaseDatabase.getInstance().getReference("Donations");
     }
 
-    // --- 1. عمليات قاعدة البيانات (Database Operations) ---
 
-    // إضافة تبرع جديد ✅
+
+
     public Task<Void> addDonation(Donations donation) {
         return dbRef.child(donation.getDonationId()).setValue(donation);
     }
 
-    // جلب كل التبرعات ✅
+
     public Query getAllDonations() {
         return dbRef;
     }
 
-    // جلب تبرع محدد باستخدام الـ ID ✅
+
     public Query getDonationById(String donationId) {
         return dbRef.child(donationId);
     }
 
-    // تحديث حالة التبرع ✅
+
     public Task<Void> updateDonationStatus(String donationId, String newStatus) {
         return dbRef.child(donationId).child("status").setValue(newStatus);
     }
 
-    // حذف تبرع ✅
+
     public Task<Void> deleteDonation(String donationId) {
         return dbRef.child(donationId).removeValue();
     }
 
-    // --- 2. منطق الفحص والتنسيق (Logic & Validation) ---
 
-    // التحقق من صحة بيانات التبرع قبل رفعها ✅
+
+
     public static String validateDonation(String donorId, String hospitalId, String quantity, String donationDate) {
         if (donorId == null || donorId.isEmpty()) return "رقم المتبرع مطلوب ✅";
         if (hospitalId == null || hospitalId.isEmpty()) return "رقم المستشفى مطلوب ✅";
@@ -57,10 +57,10 @@ public class DonationsHelper {
             return "يرجى إدخال رقم صحيح للكمية ✅";
         }
 
-        return null; // البيانات سليمة
+        return null;
     }
 
-    // دالة لتنسيق عرض حالة التبرع بالعربي ✅
+
     public static String getStatusLabel(String status) {
         if (status == null) return "غير معروف";
         switch (status) {

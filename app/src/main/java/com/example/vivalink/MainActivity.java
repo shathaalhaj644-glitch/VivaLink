@@ -18,13 +18,13 @@ public class MainActivity extends AppCompatActivity {
         Button btnLogin = findViewById(R.id.btnMainLogin);
         Button btnSignUp = findViewById(R.id.btnMainSignUp);
 
-        // عند الضغط على زر تسجيل الدخول -> نذهب لـ LoginActivity
+
         btnLogin.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
         });
 
-        // عند الضغط على زر إنشاء حساب -> نذهب لـ DonorSignUpActivity (للمتبرعين فقط)
+
         btnSignUp.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, DonorSignUpActivity.class);
             startActivity(intent);

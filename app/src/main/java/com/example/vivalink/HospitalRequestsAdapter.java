@@ -30,7 +30,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // تأكدي أن اسم الملف item_hospital_request.xml موجود في الـ Layout
+
         View v = LayoutInflater.from(context).inflate(R.layout.item_hospital_request, parent, false);
         return new VH(v);
     }
@@ -39,21 +39,21 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
     public void onBindViewHolder(@NonNull VH holder, int position) {
         HospitalRequestModel m = list.get(position);
 
-        // ربط البيانات بالـ Views
+
         holder.tvBloodType.setText(m.bloodType);
         holder.tvStatusBadge.setText(m.status);
         holder.tvUnits.setText("عدد الوحدات: " + m.units);
         holder.tvDept.setText("القسم: " + m.department);
         holder.tvCity.setText("المدينة: " + m.city);
 
-        // --- المنطق اللي طلبتيه: إذا الحالة ملغي أو مغلق، زر التعديل بيختفي ---
+
         if ("ملغي".equals(m.status) || "مغلق".equals(m.status)) {
             holder.btnEdit.setVisibility(View.GONE);
         } else {
             holder.btnEdit.setVisibility(View.VISIBLE);
         }
 
-        // 1. زر تغيير الحالة (الكل في واحد)
+
         holder.btnChangeStatus.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(context, v);
             popup.getMenu().add("مفتوح");
@@ -67,14 +67,14 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
 
                 ref.child("status").setValue(selectedStatus).addOnSuccessListener(aVoid -> {
                     Toast.makeText(context, "تم التحديث لـ " + selectedStatus, Toast.LENGTH_SHORT).show();
-                    // ملاحظة: الـ Visibility رح تتحدث لحالها لما الداتا تتغير في الفايربيس
+
                 });
                 return true;
             });
             popup.show();
         });
 
-        // 2. زر التعديل (Dialog بدون استخدام ملفات XML خارجية)
+
         holder.btnEdit.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle("تعديل الطلب ✏️");
@@ -112,7 +112,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
             builder.show();
         });
 
-        // 3. زر الحذف
+
         holder.btnDelete.setOnClickListener(v -> {
             new AlertDialog.Builder(context)
                     .setTitle("حذف")
@@ -133,7 +133,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
 
         public VH(@NonNull View v) {
             super(v);
-            // تأكدي أن الـ IDs في ملف item_hospital_request.xml هي:
+
             tvBloodType = v.findViewById(R.id.tvBloodType);
             tvStatusBadge = v.findViewById(R.id.tvStatusBadge);
             tvUnits = v.findViewById(R.id.tvUnits);

@@ -26,8 +26,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
     private TextView tvEmpty;
     private EditText etSearchDonor;
     private String currentCity = "";
-    private String selectedBloodType = "الكل"; // لحفظ الفصيلة المختارة حالياً
-
+    private String selectedBloodType = "الكل";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,14 +55,14 @@ public class HospitalDonorsActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                applyFilters(); // فلترة بناءً على الاسم والفصيلة معاً
+                applyFilters();
             }
             @Override
             public void afterTextChanged(Editable s) {}
         });
     }
 
-    // دالة لربط أزرار الفصائل وتلوينها
+
     private void setupBloodFilterButtons() {
         int[] buttonIds = {R.id.btnAll, R.id.btnAPlus, R.id.btnAMinus, R.id.btnBPlus, R.id.btnBMinus,
                 R.id.btnOPlus, R.id.btnOMinus, R.id.btnABPlus, R.id.btnABMinus};
@@ -78,21 +77,21 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         }
     }
 
-    // لتغيير لون الزر المختار للأحمر والباقي للسكني الفاتح
+
     private void updateButtonColors(int[] ids, int selectedId) {
         for (int id : ids) {
             Button btn = findViewById(id);
             if (id == selectedId) {
-                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFD32F2F)); // أحمر
-                btn.setTextColor(0xFFFFFFFF); // أبيض
+                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFD32F2F));
+                btn.setTextColor(0xFFFFFFFF);
             } else {
-                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFF5F5F5)); // سكني فاتح
-                btn.setTextColor(0xFFD32F2F); // نص أحمر
+                btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFFF5F5F5));
+                btn.setTextColor(0xFFD32F2F);
             }
         }
     }
 
-    // الدالة السحرية: تفلتر بناءً على الاسم المكتوب + الفصيلة المختارة
+
     private void applyFilters() {
         String searchText = etSearchDonor.getText().toString().toLowerCase();
         filteredList.clear();

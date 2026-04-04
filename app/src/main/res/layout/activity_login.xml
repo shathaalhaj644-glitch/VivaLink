@@ -12,7 +12,7 @@
         android:gravity="center"
         android:padding="24dp">
 
-        <!-- عنوان الصفحة -->
+
         <TextView
             android:id="@+id/tvLoginTitle"
             android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
             android:layout_marginBottom="32dp"
             android:letterSpacing="0.05"/>
 
-        <!-- البريد أو الهاتف -->
+
         <EditText
             android:id="@+id/etLoginEmailOrPhone"
             android:layout_width="match_parent"
@@ -37,7 +37,7 @@
             android:background="@android:drawable/editbox_background"
             android:layout_marginBottom="16dp"/>
 
-        <!-- كلمة المرور -->
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:padding="12dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- زر الدخول -->
+
         <Button
             android:id="@+id/btnSubmitLogin"
             android:layout_width="match_parent"
@@ -69,7 +69,7 @@
             android:elevation="4dp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- زر إنشاء حساب -->
+
         <Button
             android:id="@+id/btnGoToSignUp"
             android:layout_width="match_parent"

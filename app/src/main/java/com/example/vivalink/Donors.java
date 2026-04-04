@@ -9,8 +9,7 @@ public class Donors {
     private String lastDonation;
     private String role;
 
-    public Donors() {} // ضروري جداً
-
+    public Donors() {}
     public Donors(String name, String email, String city, String bloodType, String phone, String lastDonation, String role) {
         this.name = name;
         this.email = email;
@@ -21,7 +20,7 @@ public class Donors {
         this.role = role;
     }
 
-    // Getters and Setters
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getEmail() { return email; }

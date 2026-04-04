@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- فصيلة الدم -->
+
         <TextView
             android:id="@+id/tvBloodType"
             android:layout_width="wrap_content"
@@ -18,7 +18,7 @@
             android:textStyle="bold"
             android:paddingBottom="15dp"/>
 
-        <!-- المعلومات الشخصية -->
+
         <EditText android:id="@+id/etName"
             android:hint="الاسم الكامل"
             android:layout_width="match_parent"
@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <!-- الحالة الصحية -->
+
         <TextView
             android:text="هل تعاني من أمراض مزمنة؟"
             android:layout_width="wrap_content"
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"/>
         </RadioGroup>
 
-        <!-- سجل التبرع -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:text="لم أتبرع من قبل"/>
 
-        <!-- زر الحفظ -->
+
         <Button
             android:id="@+id/btnSave"
             android:layout_width="match_parent"

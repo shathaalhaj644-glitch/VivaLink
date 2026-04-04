@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:layoutDirection="rtl">
 
-        <!-- 🔴 الهيدر -->
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="200dp"
@@ -28,7 +28,7 @@
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <!-- 🔴 المستطيل الأول -->
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp" />
 
-        <!-- 🔴 عنوان معلومات الحساب -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,6 @@
             android:textStyle="bold"
             android:textSize="16sp"/>
 
-        <!-- 🔴 كرت معلومات -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -104,7 +103,7 @@
                 android:orientation="vertical"
                 android:padding="10dp">
 
-                <!-- اسم المستشفى -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -129,7 +128,7 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#DDDDDD"/>
 
-                <!-- المدينة -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -154,7 +153,7 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#DDDDDD"/>
 
-                <!-- الايميل -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -179,7 +178,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- 🔴 عنوان الإعدادات -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -189,7 +188,7 @@
             android:textStyle="bold"
             android:textSize="16sp"/>
 
-        <!-- 🔴 كرت الأزرار -->
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -222,7 +221,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- 🔴 تسجيل خروج -->
+
         <Button
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"

@@ -23,7 +23,7 @@ public class HospitalChangePassward extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_change_passward);
 
-        // ربط العناصر
+
         etOldPassword = findViewById(R.id.etOldPassword);
         etNewPassword = findViewById(R.id.etNewPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
@@ -38,7 +38,7 @@ public class HospitalChangePassward extends AppCompatActivity {
         String newPass = etNewPassword.getText().toString().trim();
         String confirmPass = etConfirmPassword.getText().toString().trim();
 
-        // 🔴 تحقق من الحقول
+
         if (oldPass.isEmpty() || newPass.isEmpty() || confirmPass.isEmpty()) {
             Toast.makeText(this, "الرجاء تعبئة جميع الحقول", Toast.LENGTH_SHORT).show();
             return;
@@ -61,7 +61,7 @@ public class HospitalChangePassward extends AppCompatActivity {
             return;
         }
 
-        // 🔥 إعادة التوثيق (مهم جداً)
+
         AuthCredential credential = EmailAuthProvider
                 .getCredential(user.getEmail(), oldPass);
 
@@ -70,14 +70,14 @@ public class HospitalChangePassward extends AppCompatActivity {
 
                     if (task.isSuccessful()) {
 
-                        // 🔥 تغيير كلمة المرور
+
                         user.updatePassword(newPass)
                                 .addOnCompleteListener(task1 -> {
 
                                     if (task1.isSuccessful()) {
                                         Toast.makeText(this, "تم تغيير كلمة المرور بنجاح", Toast.LENGTH_SHORT).show();
 
-                                        // 🔥 تسجيل خروج بعد التغيير (اختياري لكنه الأفضل)
+
                                         FirebaseAuth.getInstance().signOut();
                                         finish();
 

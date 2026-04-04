@@ -3,7 +3,7 @@ package com.example.vivalink;
 public class HospitalRequestModel {
 
     public String requestId, bloodType, city, hospitalName, status, department, date, hospitalId, units;
-    public String city_bloodType; // 🔥 مهم
+    public String city_bloodType;
 
     public HospitalRequestModel() {}
 

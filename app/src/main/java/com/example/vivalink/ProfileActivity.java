@@ -30,7 +30,6 @@ public class ProfileActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        // الحل السحري: استخدام String.valueOf لمنع الـ Crash نهائياً
                         String name = String.valueOf(snapshot.child("fullName").getValue());
                         String email = String.valueOf(snapshot.child("email").getValue());
                         String phone = String.valueOf(snapshot.child("phone").getValue());

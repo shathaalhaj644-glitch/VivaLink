@@ -84,7 +84,7 @@ public class CreateRequestActivity extends AppCompatActivity {
             return;
         }
 
-        // 🔥 أهم سطر
+
         String combined = cityStr + "_" + blood;
 
         String hId = FirebaseAuth.getInstance().getUid();
@@ -101,7 +101,7 @@ public class CreateRequestActivity extends AppCompatActivity {
                 deptStr,
                 date,
                 hId,
-                combined // 🔥 الحل
+                combined
         );
 
         db.child(currentId).setValue(request).addOnCompleteListener(task -> {

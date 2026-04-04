@@ -19,14 +19,13 @@ public class HospitalHomeActivity extends AppCompatActivity {
 
     private DatabaseReference dbRef;
     private String currentHospitalUid;
-    private String hospitalCity = ""; // 🔥 مهم جداً
-
+    private String hospitalCity = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_home);
 
-        // ربط العناصر
+
         tvHospitalName = findViewById(R.id.tvHospitalName);
         tvHospitalLocation = findViewById(R.id.tvHospitalLocation);
         valTotalRequests = findViewById(R.id.valTotalRequests);
@@ -44,7 +43,7 @@ public class HospitalHomeActivity extends AppCompatActivity {
             loadHospitalData();
         }
 
-        // التنقل
+
         btnCreateRequestCard.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalRequestsActivity.class)));
 
@@ -55,7 +54,7 @@ public class HospitalHomeActivity extends AppCompatActivity {
                 startActivity(new Intent(this, HospitalSettingsActivity.class)));
     }
 
-    // 🔥 تحميل بيانات المستشفى + المدينة
+
     private void loadHospitalData() {
 
         dbRef.child("Hospitals").child(currentHospitalUid)
@@ -73,7 +72,7 @@ public class HospitalHomeActivity extends AppCompatActivity {
                             tvHospitalLocation.setText(hospitalCity != null ? hospitalCity + " 📍" : "المدينة");
 
                             fetchRequests();
-                            fetchDonors(); // 🔥 هون الحل
+                            fetchDonors();
                         }
                     }
 
@@ -84,7 +83,7 @@ public class HospitalHomeActivity extends AppCompatActivity {
                 });
     }
 
-    // 🔥 الطلبات
+
     private void fetchRequests() {
 
         dbRef.child("Requests")
@@ -116,14 +115,14 @@ public class HospitalHomeActivity extends AppCompatActivity {
                 });
     }
 
-    // 🔥🔥🔥 الحل النهائي للمشكلة
+
     private void fetchDonors() {
 
         if (hospitalCity == null || hospitalCity.isEmpty()) return;
 
         dbRef.child("Donors")
                 .orderByChild("city")
-                .equalTo(hospitalCity) // 🔥 فلترة حسب مدينة المستشفى
+                .equalTo(hospitalCity)
                 .addValueEventListener(new ValueEventListener() {
 
                     @Override

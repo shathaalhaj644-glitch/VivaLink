@@ -8,10 +8,10 @@ public class HospitalDonorsModel {
     private String lastDonation;
     private int donationCount;
 
-    // Constructor فاضي (إجباري للفايربيس)
+
     public HospitalDonorsModel() {}
 
-    // Constructor كامل (للتجارب والـ List اليدوية)
+
     public HospitalDonorsModel(String fullName, String bloodType, String city, String phone, String lastDonation, int donationCount) {
         this.fullName = fullName;
         this.bloodType = bloodType;
@@ -21,7 +21,7 @@ public class HospitalDonorsModel {
         this.donationCount = donationCount;
     }
 
-    // Getters & Setters
+
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 

@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void findEmailByPhone(String phone, String pass) {
-        // البحث في قسم المتبرعين أولاً
+
         mRootRef.child("Donors").orderByChild("phone").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -80,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkUserRole(String uid) {
-        // فحص الجداول الثلاثة بناءً على الـ JSON المرفوع
+
         String[] nodes = {"Donors", "Hospitals", "BloodBankStaff"};
 
         for (String node : nodes) {
