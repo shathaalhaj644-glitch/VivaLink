@@ -6,20 +6,16 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class DonorSignUpActivity extends AppCompatActivity {
 
-    private EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword, etLastDonation, etDonationCount, etDiseaseName;
+    private EditText etFullName, etEmail, etPhone, etPassword, etConfirmPassword,
+            etLastDonation, etDonationCount, etDiseaseName, etBloodLevel;
     private Spinner spBloodType, spCity;
     private RadioGroup rgHasDisease, rgDonationStatus;
     private RadioButton rbDiseaseYes, rbNeverDonated;
     private Button btnRegister, btnBackToLogin;
-    private FirebaseAuth mAuth;
-    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,13 +23,7 @@ public class DonorSignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_donor_sign_up);
 
         initViews();
-
-        mAuth = FirebaseAuth.getInstance();
-        mRef = FirebaseDatabase.getInstance().getReference("Donors");
-
-
         setupSpinners();
-
 
         rgDonationStatus.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbNeverDonated) {
@@ -61,6 +51,7 @@ public class DonorSignUpActivity extends AppCompatActivity {
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
         etLastDonation = findViewById(R.id.etLastDonation);
         etDonationCount = findViewById(R.id.etDonationCount);
+        etBloodLevel = findViewById(R.id.etBloodLevel);
 
         spBloodType = findViewById(R.id.spBloodType);
         spCity = findViewById(R.id.spCity);
@@ -69,17 +60,16 @@ public class DonorSignUpActivity extends AppCompatActivity {
         rbDiseaseYes = findViewById(R.id.rbDiseaseYes);
         rgDonationStatus = findViewById(R.id.rgDonationStatus);
         rbNeverDonated = findViewById(R.id.rbNeverDonated);
+
         btnRegister = findViewById(R.id.btnRegister);
         btnBackToLogin = findViewById(R.id.btnBackToLogin);
     }
 
     private void setupSpinners() {
-
         String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> bloodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, bloodTypes);
         bloodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spBloodType.setAdapter(bloodAdapter);
-
 
         String[] cities = {"نابلس", "طولكرم", "رام الله", "بيت لحم", "الخليل", "البيرة", "جنين", "سلفيت", "أريحا", "طوباس", "قلقيلية"};
         ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, cities);
@@ -93,6 +83,7 @@ public class DonorSignUpActivity extends AppCompatActivity {
         String phone = etPhone.getText().toString().trim();
         String city = spCity.getSelectedItem().toString();
         String bloodType = spBloodType.getSelectedItem().toString();
+        String bloodLevel = etBloodLevel.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String confirmPass = etConfirmPassword.getText().toString().trim();
 
@@ -105,62 +96,35 @@ public class DonorSignUpActivity extends AppCompatActivity {
         } else {
             lastDonation = etLastDonation.getText().toString().trim();
             donationCount = etDonationCount.getText().toString().trim();
-            if (donationCount.isEmpty()) {
-                etDonationCount.setError("يرجى إدخال عدد مرات التبرع");
-                return;
-            }
+            if (donationCount.isEmpty()) return;
         }
 
         String hasDisease = rbDiseaseYes.isChecked() ? "نعم" : "لا";
         String diseaseName = rbDiseaseYes.isChecked() ? etDiseaseName.getText().toString().trim() : "سليم";
 
-        // Validation
-        if (fullName.isEmpty() || !Pattern.matches("^[a-zA-Z\\s]{5,}$", fullName)) {
-            etFullName.setError("الاسم يجب أن يكون بالإنجليزية و 5 حروف على الأقل"); return;
-        }
-        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("يرجى إدخال بريد إلكتروني صحيح"); return;
-        }
-        if (!Pattern.matches("^[0-9]{10}$", phone)) {
-            etPhone.setError("رقم الهاتف يجب أن يتكون من 10 أرقام"); return;
-        }
+        if (fullName.isEmpty() || !Pattern.matches("^[a-zA-Z\\s]{5,}$", fullName)) return;
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) return;
+        if (!Pattern.matches("^[0-9]{10}$", phone)) return;
+        if (bloodLevel.isEmpty()) return;
 
         String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
-        if (!Pattern.matches(passwordPattern, password)) {
-            etPassword.setError("كلمة السر ضعيفة"); return;
-        }
-        if (!password.equals(confirmPass)) {
-            etConfirmPassword.setError("كلمتا المرور غير متطابقتين"); return;
-        }
+        if (!Pattern.matches(passwordPattern, password)) return;
+        if (!password.equals(confirmPass)) return;
 
+        Intent intent = new Intent(this, VerifyCodeActivity.class);
 
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                String uid = mAuth.getCurrentUser().getUid();
-                HashMap<String, Object> donorMap = new HashMap<>();
-                donorMap.put("id", uid);
-                donorMap.put("fullName", fullName);
-                donorMap.put("email", email);
-                donorMap.put("phone", phone);
-                donorMap.put("city", city);
-                donorMap.put("bloodType", bloodType);
-                donorMap.put("hasDiseases", hasDisease);
-                donorMap.put("diseaseName", diseaseName);
-                donorMap.put("lastDonation", lastDonation);
-                donorMap.put("donationCount", donationCount);
-                donorMap.put("role", "Donor");
+        intent.putExtra("fullName", fullName);
+        intent.putExtra("email", email);
+        intent.putExtra("phone", phone);
+        intent.putExtra("city", city);
+        intent.putExtra("bloodType", bloodType);
+        intent.putExtra("bloodLevel", bloodLevel);
+        intent.putExtra("password", password);
+        intent.putExtra("lastDonation", lastDonation);
+        intent.putExtra("donationCount", donationCount);
+        intent.putExtra("hasDisease", hasDisease);
+        intent.putExtra("diseaseName", diseaseName);
 
-                mRef.child(uid).setValue(donorMap).addOnCompleteListener(saveTask -> {
-                    if (saveTask.isSuccessful()) {
-                        mAuth.signOut();
-                        Toast.makeText(this, "تم إنشاء الحساب بنجاح! سجل دخولك الآن ✅", Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(DonorSignUpActivity.this, LoginActivity.class));
-                        finish();
-                    }
-                });
-            } else {
-                Toast.makeText(this, "خطأ: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        startActivity(intent);
     }
 }

@@ -21,7 +21,6 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-
         <EditText
             android:id="@+id/etFullName"
             android:layout_width="match_parent"
@@ -37,7 +36,6 @@
             android:hint="البريد الإلكتروني"
             android:inputType="textEmailAddress" />
 
-
         <EditText
             android:id="@+id/etPhone"
             android:layout_width="match_parent"
@@ -46,7 +44,6 @@
             android:hint="رقم الهاتف"
             android:inputType="phone" />
 
-        <!-- المدينة -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -57,7 +54,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp" />
 
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -66,8 +62,16 @@
             android:id="@+id/spBloodType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp" />
+            android:layout_marginBottom="10dp" />
 
+        <!-- 🔥 نسبة الدم -->
+        <EditText
+            android:id="@+id/etBloodLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:hint="نسبة الدم"
+            android:inputType="numberDecimal" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -78,8 +82,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <RadioButton android:id="@+id/rbDonatedYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نعم" />
-            <RadioButton android:id="@+id/rbNeverDonated" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="لا" android:checked="true" />
+            <RadioButton
+                android:id="@+id/rbDonatedYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="نعم" />
+            <RadioButton
+                android:id="@+id/rbNeverDonated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="لا"
+                android:checked="true" />
         </RadioGroup>
 
         <EditText
@@ -99,7 +112,6 @@
             android:inputType="number"
             android:visibility="gone" />
 
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -110,8 +122,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <RadioButton android:id="@+id/rbDiseaseYes" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نعم" />
-            <RadioButton android:id="@+id/rbDiseaseNo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="لا" android:checked="true" />
+            <RadioButton
+                android:id="@+id/rbDiseaseYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="نعم" />
+            <RadioButton
+                android:id="@+id/rbDiseaseNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="لا"
+                android:checked="true" />
         </RadioGroup>
 
         <EditText
@@ -120,7 +141,6 @@
             android:layout_height="wrap_content"
             android:hint="اسم المرض"
             android:visibility="gone" />
-
 
         <EditText
             android:id="@+id/etPassword"
@@ -137,7 +157,6 @@
             android:layout_marginBottom="20dp"
             android:hint="تأكيد كلمة السر"
             android:inputType="textPassword" />
-
 
         <Button
             android:id="@+id/btnRegister"

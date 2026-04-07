@@ -154,7 +154,7 @@
             app:cardCornerRadius="20dp">
             <LinearLayout android:gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="➕" android:textSize="20sp"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="إنشاء طلب" android:textColor="#D32F2F" android:textStyle="bold" android:layout_marginTop="4dp" android:textSize="13sp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اضافة طلب" android:textColor="#D32F2F" android:textStyle="bold" android:layout_marginTop="4dp" android:textSize="13sp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
