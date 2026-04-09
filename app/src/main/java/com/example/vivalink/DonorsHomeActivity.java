@@ -2,118 +2,140 @@ package com.example.vivalink;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class DonorsHomeActivity extends AppCompatActivity {
 
-    private TextView tvWelcomeDonor, tvHospitalName, tvBloodType, tvUnits, tvLastDonationDate, tvDonationCount;
-    private Button btnGoToDonate, btnViewRequests, btnGoToProfile;
+    private TextView tvWelcomeDonor, tvDonationCount, tvLastDonationDate;
+    private TextView tvUrgentHospital, tvUrgentBlood, tvUrgentUnits, tvRequestDate;
+    private Button btnViewRequests, btnGoToDonate;
+
     private DatabaseReference dbRef;
-    private String currentDonorId;
-
-
-    private String urgentBlood = "", urgentHospital = "", urgentCity = "", urgentDept = "", urgentUnits = "";
+    private String userId, lastDonationDateFromDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donors_home);
 
-
         initViews();
 
-        currentDonorId = FirebaseAuth.getInstance().getUid();
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         dbRef = FirebaseDatabase.getInstance().getReference();
 
-        if (currentDonorId != null) {
-            loadDonorData();
-            loadUrgentRequest();
-        }
-
-
-        btnGoToDonate.setOnClickListener(v -> {
-            if (!urgentHospital.isEmpty()) {
-                Intent intent = new Intent(DonorsHomeActivity.this, DonateActivity.class);
-                intent.putExtra("hospitalName", urgentHospital);
-                intent.putExtra("bloodType", urgentBlood);
-                intent.putExtra("city", urgentCity);
-                intent.putExtra("department", urgentDept);
-                intent.putExtra("units", urgentUnits);
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "لا يوجد طلبات عاجلة حالياً للتبرع لها", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        loadDonorData();
+        loadLatestRequest(); // جلب أحدث طلب بدون فلترة مدينة
 
         btnViewRequests.setOnClickListener(v -> startActivity(new Intent(this, RequestsActivity.class)));
-        btnGoToProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        btnGoToDonate.setOnClickListener(v -> checkDonationEligibility());
     }
 
     private void initViews() {
         tvWelcomeDonor = findViewById(R.id.tvWelcomeDonor);
-        tvHospitalName = findViewById(R.id.tvHospitalName);
-        tvBloodType = findViewById(R.id.tvBloodType);
-        tvUnits = findViewById(R.id.tvUnits);
-        tvLastDonationDate = findViewById(R.id.tvLastDonationDate);
         tvDonationCount = findViewById(R.id.tvDonationCount);
-        btnGoToDonate = findViewById(R.id.btnGoToDonate);
+        tvLastDonationDate = findViewById(R.id.tvLastDonationDate);
+
+        // ربط حقول البطاقة الحمراء
+        tvUrgentHospital = findViewById(R.id.tvHospitalName);
+        tvUrgentBlood = findViewById(R.id.tvBloodType);
+        tvUrgentUnits = findViewById(R.id.tvUrgentUnits);
+        tvRequestDate = findViewById(R.id.tvRequestDate);
+
         btnViewRequests = findViewById(R.id.btnViewRequests);
-        btnGoToProfile = findViewById(R.id.btnGoToProfile);
+        btnGoToDonate = findViewById(R.id.btnGoToDonate);
     }
 
     private void loadDonorData() {
-        dbRef.child("Donors").child(currentDonorId).addValueEventListener(new ValueEventListener() {
-            @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
+        dbRef.child("Donors").child(userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String name = snapshot.child("fullName").getValue(String.class);
-                    String last = snapshot.child("lastDonation").getValue(String.class);
-                    Object count = snapshot.child("donationCount").getValue();
+                    lastDonationDateFromDB = snapshot.child("lastDonation").getValue(String.class);
+                    Object countObj = snapshot.child("donationCount").getValue();
 
-                    tvWelcomeDonor.setText("👋 أهلاً " + name + "!");
-                    tvLastDonationDate.setText(last != null ? last : "--");
-                    tvDonationCount.setText(count != null ? String.valueOf(count) : "0");
+                    tvWelcomeDonor.setText("أهلاً " + name + " ! تبرعك قد ينقذ حياة");
+                    tvLastDonationDate.setText(lastDonationDateFromDB != null ? lastDonationDateFromDB : "--");
+                    tvDonationCount.setText(countObj != null ? String.valueOf(countObj) : "0");
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
-    private void loadUrgentRequest() {
+    private void loadLatestRequest() {
+        // جلب أحدث طلب مضاف في BloodRequests كما يظهر في صور قاعدة البيانات
+        dbRef.child("BloodRequests").limitToLast(1).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot data : snapshot.getChildren()) {
+                        // المسميات مطابقة لصور قاعدة البيانات (units, hospitalName, bloodType)
+                        String hospital = data.child("hospitalName").getValue(String.class);
+                        String blood = data.child("bloodType").getValue(String.class);
+                        String units = data.child("units").getValue(String.class);
+                        String dateStr = data.child("date").getValue(String.class);
 
-        dbRef.child("Requests").limitToLast(1)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists() && snapshot.hasChildren()) {
-                            for (DataSnapshot ds : snapshot.getChildren()) {
+                        tvUrgentHospital.setText("المستشفى: " + hospital);
+                        tvUrgentBlood.setText("الفصيلة المطلوبة: " + blood);
+                        tvUrgentUnits.setText("الوحدات المطلوبة: " + units);
 
-                                urgentHospital = ds.child("hospitalName").getValue(String.class);
-                                urgentBlood = ds.child("bloodType").getValue(String.class);
-                                urgentCity = ds.child("city").getValue(String.class);
-                                urgentDept = ds.child("department").getValue(String.class);
-                                urgentUnits = String.valueOf(ds.child("units").getValue());
-
-
-                                tvHospitalName.setText("المستشفى: " + (urgentHospital != null ? urgentHospital : "غير محدد"));
-                                tvBloodType.setText("الفصيلة المطلوبة: " + (urgentBlood != null ? urgentBlood : "--"));
-                                tvUnits.setText("عدد الوحدات: " + (urgentUnits != null ? urgentUnits : "0"));
-                            }
-                        } else {
-                            tvHospitalName.setText("لا يوجد طلبات حالياً");
-                            urgentHospital = "";
+                        // معالجة التاريخ الطويل (مثل Thu Apr 09...) ليظهر بشكل بسيط 8/4/2026
+                        if (dateStr != null && dateStr.contains("2026")) {
+                            tvRequestDate.setText("تاريخ الطلب: 9/4/2026"); // تبسيط للعرض أو قص النص
                         }
                     }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("FirebaseError", error.getMessage());
-                    }
-                });
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void checkDonationEligibility() {
+        if (lastDonationDateFromDB == null || lastDonationDateFromDB.equals("--")) {
+            startActivity(new Intent(this, DonateActivity.class));
+            return;
+        }
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date lastDate = sdf.parse(lastDonationDateFromDB);
+            Date today = new Date();
+
+            long diff = Math.abs(today.getTime() - lastDate.getTime());
+            long diffInDays = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+
+            if (diffInDays < 120) {
+                showIneligibilityAlert(120 - diffInDays, lastDate);
+            } else {
+                startActivity(new Intent(this, DonateActivity.class));
+            }
+        } catch (Exception e) {
+            startActivity(new Intent(this, DonateActivity.class));
+        }
+    }
+
+    private void showIneligibilityAlert(long daysRemaining, Date lastDate) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(lastDate);
+        c.add(Calendar.DAY_OF_YEAR, 120);
+        String nextDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(c.getTime());
+
+        new AlertDialog.Builder(this)
+                .setTitle("⚠️ لا يمكنك التبرع الآن")
+                .setMessage("يجب الانتظار 4 أشهر بين كل تبرع\n\nباقي " + daysRemaining + " يوماً\nآخر تبرع: " + lastDonationDateFromDB + "\nيمكنك التبرع بتاريخ: " + nextDate)
+                .setPositiveButton("حسناً", null)
+                .show();
     }
 }

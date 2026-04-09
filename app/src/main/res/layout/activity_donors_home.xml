@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:layoutDirection="rtl">
+    android:background="#FDFDF1"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,113 +16,125 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="20dp"
             android:text="VivaLink"
-            android:textColor="#E62020"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textColor="#D32F2F"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="#F8E3E3"
+            app:cardCornerRadius="15dp"
             app:cardElevation="0dp">
 
             <TextView
                 android:id="@+id/tvWelcomeDonor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#FCE4EC"
-                android:gravity="center"
                 android:padding="15dp"
-                android:text="👋 أهلاً بك! تبرعك قد ينقذ حياة"
-                android:textColor="#C2185B"
+                android:text="أهلاً بك! تبرعك قد ينقذ حياة ✨"
+                android:textColor="#333333"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:gravity="right" />
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="25dp"
+            app:cardBackgroundColor="#CB4D38"
             app:cardCornerRadius="20dp"
             app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#E62020"
                 android:orientation="vertical"
+                android:gravity="center"
                 android:padding="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="🩸 طلب دم عاجل"
+                    android:text="🚨 طلب دم عاجل"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="15dp" />
 
                 <TextView
                     android:id="@+id/tvHospitalName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:text="المستشفى: جارٍ التحميل..."
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp" />
+                    android:text="المستشفى: جاري التحميل..."
+                    android:textColor="#F0F0F0"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="5dp"/>
 
                 <TextView
                     android:id="@+id/tvBloodType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
                     android:text="الفصيلة المطلوبة: --"
                     android:textColor="#FFFFFF"
-                    android:textSize="15sp" />
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="5dp"/>
 
                 <TextView
-                    android:id="@+id/tvUnits"
+                    android:id="@+id/tvUrgentUnits"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:text="عدد الوحدات: --"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp" />
+                    android:text="الوحدات المطلوبة: --"
+                    android:textColor="#F0F0F0"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/tvRequestDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="تاريخ الطلب: --"
+                    android:textColor="#F0F0F0"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="20dp"/>
 
                 <Button
                     android:id="@+id/btnGoToDonate"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="#FFFFFF"
+                    android:layout_height="50dp"
                     android:text="تبرع الآن"
-                    android:textColor="#E62020"
+                    android:textColor="#CB4D38"
                     android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    android:backgroundTint="#FFFFFF"
+                    app:cornerRadius="25dp"/>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <Button
             android:id="@+id/btnViewRequests"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:layout_marginBottom="30dp"
-            android:backgroundTint="#E57373"
             android:text="عرض جميع الطلبات"
+            android:backgroundTint="#CB4D38"
             android:textColor="#FFFFFF"
-            app:cornerRadius="12dp" />
+            android:textSize="16sp"
+            app:cornerRadius="10dp"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="15dp"
+            android:gravity="center"
             android:text="إحصائياتك"
             android:textColor="#333333"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="15dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -133,81 +145,61 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                app:cardBackgroundColor="#F5F5F5"
+                android:layout_margin="5dp"
                 app:cardCornerRadius="15dp"
-                app:cardElevation="0dp">
-
+                app:cardElevation="2dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="15dp">
-
+                    android:padding="15dp"
+                    android:gravity="center">
                     <TextView
-                        android:id="@+id/tvLastDonationDate"
+                        android:id="@+id/tvDonationCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="--"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
+                        android:text="0"
+                        android:textColor="#CB4D38"
+                        android:textSize="24sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="آخر تبرع"
-                        android:textColor="#777777"
-                        android:textSize="12sp" />
+                        android:text="عدد التبرعات"
+                        android:textColor="#666666"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                app:cardBackgroundColor="#F5F5F5"
+                android:layout_margin="5dp"
                 app:cardCornerRadius="15dp"
-                app:cardElevation="0dp">
-
+                app:cardElevation="2dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="15dp">
-
+                    android:padding="15dp"
+                    android:gravity="center">
                     <TextView
-                        android:id="@+id/tvDonationCount"
+                        android:id="@+id/tvLastDonationDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
+                        android:text="--"
+                        android:textColor="#CB4D38"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="عدد التبرعات"
-                        android:textColor="#777777"
-                        android:textSize="12sp" />
+                        android:text="آخر تبرع"
+                        android:textColor="#666666"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
-
-        <Button
-            android:id="@+id/btnGoToProfile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:backgroundTint="#FFFFFF"
-            android:text="🏠 الرئيسية"
-            android:textColor="#E62020"
-            style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
     </LinearLayout>
 </ScrollView>

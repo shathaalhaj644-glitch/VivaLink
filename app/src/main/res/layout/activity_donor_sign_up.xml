@@ -36,18 +36,37 @@
             android:hint="البريد الإلكتروني"
             android:inputType="textEmailAddress" />
 
-        <EditText
-            android:id="@+id/etPhone"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="رقم الهاتف" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:hint="رقم الهاتف"
-            android:inputType="phone" />
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spCountryCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" />
+
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="7XXXXXXXX"
+                android:inputType="phone" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="اختر مدينتك" />
+
         <Spinner
             android:id="@+id/spCity"
             android:layout_width="match_parent"
@@ -58,41 +77,52 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="فصيلة الدم" />
+
         <Spinner
             android:id="@+id/spBloodType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp" />
 
-        <!-- 🔥 نسبة الدم -->
         <EditText
             android:id="@+id/etBloodLevel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="10dp"
             android:hint="نسبة الدم"
             android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etLastBloodTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:hint="تاريخ آخر فحص دم (yyyy-mm-dd)"
+            android:inputType="date" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="هل تبرعت من قبل؟" />
+
         <RadioGroup
             android:id="@+id/rgDonationStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <RadioButton
                 android:id="@+id/rbDonatedYes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="نعم" />
+
             <RadioButton
                 android:id="@+id/rbNeverDonated"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="لا"
-                android:checked="true" />
+                android:checked="true"
+                android:text="لا" />
         </RadioGroup>
 
         <EditText
@@ -117,22 +147,25 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:text="هل تعاني من أمراض؟" />
+
         <RadioGroup
             android:id="@+id/rgHasDisease"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <RadioButton
                 android:id="@+id/rbDiseaseYes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="نعم" />
+
             <RadioButton
                 android:id="@+id/rbDiseaseNo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="لا"
-                android:checked="true" />
+                android:checked="true"
+                android:text="لا" />
         </RadioGroup>
 
         <EditText

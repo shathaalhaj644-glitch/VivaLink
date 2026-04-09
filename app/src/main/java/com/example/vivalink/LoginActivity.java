@@ -8,6 +8,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
 
 public class LoginActivity extends AppCompatActivity {
@@ -52,7 +53,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void findEmailByPhone(String phone, String pass) {
-
         mRootRef.child("Donors").orderByChild("phone").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -72,16 +72,45 @@ public class LoginActivity extends AppCompatActivity {
     private void signIn(String email, String pass) {
         mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                checkUserRole(mAuth.getCurrentUser().getUid());
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null) {
+                    // الآن نفحص الرتبة أولاً قبل طلب التحقق
+                    checkUserRoleAndVerify(user);
+                }
             } else {
                 Toast.makeText(this, "فشل الدخول: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void checkUserRole(String uid) {
+    private void checkUserRoleAndVerify(FirebaseUser user) {
+        String uid = user.getUid();
 
-        String[] nodes = {"Donors", "Hospitals", "BloodBankStaff"};
+        // 1. نبحث أولاً في جدول المتبرعين
+        mRootRef.child("Donors").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // المستخدم متبرع (donor) -> الآن فقط نفحص رابط التحقق
+                    if (user.isEmailVerified()) {
+                        startActivity(new Intent(LoginActivity.this, DonorsHomeActivity.class));
+                        finish();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "يرجى تفعيل حسابك كمتبرع من الرابط المرسل لإيميلك أولاً ✅", Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                    }
+                } else {
+                    // 2. إذا لم يكن متبرع، نبحث في الجداول الأخرى (دخول مباشر)
+                    checkManagementRoles(uid);
+                }
+            }
+            @Override public void onCancelled(DatabaseError error) {}
+        });
+    }
+
+    private void checkManagementRoles(String uid) {
+        // فحص المستشفيات والموظفين - هؤلاء لا يحتاجون رابط تفعيل
+        String[] nodes = {"Hospitals", "BloodBankStaff"};
 
         for (String node : nodes) {
             mRootRef.child(node).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -91,9 +120,8 @@ public class LoginActivity extends AppCompatActivity {
                         String role = snapshot.child("role").getValue(String.class);
                         Intent intent = null;
 
-                        if ("Donor".equalsIgnoreCase(role)) {
-                            intent = new Intent(LoginActivity.this, DonorsHomeActivity.class);
-                        } else if ("hospital".equalsIgnoreCase(role)) {
+                        // تذكري: donor بالسمول، أما hospital و BankStaff حسب ما خزنتيهم
+                        if ("hospital".equalsIgnoreCase(role)) {
                             intent = new Intent(LoginActivity.this, HospitalHomeActivity.class);
                         } else if ("BankStaff".equalsIgnoreCase(role)) {
                             intent = new Intent(LoginActivity.this, BloodBankStaffHomeActivity.class);
