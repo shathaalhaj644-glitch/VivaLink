@@ -13,7 +13,7 @@ import java.util.List;
 public class RequestsActivity extends AppCompatActivity {
     private RecyclerView rvRequests;
     private RequestsAdapter adapter;
-    private List<BloodRequests> requestList;
+    private List<RequestModel> requestList;
     private FirebaseAuth mAuth;
 
     @Override
@@ -26,93 +26,66 @@ public class RequestsActivity extends AppCompatActivity {
         rvRequests.setLayoutManager(new LinearLayoutManager(this));
         requestList = new ArrayList<>();
 
-        adapter = new RequestsAdapter(requestList, this::showDonateDialog);
-        rvRequests.setAdapter(adapter);
+        adapter = new RequestsAdapter(requestList, (request, position) -> {
+            // 1. الحفظ في جدول المتبرع لضمان بقاء الحالة "تم التبرع" ثابتة
+            String uid = mAuth.getCurrentUser().getUid();
+            FirebaseDatabase.getInstance().getReference("Donors")
+                    .child(uid).child("myDonations").child(request.getRequestId()).setValue(true);
 
-        if (mAuth.getCurrentUser() != null) {
-            loadUserCityAndRequests();
-        }
+            // 2. الانتقال للتفاصيل
+            Intent intent = new Intent(this, RequestsDetailsActivity.class);
+            intent.putExtra("requestId", request.getRequestId());
+            intent.putExtra("hospitalName", request.getHospitalName());
+            intent.putExtra("city", request.getCity());
+            intent.putExtra("bloodType", request.getBloodType());
+            intent.putExtra("department", request.getDepartment());
+            intent.putExtra("units", request.getUnits());
+            intent.putExtra("date", request.getDate());
+            startActivity(intent);
+        });
+
+        rvRequests.setAdapter(adapter);
+        loadUserFilterAndData();
     }
 
-
-    private void loadUserCityAndRequests() {
+    private void loadUserFilterAndData() {
         String uid = mAuth.getCurrentUser().getUid();
-        FirebaseDatabase.getInstance().getReference("Donors").child(uid)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference donorRef = FirebaseDatabase.getInstance().getReference("Donors").child(uid);
+
+        donorRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot donorSnapshot) {
+                if (donorSnapshot.exists()) {
+                    String city = donorSnapshot.child("city").getValue(String.class);
+                    String blood = donorSnapshot.child("bloodType").getValue(String.class);
+                    // جلب البيانات المفلترة مع فحص حالة التبرع السابقة
+                    fetchRequests(city, blood, donorSnapshot);
+                }
+            }
+            @Override public void onCancelled(DatabaseError error) {}
+        });
+    }
+
+    private void fetchRequests(String city, String blood, DataSnapshot donorSnapshot) {
+        String combinedKey = city + "_" + blood;
+        FirebaseDatabase.getInstance().getReference("Requests")
+                .orderByChild("city_bloodType").equalTo(combinedKey)
+                .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            String userCity = snapshot.child("city").getValue(String.class);
-                            String userBlood = snapshot.child("bloodType").getValue(String.class);
-
-                            if (userCity != null && userBlood != null) {
-                                fetchRequestsByCityAndBlood(userCity, userBlood);
+                        requestList.clear();
+                        for (DataSnapshot data : snapshot.getChildren()) {
+                            RequestModel req = data.getValue(RequestModel.class);
+                            if (req != null) {
+                                req.setRequestId(data.getKey());
+                                // فحص إذا المتبرع تبرع لهذا الطلب سابقاً لتثبيت الحالة
+                                req.setDonated(donorSnapshot.child("myDonations").hasChild(data.getKey()));
+                                requestList.add(req);
                             }
                         }
+                        adapter.notifyDataSetChanged();
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {}
+                    @Override public void onCancelled(DatabaseError error) {}
                 });
-    }
-
-
-    private void fetchRequestsByCityAndBlood(String city, String bloodType) {
-
-        String combined = city + "_" + bloodType;
-
-        Query query = FirebaseDatabase.getInstance().getReference("Requests")
-                .orderByChild("city_bloodType")
-                .equalTo(combined);
-
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                requestList.clear();
-                for (DataSnapshot data : snapshot.getChildren()) {
-                    BloodRequests req = data.getValue(BloodRequests.class);
-                    if (req != null) {
-                        req.setRequestId(data.getKey());
-                        requestList.add(req);
-                    }
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override public void onCancelled(DatabaseError error) {}
-        });
-    }
-
-
-    private void fetchRequestsByCity(String city) {
-        Query cityQuery = FirebaseDatabase.getInstance().getReference("Requests")
-                .orderByChild("city").equalTo(city);
-
-        cityQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                requestList.clear();
-                for (DataSnapshot data : snapshot.getChildren()) {
-                    BloodRequests req = data.getValue(BloodRequests.class);
-                    if (req != null) {
-                        req.setRequestId(data.getKey());
-                        requestList.add(req);
-                    }
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override public void onCancelled(DatabaseError error) {}
-        });
-    }
-
-    private void showDonateDialog(BloodRequests request) {
-        Intent intent = new Intent(this, DonateActivity.class);
-        intent.putExtra("bloodType", request.getBloodType());
-        intent.putExtra("hospitalName", request.getHospitalName());
-        intent.putExtra("city", request.getCity());
-        intent.putExtra("department", request.getDepartment());
-        intent.putExtra("units", String.valueOf(request.getUnits()));
-        startActivity(intent);
     }
 }

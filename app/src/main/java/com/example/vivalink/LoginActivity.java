@@ -2,9 +2,13 @@ package com.example.vivalink;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -15,6 +19,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmailOrPhone, etPassword;
     private Button btnLogin, btnGoToSignUp;
+    private TextView tvForgotPassword; // تم إضافة المتغير هنا
     private FirebaseAuth mAuth;
     private DatabaseReference mRootRef;
 
@@ -30,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etLoginPassword);
         btnLogin = findViewById(R.id.btnSubmitLogin);
         btnGoToSignUp = findViewById(R.id.btnGoToSignUp);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword); // تم ربط العنصر هنا
 
         btnLogin.setOnClickListener(v -> {
             String input = etEmailOrPhone.getText().toString().trim();
@@ -47,9 +53,49 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // تم إضافة حدث الضغط لفتح نافذة استعادة كلمة السر
+        tvForgotPassword.setOnClickListener(v -> {
+            showForgotPasswordDialog();
+        });
+
         btnGoToSignUp.setOnClickListener(v -> {
             startActivity(new Intent(this, DonorSignUpActivity.class));
         });
+    }
+
+    // الدالة المسؤولة عن النافذة المنبثقة
+    private void showForgotPasswordDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("إعادة تعيين كلمة المرور");
+        builder.setMessage("يرجى إدخال بريدك الإلكتروني لإرسال رابط التغيير:");
+
+        final EditText etResetEmail = new EditText(this);
+        etResetEmail.setHint("example@email.com");
+        etResetEmail.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(50, 20, 50, 0);
+        etResetEmail.setLayoutParams(params);
+        container.addView(etResetEmail);
+        builder.setView(container);
+
+        builder.setPositiveButton("إرسال", (dialog, which) -> {
+            String email = etResetEmail.getText().toString().trim();
+            if (!email.isEmpty()) {
+                mAuth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(LoginActivity.this, "تم إرسال الرابط بنجاح ✅", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "فشل الإرسال: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+        builder.setNegativeButton("إلغاء", null);
+        builder.show();
     }
 
     private void findEmailByPhone(String phone, String pass) {
@@ -74,7 +120,6 @@ public class LoginActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 FirebaseUser user = mAuth.getCurrentUser();
                 if (user != null) {
-                    // الآن نفحص الرتبة أولاً قبل طلب التحقق
                     checkUserRoleAndVerify(user);
                 }
             } else {
@@ -85,22 +130,18 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkUserRoleAndVerify(FirebaseUser user) {
         String uid = user.getUid();
-
-        // 1. نبحث أولاً في جدول المتبرعين
         mRootRef.child("Donors").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    // المستخدم متبرع (donor) -> الآن فقط نفحص رابط التحقق
                     if (user.isEmailVerified()) {
                         startActivity(new Intent(LoginActivity.this, DonorsHomeActivity.class));
                         finish();
                     } else {
-                        Toast.makeText(LoginActivity.this, "يرجى تفعيل حسابك كمتبرع من الرابط المرسل لإيميلك أولاً ✅", Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "يرجى تفعيل الحساب من الإيميل أولاً ✅", Toast.LENGTH_LONG).show();
                         mAuth.signOut();
                     }
                 } else {
-                    // 2. إذا لم يكن متبرع، نبحث في الجداول الأخرى (دخول مباشر)
                     checkManagementRoles(uid);
                 }
             }
@@ -109,9 +150,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkManagementRoles(String uid) {
-        // فحص المستشفيات والموظفين - هؤلاء لا يحتاجون رابط تفعيل
         String[] nodes = {"Hospitals", "BloodBankStaff"};
-
         for (String node : nodes) {
             mRootRef.child(node).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -119,14 +158,11 @@ public class LoginActivity extends AppCompatActivity {
                     if (snapshot.exists()) {
                         String role = snapshot.child("role").getValue(String.class);
                         Intent intent = null;
-
-                        // تذكري: donor بالسمول، أما hospital و BankStaff حسب ما خزنتيهم
                         if ("hospital".equalsIgnoreCase(role)) {
                             intent = new Intent(LoginActivity.this, HospitalHomeActivity.class);
                         } else if ("BankStaff".equalsIgnoreCase(role)) {
                             intent = new Intent(LoginActivity.this, BloodBankStaffHomeActivity.class);
                         }
-
                         if (intent != null) {
                             startActivity(intent);
                             finish();

@@ -1,19 +1,7 @@
 package com.example.vivalink;
 
 public class BloodRequests {
-    private String bloodType;
-    private String hospitalName;
-    private String city;
-    private String department;
-    private String units;
-    private String status;
-    private String requestId;
-
-
-    private String time;
-
-    private String city_bloodType;
-
+    private String bloodType, hospitalName, city, department, units, status, requestId, date, city_bloodType;
 
     public BloodRequests() {}
 
@@ -25,12 +13,12 @@ public class BloodRequests {
     public String getUnits() { return units; }
     public String getStatus() { return status; }
     public String getRequestId() { return requestId; }
-    public String getTime() { return time; }
+    public String getDate() { return date; } // تم التعديل لـ date
     public String getCity_bloodType() { return city_bloodType; }
 
     // Setters
     public void setStatus(String status) { this.status = status; }
     public void setRequestId(String requestId) { this.requestId = requestId; }
-    public void setTime(String time) { this.time = time; }
+    public void setDate(String date) { this.date = date; } // تم التعديل لـ date
     public void setCity_bloodType(String city_bloodType) { this.city_bloodType = city_bloodType; }
 }

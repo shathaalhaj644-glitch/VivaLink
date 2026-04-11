@@ -52,7 +52,7 @@ public class HospitalDonorsModel {
     public void setLastDonation(String lastDonation) { this.lastDonation = lastDonation; }
 
     public String getLastBloodTest() {
-        return (lastBloodTest == null || lastBloodTest.isEmpty()) ? "none" : lastBloodTest;
+        return lastBloodTest;
     }
     public void setLastBloodTest(String lastBloodTest) {
         this.lastBloodTest = lastBloodTest;

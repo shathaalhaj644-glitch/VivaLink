@@ -1,127 +1,88 @@
 package com.example.vivalink;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAdapter.DonorVH> {
 
     private Context context;
-    private List<HospitalDonorsModel> donorList;
+    private List<RequestModel> requestList; // تم التعديل لـ RequestModel
     private OnDonorClickListener listener;
 
     public interface OnDonorClickListener {
-        void onDonorClick(HospitalDonorsModel donor);
+        void onDonorClick(RequestModel request);
     }
 
-    public HospitalDonorsAdapter(Context context, List<HospitalDonorsModel> donorList, OnDonorClickListener listener) {
+    public HospitalDonorsAdapter(Context context, List<RequestModel> requestList, OnDonorClickListener listener) {
         this.context = context;
-        this.donorList = donorList;
+        this.requestList = requestList;
         this.listener = listener;
     }
 
     @NonNull
     @Override
     public DonorVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.item_hospital_donors, parent, false);
+        // الربط مع ملف XML تبع طلبات الدم
+        View v = LayoutInflater.from(context).inflate(R.layout.item_blood_requests, parent, false);
         return new DonorVH(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull DonorVH holder, int position) {
-        HospitalDonorsModel donor = donorList.get(position);
 
-        holder.tvName.setText(donor.getFullName());
-        holder.tvCity.setText("📍 " + donor.getCity());
-        holder.tvBloodType.setText(donor.getBloodType());
-        holder.tvDonationCount.setText("🩸 عدد التبرعات: " + donor.getDonationCount());
+        RequestModel request = requestList.get(position);
 
-        String lastDonation = donor.getLastDonation();
-        String lastBloodTest = donor.getLastBloodTest();
+        // ربط البيانات بالـ IDs الموجودة في item_blood_requests.xml
+        holder.tvHospitalName.setText(request.getHospitalName());
+        holder.tvCity.setText("📍 المدينة: " + request.getCity());
+        holder.tvBloodType.setText("🩸 فصيلة الدم: " + request.getBloodType());
+        holder.tvUnits.setText("🧪 عدد الوحدات: " + request.getUnits());
+        holder.tvDepartment.setText("🏢 القسم: " + request.getDepartment());
 
-        holder.tvLastDonation.setText("📅 آخر تبرع: " + (lastDonation != null && !lastDonation.isEmpty() ? lastDonation : "لا يوجد"));
-
-        if (lastBloodTest == null || lastBloodTest.equals("none") || lastBloodTest.isEmpty()) {
-            holder.tvStatus.setText("⏳ لم يتم إجراء فحص دم بعد");
-            holder.tvStatus.setTextColor(Color.GRAY);
+        // عرض التاريخ والوقت من حقل date
+        if (request.getDate() != null) {
+            holder.tvDate.setText("📅 تاريخ ووقت الطلب: " + request.getDate());
         } else {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                Date testDate = sdf.parse(lastBloodTest);
-
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(testDate);
-                cal.add(Calendar.MONTH, 4);
-
-                Date expiryDate = cal.getTime();
-                Date today = new Date();
-
-                if (today.after(expiryDate)) {
-                    holder.tvStatus.setText("⚠️ استحق الفحص (منتهي الصلاحية)");
-                    holder.tvStatus.setTextColor(Color.RED);
-                } else {
-                    long diff = expiryDate.getTime() - today.getTime();
-                    long daysLeft = diff / (24 * 60 * 60 * 1000);
-                    holder.tvStatus.setText("✔️ فحص ساري (باقي " + daysLeft + " يوم)");
-                    holder.tvStatus.setTextColor(Color.parseColor("#2E7D32"));
-                }
-            } catch (Exception e) {
-                holder.tvStatus.setText("⚠️ خطأ في تاريخ الفحص");
-                holder.tvStatus.setTextColor(Color.RED);
-            }
+            holder.tvDate.setText("📅 تاريخ ووقت الطلب: --");
         }
 
-        holder.tvNote.setText("📝 " + (donor.getHospitalNote() != null ? donor.getHospitalNote() : "لا توجد ملاحظات"));
-
-        holder.itemView.setOnClickListener(v -> {
+        // عند الضغط على زر "تبرع الآن"
+        holder.btnDonate.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onDonorClick(donor);
-            }
-        });
-
-        holder.btnCall.setOnClickListener(v -> {
-            if (donor.getPhone() != null && !donor.getPhone().isEmpty()) {
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:" + donor.getPhone()));
-                context.startActivity(intent);
+                listener.onDonorClick(request);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return donorList.size();
+        return requestList.size();
     }
 
     public static class DonorVH extends RecyclerView.ViewHolder {
-        TextView tvName, tvCity, tvBloodType, tvDonationCount, tvLastDonation;
-        TextView tvStatus, tvNote;
-        ImageButton btnCall;
+
+        // المعرفات (IDs) الصحيحة التي تمنع ظهور Error
+        TextView tvHospitalName, tvCity, tvBloodType, tvUnits, tvDepartment, tvDate;
+        Button btnDonate;
 
         public DonorVH(@NonNull View v) {
             super(v);
-            tvName = v.findViewById(R.id.tvDonorName);
-            tvCity = v.findViewById(R.id.tvDonorCity);
+            tvHospitalName = v.findViewById(R.id.tvHospitalName);
+            tvCity = v.findViewById(R.id.tvCity);
             tvBloodType = v.findViewById(R.id.tvBloodType);
-            tvDonationCount = v.findViewById(R.id.tvDonationCount);
-            tvLastDonation = v.findViewById(R.id.tvLastDonation);
-            tvStatus = v.findViewById(R.id.tvStatus);
-            tvNote = v.findViewById(R.id.tvNote);
-            btnCall = v.findViewById(R.id.btnCall);
+            tvUnits = v.findViewById(R.id.tvUnits);
+            tvDepartment = v.findViewById(R.id.tvDepartment);
+            tvDate = v.findViewById(R.id.tvDate);
+            btnDonate = v.findViewById(R.id.btnDonateItem);
         }
     }
 }

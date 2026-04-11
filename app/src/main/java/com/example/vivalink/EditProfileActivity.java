@@ -4,17 +4,18 @@ import android.os.Bundle;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+
 import java.util.HashMap;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    private TextView tvBloodType;
-    private EditText etName, etEmail, etPhone, etCity, etLastDonation;
+    private TextView tvBloodTypeDisplay;
+    private EditText etName, etEmail, etPhone, etCity, etBloodPercentage, etLastBloodTest;
     private RadioGroup rgHealth;
     private RadioButton rbYes, rbNo;
-    private CheckBox cbNeverDonated;
     private Button btnSave;
 
     private DatabaseReference userRef;
@@ -25,68 +26,69 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-
-        tvBloodType = findViewById(R.id.tvBloodType);
+        // الربط
+        tvBloodTypeDisplay = findViewById(R.id.tvBloodTypeDisplay);
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
         etCity = findViewById(R.id.etCity);
+        etBloodPercentage = findViewById(R.id.etBloodPercentage);
+        etLastBloodTest = findViewById(R.id.etLastBloodTest);
         rgHealth = findViewById(R.id.rgHealth);
         rbYes = findViewById(R.id.rbYes);
         rbNo = findViewById(R.id.rbNo);
-        etLastDonation = findViewById(R.id.etLastDonation);
-        cbNeverDonated = findViewById(R.id.cbNeverDonated);
         btnSave = findViewById(R.id.btnSave);
 
         uid = FirebaseAuth.getInstance().getUid();
 
         if (uid != null) {
-            userRef = FirebaseDatabase.getInstance().getReference("Donors").child(uid);
-            loadUserData();
+            // ✅ التعديل المهم (Donors بدل donors)
+            userRef = FirebaseDatabase.getInstance()
+                    .getReference("Donors")
+                    .child(uid);
+
+            loadData();
         }
 
-
-        cbNeverDonated.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                etLastDonation.setText("");
-                etLastDonation.setEnabled(false);
-            } else {
-                etLastDonation.setEnabled(true);
-            }
-        });
-
-        btnSave.setOnClickListener(v -> saveChanges());
+        btnSave.setOnClickListener(v -> saveUpdates());
     }
 
-    private void loadUserData() {
+    private void loadData() {
+
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
 
-                    tvBloodType.setText("فصيلة الدم: " +
-                            snapshot.child("bloodType").getValue(String.class) +
-                            " (لا يمكن تغييرها)");
+                if (!snapshot.exists()) return;
 
-                    etName.setText(snapshot.child("name").getValue(String.class));
-                    etEmail.setText(snapshot.child("email").getValue(String.class));
-                    etPhone.setText(snapshot.child("phone").getValue(String.class));
-                    etCity.setText(snapshot.child("city").getValue(String.class));
+                // ✅ قراءة آمنة
+                String blood = snapshot.child("bloodType").getValue(String.class);
+                String name = snapshot.child("fullName").getValue(String.class);
+                String email = snapshot.child("email").getValue(String.class);
+                String phone = snapshot.child("phone").getValue(String.class);
+                String city = snapshot.child("city").getValue(String.class);
+                String lastTest = snapshot.child("lastBloodTest").getValue(String.class);
 
-                    String health = snapshot.child("chronicDisease").getValue(String.class);
-                    if ("نعم".equals(health)) rbYes.setChecked(true);
-                    else rbNo.setChecked(true);
+                Object perc = snapshot.child("bloodPercentage").getValue();
 
-                    String lastDonation = snapshot.child("lastDonation").getValue(String.class);
+                String disease = snapshot.child("chronicDisease").getValue(String.class);
 
-                    if (lastDonation != null && !lastDonation.isEmpty()) {
-                        etLastDonation.setText(lastDonation);
-                        cbNeverDonated.setChecked(false);
-                    } else {
-                        cbNeverDonated.setChecked(true);
-                        etLastDonation.setText("");
-                        etLastDonation.setEnabled(false);
-                    }
+                // ✅ عرض البيانات
+                tvBloodTypeDisplay.setText("فصيلة الدم: " + (blood != null ? blood : "--"));
+
+                etName.setText(name != null ? name : "");
+                etEmail.setText(email != null ? email : "");
+                etPhone.setText(phone != null ? phone : "");
+                etCity.setText(city != null ? city : "");
+                etLastBloodTest.setText(lastTest != null ? lastTest : "");
+
+                etBloodPercentage.setText(perc != null ? String.valueOf(perc) : "");
+
+                if ("نعم".equals(disease)) {
+                    rbYes.setChecked(true);
+                } else {
+                    rbNo.setChecked(true);
                 }
             }
 
@@ -95,30 +97,22 @@ public class EditProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void saveChanges() {
-        HashMap<String, Object> updates = new HashMap<>();
+    private void saveUpdates() {
 
-        updates.put("name", etName.getText().toString().trim());
-        updates.put("email", etEmail.getText().toString().trim());
-        updates.put("phone", etPhone.getText().toString().trim());
-        updates.put("city", etCity.getText().toString().trim());
+        HashMap<String, Object> map = new HashMap<>();
 
-        int selectedId = rgHealth.getCheckedRadioButtonId();
-        if (selectedId == R.id.rbYes)
-            updates.put("chronicDisease", "نعم");
-        else
-            updates.put("chronicDisease", "لا");
+        map.put("fullName", etName.getText().toString().trim());
+        map.put("email", etEmail.getText().toString().trim());
+        map.put("phone", etPhone.getText().toString().trim());
+        map.put("city", etCity.getText().toString().trim());
+        map.put("bloodPercentage", etBloodPercentage.getText().toString().trim());
+        map.put("lastBloodTest", etLastBloodTest.getText().toString().trim());
+        map.put("chronicDisease", rbYes.isChecked() ? "نعم" : "لا");
 
-        // حفظ التبرع
-        if (cbNeverDonated.isChecked()) {
-            updates.put("lastDonation", "");
-        } else {
-            updates.put("lastDonation", etLastDonation.getText().toString().trim());
-        }
+        userRef.updateChildren(map).addOnCompleteListener(task -> {
 
-        userRef.updateChildren(updates).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(this, "تم حفظ التعديلات", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "تم الحفظ", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
                 Toast.makeText(this, "فشل الحفظ", Toast.LENGTH_SHORT).show();
