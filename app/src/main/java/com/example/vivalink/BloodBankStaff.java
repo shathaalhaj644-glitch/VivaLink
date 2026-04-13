@@ -22,7 +22,7 @@ public class BloodBankStaff {
         this.position = position;
     }
 
-    // Getters & Setters
+
     public String getStaffId() { return staffId; }
     public void setStaffId(String staffId) { this.staffId = staffId; }
 

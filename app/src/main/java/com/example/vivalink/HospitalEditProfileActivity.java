@@ -53,7 +53,7 @@ public class HospitalEditProfileActivity extends AppCompatActivity {
 
 
     private void loadData() {
-        dbRef.addValueEventListener(new ValueEventListener() { // 🔥 مهم
+        dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {

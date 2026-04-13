@@ -7,7 +7,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class CreateRequestActivity extends AppCompatActivity {
 
@@ -18,11 +20,13 @@ public class CreateRequestActivity extends AppCompatActivity {
     TextView tvPageTitle;
     DatabaseReference db;
     String requestId = null;
+    String hospitalPhone = "0590000000";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_request);
+
 
         tvPageTitle = findViewById(R.id.tvPageTitle);
         et_city = findViewById(R.id.et_city);
@@ -32,18 +36,21 @@ public class CreateRequestActivity extends AppCompatActivity {
         sp_bloodType = findViewById(R.id.sp_bloodType);
         btn_create_request = findViewById(R.id.btn_create_request);
 
+
         String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, bloodTypes);
         sp_bloodType.setAdapter(adapter);
 
         db = FirebaseDatabase.getInstance().getReference("Requests");
 
+
         fetchHospitalProfile();
+
 
         requestId = getIntent().getStringExtra("requestId");
         if (requestId != null) {
-            tvPageTitle.setText("تعديل الطلب");
-            btn_create_request.setText("تحديث الطلب");
+            tvPageTitle.setText("تعديل الطلب ✏️");
+            btn_create_request.setText("تحديث الآن");
             et_units.setText(getIntent().getStringExtra("units"));
             et_department.setText(getIntent().getStringExtra("dept"));
         }
@@ -61,7 +68,9 @@ public class CreateRequestActivity extends AppCompatActivity {
                             if (snapshot.exists()) {
                                 String name = snapshot.child("hospitalName").getValue(String.class);
                                 String city = snapshot.child("city").getValue(String.class);
-
+                                if (snapshot.hasChild("phone")) {
+                                    hospitalPhone = snapshot.child("phone").getValue(String.class);
+                                }
                                 et_hospitalName.setText(name);
                                 et_city.setText(city);
                             }
@@ -72,43 +81,54 @@ public class CreateRequestActivity extends AppCompatActivity {
     }
 
     private void saveRequest() {
-
         String blood = sp_bloodType.getSelectedItem().toString();
-        String unitsStr = et_units.getText().toString().trim() + " وحدات";
+        String unitsStr = et_units.getText().toString().trim();
         String cityStr = et_city.getText().toString().trim();
         String hospStr = et_hospitalName.getText().toString().trim();
         String deptStr = et_department.getText().toString().trim();
 
         if (TextUtils.isEmpty(unitsStr) || TextUtils.isEmpty(deptStr)) {
-            Toast.makeText(this, "يرجى تعبئة كافة الحقول", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "يرجى تعبئة كافة الحقول ⚠️", Toast.LENGTH_SHORT).show();
             return;
         }
 
 
-        String combined = cityStr + "_" + blood;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.US);
+        String fullDateTime = sdf.format(new Date());
 
         String hId = FirebaseAuth.getInstance().getUid();
-        String date = Calendar.getInstance().getTime().toString();
+
+
+        String combined = cityStr + "_" + blood;
+
         String currentId = (requestId != null) ? requestId : db.push().getKey();
+
 
         HospitalRequestModel request = new HospitalRequestModel(
                 currentId,
                 blood,
-                cityStr,
-                hospStr,
-                unitsStr,
-                "عاجل",
-                deptStr,
-                date,
+                "📍 " + cityStr,
+                "🏥 " + hospStr,
+                "💉 " + unitsStr,
+                "مفتوح",
+                "🏢 " + deptStr,
+                fullDateTime,
+                "",
                 hId,
+                hospitalPhone,
                 combined
         );
 
-        db.child(currentId).setValue(request).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(this, "تم الحفظ بنجاح ✅", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
+        if (currentId != null) {
+            db.child(currentId).setValue(request).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(this, "تم الحفظ وإبلاغ المتبرعين بنجاح ✅", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(this, "حدث خطأ في الحفظ، حاول ثانية", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }

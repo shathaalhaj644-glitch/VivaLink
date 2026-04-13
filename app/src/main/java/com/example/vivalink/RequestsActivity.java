@@ -27,12 +27,12 @@ public class RequestsActivity extends AppCompatActivity {
         requestList = new ArrayList<>();
 
         adapter = new RequestsAdapter(requestList, (request, position) -> {
-            // 1. الحفظ في جدول المتبرع لضمان بقاء الحالة "تم التبرع" ثابتة
+
             String uid = mAuth.getCurrentUser().getUid();
             FirebaseDatabase.getInstance().getReference("Donors")
                     .child(uid).child("myDonations").child(request.getRequestId()).setValue(true);
 
-            // 2. الانتقال للتفاصيل
+
             Intent intent = new Intent(this, RequestsDetailsActivity.class);
             intent.putExtra("requestId", request.getRequestId());
             intent.putExtra("hospitalName", request.getHospitalName());
@@ -78,7 +78,7 @@ public class RequestsActivity extends AppCompatActivity {
                             RequestModel req = data.getValue(RequestModel.class);
                             if (req != null) {
                                 req.setRequestId(data.getKey());
-                                // فحص إذا المتبرع تبرع لهذا الطلب سابقاً لتثبيت الحالة
+
                                 req.setDonated(donorSnapshot.child("myDonations").hasChild(data.getKey()));
                                 requestList.add(req);
                             }

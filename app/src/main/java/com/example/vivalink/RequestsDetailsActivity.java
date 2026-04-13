@@ -34,18 +34,18 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         if (dept != null) tvDept.setText(dept);
         if (units != null) tvUnits.setText("الوحدات المطلوبة: " + units);
 
-        // عرض التاريخ بالأرقام الإنجليزية
+
         tvDate.setText(formatBloodDate(rawDate));
     }
 
     private String formatBloodDate(String rawDate) {
         if (rawDate == null) return "";
         try {
-            // المحلل لصيغة الفايربيس (كما هي في الصور)
+
             SimpleDateFormat parser = new SimpleDateFormat("EEE MMM dd HH:mm:ss 'GMT'Z yyyy", Locale.ENGLISH);
             Date date = parser.parse(rawDate);
 
-            // التعديل السحري هنا: Locale.ENGLISH بتخلي الأرقام إنجليزية غصب عن لغة الجهاز
+
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.ENGLISH);
             return formatter.format(date);
         } catch (Exception e) {

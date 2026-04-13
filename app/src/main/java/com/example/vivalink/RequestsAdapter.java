@@ -39,7 +39,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         RequestModel request = requestList.get(position);
 
-        // 1. اللون الوردي للمربع (مطابق لطلبك)
+
         holder.cardView.setCardBackgroundColor(Color.parseColor("#FFF5F5"));
 
         holder.tvHospital.setText(request.getHospitalName());
@@ -48,10 +48,10 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.tvUnits.setText("💉 عدد الوحدات: " + request.getUnits());
         holder.tvDepartment.setText("🏢 القسم: " + request.getDepartment());
 
-        // 2. التاريخ بالإنجليزي (استخدام الدالة المحدثة بالأسفل)
+
         holder.tvDate.setText("📅 تاريخ الطلب: " + formatBloodDateToEnglish(request.getDate()));
 
-        // 3. ثبات حالة "تم التبرع"
+
         if (request.isDonated()) {
             holder.btnDonate.setVisibility(View.GONE);
             holder.layoutDonated.setVisibility(View.VISIBLE);
@@ -63,11 +63,11 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.btnDonate.setOnClickListener(v -> listener.onRequestClick(request, position));
     }
 
-    // الدالة السحرية لعرض الأرقام بالإنجليزية
+
     private String formatBloodDateToEnglish(String rawDate) {
         if (rawDate == null) return "";
         try {
-            // المحلل لصيغة الفايربيس (Thu Apr 09...)
+
             SimpleDateFormat parser = new SimpleDateFormat("EEE MMM dd HH:mm:ss 'GMT'Z yyyy", Locale.ENGLISH);
             Date date = parser.parse(rawDate);
 

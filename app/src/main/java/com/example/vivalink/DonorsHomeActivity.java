@@ -96,7 +96,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                         city = reqCity;
                         department = data.child("department").getValue(String.class);
 
-                        // تنسيق التاريخ
+
                         if (requestDate != null) {
                             try {
                                 SimpleDateFormat outputFormat = new SimpleDateFormat("d/M/yyyy", Locale.ENGLISH);
@@ -105,7 +105,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                             } catch (Exception e) {}
                         }
 
-                        tvUrgentHospital.setText("المستشفى: " + hospitalName); // تم حذف إضافة القسم هنا
+                        tvUrgentHospital.setText("المستشفى: " + hospitalName);
                         tvUrgentBlood.setText("الفصيلة المطلوبة: " + bloodType);
                         tvUrgentUnits.setText("الوحدات المطلوبة: " + units);
                         tvRequestDate.setText("📅 تاريخ الطلب: " + requestDate);

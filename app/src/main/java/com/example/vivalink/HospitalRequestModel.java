@@ -1,17 +1,13 @@
 package com.example.vivalink;
 
 public class HospitalRequestModel {
-
-    public String requestId, bloodType, city, hospitalName, status, department, date, hospitalId, units;
-    public String city_bloodType;
+    public String requestId, bloodType, city, hospitalName, status, department, date, time, hospitalId, units, phone, city_bloodType;
 
     public HospitalRequestModel() {}
 
-    public HospitalRequestModel(String requestId, String bloodType, String city,
-                                String hospitalName, String units, String status,
-                                String department, String date, String hospitalId,
-                                String city_bloodType) {
-
+    public HospitalRequestModel(String requestId, String bloodType, String city, String hospitalName,
+                                String units, String status, String department, String date, String time,
+                                String hospitalId, String phone, String city_bloodType) {
         this.requestId = requestId;
         this.bloodType = bloodType;
         this.city = city;
@@ -20,15 +16,9 @@ public class HospitalRequestModel {
         this.status = status;
         this.department = department;
         this.date = date;
+        this.time = time;
         this.hospitalId = hospitalId;
-        this.city_bloodType = city_bloodType;
-    }
-
-    public String getCity_bloodType() {
-        return city_bloodType;
-    }
-
-    public void setCity_bloodType(String city_bloodType) {
+        this.phone = phone;
         this.city_bloodType = city_bloodType;
     }
 }

@@ -19,7 +19,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmailOrPhone, etPassword;
     private Button btnLogin, btnGoToSignUp;
-    private TextView tvForgotPassword; // تم إضافة المتغير هنا
+    private TextView tvForgotPassword;
     private FirebaseAuth mAuth;
     private DatabaseReference mRootRef;
 
@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etLoginPassword);
         btnLogin = findViewById(R.id.btnSubmitLogin);
         btnGoToSignUp = findViewById(R.id.btnGoToSignUp);
-        tvForgotPassword = findViewById(R.id.tvForgotPassword); // تم ربط العنصر هنا
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         btnLogin.setOnClickListener(v -> {
             String input = etEmailOrPhone.getText().toString().trim();
@@ -53,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // تم إضافة حدث الضغط لفتح نافذة استعادة كلمة السر
+
         tvForgotPassword.setOnClickListener(v -> {
             showForgotPasswordDialog();
         });
@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // الدالة المسؤولة عن النافذة المنبثقة
+
     private void showForgotPasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("إعادة تعيين كلمة المرور");

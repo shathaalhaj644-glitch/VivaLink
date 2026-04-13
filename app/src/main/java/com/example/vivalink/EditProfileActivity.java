@@ -26,7 +26,7 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        // الربط
+
         tvBloodTypeDisplay = findViewById(R.id.tvBloodTypeDisplay);
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
@@ -42,7 +42,7 @@ public class EditProfileActivity extends AppCompatActivity {
         uid = FirebaseAuth.getInstance().getUid();
 
         if (uid != null) {
-            // ✅ التعديل المهم (Donors بدل donors)
+
             userRef = FirebaseDatabase.getInstance()
                     .getReference("Donors")
                     .child(uid);
@@ -62,7 +62,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 if (!snapshot.exists()) return;
 
-                // ✅ قراءة آمنة
+
                 String blood = snapshot.child("bloodType").getValue(String.class);
                 String name = snapshot.child("fullName").getValue(String.class);
                 String email = snapshot.child("email").getValue(String.class);
@@ -74,7 +74,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 String disease = snapshot.child("chronicDisease").getValue(String.class);
 
-                // ✅ عرض البيانات
+
                 tvBloodTypeDisplay.setText("فصيلة الدم: " + (blood != null ? blood : "--"));
 
                 etName.setText(name != null ? name : "");

@@ -108,24 +108,24 @@ public class DonorSignUpActivity extends AppCompatActivity {
 
         btnRegister.setEnabled(false);
 
-        // 1. إنشاء الحساب
+
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 FirebaseUser user = mAuth.getCurrentUser();
                 if (user != null) {
-                    // 2. إرسال رابط التفعيل فوراً
+
                     user.sendEmailVerification().addOnCompleteListener(verifyTask -> {
                         if (verifyTask.isSuccessful()) {
 
-                            // 3. حفظ البيانات في الداتابيز مع رول donor سمول
+
                             saveUserData(user.getUid());
 
-                            // 4. تسجيل خروج عشان يضطر يفعل من الرابط قبل ما يسجل دخول
+
                             mAuth.signOut();
 
                             Toast.makeText(DonorSignUpActivity.this, "تم التسجيل بنجاح! يرجى تفعيل حسابك من الرابط المرسل لبريدك ✅", Toast.LENGTH_LONG).show();
 
-                            // 5. الانتقال لصفحة تسجيل الدخول
+
                             Intent intent = new Intent(DonorSignUpActivity.this, LoginActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);

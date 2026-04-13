@@ -5,7 +5,7 @@ public class BloodRequests {
 
     public BloodRequests() {}
 
-    // Getters
+
     public String getBloodType() { return bloodType; }
     public String getHospitalName() { return hospitalName; }
     public String getCity() { return city; }
@@ -13,12 +13,12 @@ public class BloodRequests {
     public String getUnits() { return units; }
     public String getStatus() { return status; }
     public String getRequestId() { return requestId; }
-    public String getDate() { return date; } // تم التعديل لـ date
+    public String getDate() { return date; }
     public String getCity_bloodType() { return city_bloodType; }
 
-    // Setters
+
     public void setStatus(String status) { this.status = status; }
     public void setRequestId(String requestId) { this.requestId = requestId; }
-    public void setDate(String date) { this.date = date; } // تم التعديل لـ date
+    public void setDate(String date) { this.date = date; }
     public void setCity_bloodType(String city_bloodType) { this.city_bloodType = city_bloodType; }
 }

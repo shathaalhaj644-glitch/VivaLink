@@ -26,7 +26,7 @@ public class BloodBankStaffHomeActivity extends AppCompatActivity {
         }
 
         String currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        // التأكد من أن المسار هو BloodBankStaff كما في الـ JSON
+
         mRef = FirebaseDatabase.getInstance().getReference("BloodBankStaff").child(currentUid);
 
         loadStaffData();

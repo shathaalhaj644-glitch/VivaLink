@@ -62,7 +62,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                     tvTotalDonations.setText(count);
 
-                    // ✅ تنسيق التاريخ
+
                     tvLastDonationDate.setText(formatDate(lastDonation));
                     tvLastTestDate.setText(formatDate(lastTest));
                 }
@@ -103,13 +103,13 @@ public class ProfileActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.btnLogout);
     }
 
-    // ✅ يمنع null
+
     private String getValue(DataSnapshot snapshot, String key) {
         Object value = snapshot.child(key).getValue();
         return value != null ? value.toString() : "--";
     }
 
-    // ✅ تحويل أي تاريخ لشكل: 9/4/2026
+
     private String formatDate(String input) {
 
         if (input == null || input.equals("--") || input.isEmpty())
@@ -118,7 +118,7 @@ public class ProfileActivity extends AppCompatActivity {
         try {
             Date date;
 
-            // شكل Firebase الطويل
+
             if (input.contains("GMT")) {
                 SimpleDateFormat f =
                         new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
@@ -134,7 +134,7 @@ public class ProfileActivity extends AppCompatActivity {
                 return input;
             }
 
-            // 🔥 الشكل النهائي المطلوب
+
             SimpleDateFormat out =
                     new SimpleDateFormat("d/M/yyyy", Locale.ENGLISH);
 

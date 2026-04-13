@@ -2,7 +2,7 @@ package com.example.vivalink;
 
 public class RequestModel {
     private String hospitalName, bloodType, city, department, units, requestId, date;
-    private boolean isDonated; // متغير جديد لحالة التبرع
+    private boolean isDonated;
 
     public RequestModel() {}
 
@@ -16,7 +16,7 @@ public class RequestModel {
     public String getDate() { return date; }
     public boolean isDonated() { return isDonated; }
 
-    // Setters
+
     public void setRequestId(String requestId) { this.requestId = requestId; }
     public void setDonated(boolean donated) { isDonated = donated; }
 }

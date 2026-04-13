@@ -15,7 +15,7 @@ import java.util.List;
 public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAdapter.DonorVH> {
 
     private Context context;
-    private List<RequestModel> requestList; // تم التعديل لـ RequestModel
+    private List<RequestModel> requestList;
     private OnDonorClickListener listener;
 
     public interface OnDonorClickListener {
@@ -31,7 +31,7 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     @NonNull
     @Override
     public DonorVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // الربط مع ملف XML تبع طلبات الدم
+
         View v = LayoutInflater.from(context).inflate(R.layout.item_blood_requests, parent, false);
         return new DonorVH(v);
     }
@@ -41,21 +41,21 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
 
         RequestModel request = requestList.get(position);
 
-        // ربط البيانات بالـ IDs الموجودة في item_blood_requests.xml
+
         holder.tvHospitalName.setText(request.getHospitalName());
         holder.tvCity.setText("📍 المدينة: " + request.getCity());
         holder.tvBloodType.setText("🩸 فصيلة الدم: " + request.getBloodType());
         holder.tvUnits.setText("🧪 عدد الوحدات: " + request.getUnits());
         holder.tvDepartment.setText("🏢 القسم: " + request.getDepartment());
 
-        // عرض التاريخ والوقت من حقل date
+
         if (request.getDate() != null) {
             holder.tvDate.setText("📅 تاريخ ووقت الطلب: " + request.getDate());
         } else {
             holder.tvDate.setText("📅 تاريخ ووقت الطلب: --");
         }
 
-        // عند الضغط على زر "تبرع الآن"
+
         holder.btnDonate.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onDonorClick(request);
@@ -70,7 +70,7 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
 
     public static class DonorVH extends RecyclerView.ViewHolder {
 
-        // المعرفات (IDs) الصحيحة التي تمنع ظهور Error
+
         TextView tvHospitalName, tvCity, tvBloodType, tvUnits, tvDepartment, tvDate;
         Button btnDonate;
 

@@ -15,7 +15,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
     private RecyclerView rvDonors;
     private HospitalDonorsAdapter adapter;
 
-    // الحل هنا: تأكدي أن القائمة نوعها RequestModel
+
     private List<RequestModel> list;
     private String currentCity = "";
 
@@ -27,14 +27,14 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         rvDonors = findViewById(R.id.rvDonors);
         rvDonors.setLayoutManager(new LinearLayoutManager(this));
 
-        // تأكدي من تهيئة القائمة بالنوع الجديد
+
         list = new ArrayList<>();
 
-        // الحل هنا: تمرير RequestModel داخل الـ Listener
+
         adapter = new HospitalDonorsAdapter(this, list, new HospitalDonorsAdapter.OnDonorClickListener() {
             @Override
             public void onDonorClick(RequestModel request) {
-                // ضعي هنا الأكشن عند الضغط
+
             }
         });
 
