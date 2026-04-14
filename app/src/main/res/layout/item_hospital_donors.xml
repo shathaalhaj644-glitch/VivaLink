@@ -3,99 +3,49 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="2dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="15dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:layoutDirection="rtl">
+        android:padding="15dp"
+        android:background="#FFF0F0"> <TextView
+        android:id="@+id/tvHospitalName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#CC0000"
+        android:text="اسم المتبرع"
+        android:gravity="right" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
-
-            <TextView
-                android:id="@+id/tvHospitalName"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="مستشفى ابن سينا التخصصي"
-                android:textColor="#222222"
-                android:textSize="17sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🏥"
-                android:textSize="18sp"
-                android:layout_marginStart="5dp"/>
+            android:layout_marginTop="5dp"
+            android:gravity="right">
+            <TextView android:id="@+id/tvCity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📍 المدينة" android:layout_marginRight="10dp"/>
+            <TextView android:id="@+id/tvBloodType" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🩸 الفصيلة" android:textStyle="bold" android:textColor="#FF4433"/>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvCity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📍 المدينة: جنين"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:layout_marginBottom="5dp"/>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#DDD" android:layout_marginVertical="8dp"/>
 
-        <TextView
-            android:id="@+id/tvBloodType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🩸 فصيلة الدم: O+"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:layout_marginBottom="5dp"/>
-
-        <TextView
-            android:id="@+id/tvUnits"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🧪 عدد الوحدات: 4 وحدات"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:layout_marginBottom="5dp"/>
-
-        <TextView
-            android:id="@+id/tvDepartment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🏢 القسم: جراحة"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📅 تاريخ الطلب: 10/4/2026 - 22:20"
-            android:textColor="#999999"
-            android:textSize="12sp"
-            android:layout_marginBottom="15dp"
-            android:gravity="center"/>
+        <TextView android:id="@+id/tvUnits" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="عدد التبرعات: 0" android:gravity="right"/>
+        <TextView android:id="@+id/tvDepartment" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="آخر فحص: --/--/----" android:gravity="right"/>
+        <TextView android:id="@+id/tvDate" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="آخر تبرع: --/--/----" android:gravity="right" android:layout_marginBottom="10dp"/>
 
         <Button
             android:id="@+id/btnDonateItem"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="تبرع الآن"
-            android:textColor="#FFFFFF"
+            android:layout_height="45dp"
+            android:text="فتح الملف"
             android:backgroundTint="#FF4433"
-            app:cornerRadius="12dp"
-            android:textStyle="bold"
-            android:textSize="16sp"/>
+            android:textColor="#FFFFFF"
+            app:cornerRadius="10dp" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

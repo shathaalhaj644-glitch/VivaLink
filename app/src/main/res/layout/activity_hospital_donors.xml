@@ -1,72 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF"
-    android:layoutDirection="rtl">
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#FF4433"
+        android:text="قائمة المتبرعين"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <EditText
-        android:id="@+id/etSearchDonor"
+        android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="16dp"
-        android:background="#FFF5F5"
-        android:hint="ابحث باسم المتبرع..."
-        android:paddingHorizontal="15dp"
-        android:drawablePadding="10dp"
-        android:textColorHint="#D32F2F"
-        android:textColor="#333333"
-        android:textSize="14sp" />
+        android:layout_margin="15dp"
+        android:hint="🔍 ابحث باسم المتبرع..."
+        android:padding="12dp"
+        android:background="#F2F2F2"
+        android:gravity="right|center_vertical"
+        android:layoutDirection="rtl" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:layout_marginBottom="10dp">
-
+        android:padding="5dp"
+        android:scrollbars="none">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
+            android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnAll"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="الكل"
-                android:backgroundTint="#D32F2F"
-                android:textColor="#FFFFFF"
-                android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnAll" android:layout_width="wrap_content" android:layout_height="45dp"
+                android:text="الكل" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
 
-            <Button android:id="@+id/btnAPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="A+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnAMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="A-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnBPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="B+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnBMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="B-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnOPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="O+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnOMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="O-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnABPlus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="AB+" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
-            <Button android:id="@+id/btnABMinus" android:layout_width="wrap_content" android:layout_height="40dp" android:text="AB-" android:backgroundTint="#F5F5F5" android:textColor="#D32F2F" android:layout_marginEnd="8dp" />
+            <Button android:id="@+id/btnOPlus" android:layout_width="wrap_content" android:layout_height="45dp"
+                android:text="O+" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
 
+            <Button android:id="@+id/btnOMinus" android:layout_width="wrap_content" android:layout_height="45dp"
+                android:text="O-" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+
+            <Button android:id="@+id/btnAPlus" android:layout_width="wrap_content" android:layout_height="45dp"
+                android:text="A+" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+
+            <Button android:id="@+id/btnBPlus" android:layout_width="wrap_content" android:layout_height="45dp"
+                android:text="B+" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
         </LinearLayout>
     </HorizontalScrollView>
-
-    <TextView
-        android:id="@+id/tvEmptyMessage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="20dp"
-        android:text="لا يوجد متبرعين حالياً لهذه الفصيلة 🩸"
-        android:textColor="#AAAAAA"
-        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvDonors"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp" />
+        android:padding="10dp" />
 
 </LinearLayout>

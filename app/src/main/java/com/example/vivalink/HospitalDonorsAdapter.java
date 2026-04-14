@@ -6,77 +6,59 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 
 public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAdapter.DonorVH> {
 
     private Context context;
-    private List<RequestModel> requestList;
+    private List<HospitalDonorsModel> list;
     private OnDonorClickListener listener;
 
-    public interface OnDonorClickListener {
-        void onDonorClick(RequestModel request);
-    }
+    public interface OnDonorClickListener { void onDonorClick(HospitalDonorsModel donor); }
 
-    public HospitalDonorsAdapter(Context context, List<RequestModel> requestList, OnDonorClickListener listener) {
+    public HospitalDonorsAdapter(Context context, List<HospitalDonorsModel> list, OnDonorClickListener listener) {
         this.context = context;
-        this.requestList = requestList;
+        this.list = list;
         this.listener = listener;
     }
 
     @NonNull
     @Override
     public DonorVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View v = LayoutInflater.from(context).inflate(R.layout.item_blood_requests, parent, false);
         return new DonorVH(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull DonorVH holder, int position) {
+        HospitalDonorsModel donor = list.get(position);
 
-        RequestModel request = requestList.get(position);
+        holder.tvName.setText(donor.getFullName());
+        holder.tvCity.setText("📍 المدينة: " + donor.getCity());
+        holder.tvBloodType.setText("🩸 فصيلة الدم: " + donor.getBloodType());
 
+        // تعديل النصوص لتناسب بيانات المتبرع
+        holder.tvUnits.setText("عدد التبرعات: " + donor.getDonationCount());
+        holder.tvDepartment.setText("آخر فحص: " + donor.getLastBloodTest());
+        holder.tvDate.setText("تاريخ آخر تبرع: " + donor.getLastDonation());
 
-        holder.tvHospitalName.setText(request.getHospitalName());
-        holder.tvCity.setText("📍 المدينة: " + request.getCity());
-        holder.tvBloodType.setText("🩸 فصيلة الدم: " + request.getBloodType());
-        holder.tvUnits.setText("🧪 عدد الوحدات: " + request.getUnits());
-        holder.tvDepartment.setText("🏢 القسم: " + request.getDepartment());
-
-
-        if (request.getDate() != null) {
-            holder.tvDate.setText("📅 تاريخ ووقت الطلب: " + request.getDate());
-        } else {
-            holder.tvDate.setText("📅 تاريخ ووقت الطلب: --");
-        }
-
-
+        holder.btnDonate.setText("فتح الملف");
         holder.btnDonate.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDonorClick(request);
-            }
+            if (listener != null) listener.onDonorClick(donor);
         });
     }
 
-    @Override
-    public int getItemCount() {
-        return requestList.size();
-    }
+    @Override public int getItemCount() { return list.size(); }
 
     public static class DonorVH extends RecyclerView.ViewHolder {
-
-
-        TextView tvHospitalName, tvCity, tvBloodType, tvUnits, tvDepartment, tvDate;
+        TextView tvName, tvCity, tvBloodType, tvUnits, tvDepartment, tvDate;
         Button btnDonate;
 
         public DonorVH(@NonNull View v) {
             super(v);
-            tvHospitalName = v.findViewById(R.id.tvHospitalName);
+            tvName = v.findViewById(R.id.tvHospitalName);
             tvCity = v.findViewById(R.id.tvCity);
             tvBloodType = v.findViewById(R.id.tvBloodType);
             tvUnits = v.findViewById(R.id.tvUnits);
