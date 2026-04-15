@@ -3,25 +3,25 @@ package com.example.vivalink;
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class HospitalDonorsActivity extends AppCompatActivity {
 
@@ -49,11 +49,9 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
 
-        // جلب مدينة المستشفى الحالية
         FirebaseDatabase.getInstance().getReference("Hospitals").child(uid)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
                             hospitalCity = snapshot.child("city").getValue(String.class);
                             loadDonorsFromSameCity();
@@ -64,12 +62,10 @@ public class HospitalDonorsActivity extends AppCompatActivity {
     }
 
     private void loadDonorsFromSameCity() {
-        // التعديل هنا: البحث في عقدة "Donors" وليس "Users"
         FirebaseDatabase.getInstance().getReference("Donors")
                 .orderByChild("city").equalTo(hospitalCity)
                 .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
                         donorList.clear();
                         for (DataSnapshot ds : snapshot.getChildren()) {
                             HospitalDonorsModel donor = ds.getValue(HospitalDonorsModel.class);
@@ -90,52 +86,61 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_donor_details);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        // ربط العناصر مع التصميم
-        TextView tvTitle = dialog.findViewById(R.id.tvDonorName);
+        TextView tvName = dialog.findViewById(R.id.tvDonorName);
         EditText etPhone = dialog.findViewById(R.id.etPhone);
         EditText etDiseases = dialog.findViewById(R.id.etDiseases);
         EditText etLastDonation = dialog.findViewById(R.id.etLastDonation);
+        EditText etLastBloodTest = dialog.findViewById(R.id.etLastBloodTest);
         EditText etNote = dialog.findViewById(R.id.etNote);
-        Button btnSave = dialog.findViewById(R.id.btnUpdate);
+        EditText etHospital = dialog.findViewById(R.id.etHospital);
         TextView tvEligibility = dialog.findViewById(R.id.tvEligibility);
+        RadioGroup rgEligibility = dialog.findViewById(R.id.rgEligibility);
+        RadioButton rbEligible = dialog.findViewById(R.id.rbEligible);
+        RadioButton rbNotEligible = dialog.findViewById(R.id.rbNotEligible);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+        Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
 
-        // التصميم البرمجي (Native) كما طلبت
-        GradientDrawable fieldBg = new GradientDrawable();
-        fieldBg.setColor(Color.parseColor("#F5F5F5"));
-        fieldBg.setCornerRadius(15f);
-        fieldBg.setStroke(2, Color.parseColor("#DDDDDD"));
-
-        etPhone.setBackground(fieldBg);
-        etDiseases.setBackground(fieldBg);
-        etLastDonation.setBackground(fieldBg);
-        etNote.setBackground(fieldBg);
-
-        // تعبئة البيانات من Firebase
-        tvTitle.setText(donor.getFullName());
+        // تعبئة البيانات
+        tvName.setText(donor.getFullName());
         etPhone.setText(donor.getPhone());
+        etDiseases.setText(donor.isHasDisease() ? donor.getDiseaseName() : "");
         etLastDonation.setText(donor.getLastDonation());
-        etDiseases.setText(donor.isHasDisease() ? donor.getDiseaseName() : "لا يوجد أمراض");
+        etLastBloodTest.setText(donor.getLastBloodTest());
+        etNote.setText("");
+        etHospital.setText(donor.getHospitalName());
 
-        // فحص الأهلية (4 شهور) بناءً على الفحص الدوري
-        checkEligibility(donor.getLastBloodTest(), donor.getLastDonation(), tvEligibility);
+        // فحص الأهلية
+        checkEligibility(donor.getLastBloodTest(), donor.getLastDonation(), tvEligibility, rbEligible, rbNotEligible);
 
-        btnSave.setOnClickListener(v -> {
-            // تحديث البيانات في عقدة Donors
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnUpdate.setOnClickListener(v -> {
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Donors").child(donor.getUid());
+            ref.child("phone").setValue(etPhone.getText().toString());
+            ref.child("diseaseName").setValue(etDiseases.getText().toString());
             ref.child("lastDonation").setValue(etLastDonation.getText().toString());
-            // زيادة عدد التبرعات عند الحفظ
-            ref.child("donationCount").setValue(donor.getDonationCount() + 1);
+            ref.child("lastBloodTest").setValue(etLastBloodTest.getText().toString());
+            ref.child("hospitalName").setValue(etHospital.getText().toString());
+            ref.child("hasDisease").setValue(!etDiseases.getText().toString().isEmpty());
 
-            Toast.makeText(this, "تم تحديث بيانات المتبرع بنجاح", Toast.LENGTH_SHORT).show();
+            if (rbEligible.isChecked()) {
+                tvEligibility.setText("✅ مؤهل للتبرع");
+                tvEligibility.setTextColor(Color.parseColor("#2E7D32"));
+            } else {
+                tvEligibility.setText("❌ غير مؤهل للتبرع");
+                tvEligibility.setTextColor(Color.RED);
+            }
+
+            Toast.makeText(this, "تم حفظ التعديلات بنجاح", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void checkEligibility(String testDateStr, String donationDateStr, TextView tv) {
+    private void checkEligibility(String testDateStr, String donationDateStr, TextView tv, RadioButton rbEligible, RadioButton rbNotEligible) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
             Date testDate = sdf.parse(testDateStr);
             Date donationDate = sdf.parse(donationDateStr);
 
@@ -143,13 +148,14 @@ public class HospitalDonorsActivity extends AppCompatActivity {
             cal.add(Calendar.MONTH, -4);
             Date fourMonthsAgo = cal.getTime();
 
-            // إذا كان الفحص أو التبرع صار له أكثر من 4 شهور -> غير مؤهل
-            if (testDate.before(fourMonthsAgo) || donationDate.after(fourMonthsAgo)) {
-                tv.setText("❌ غير مؤهل (يجب فحص دم كل 4 شهور)");
-                tv.setTextColor(Color.RED);
-            } else {
+            if (testDate.before(fourMonthsAgo) || donationDate.before(fourMonthsAgo)) {
                 tv.setText("✅ مؤهل للتبرع");
                 tv.setTextColor(Color.parseColor("#2E7D32"));
+                rbEligible.setChecked(true);
+            } else {
+                tv.setText("❌ غير مؤهل للتبرع");
+                tv.setTextColor(Color.RED);
+                rbNotEligible.setChecked(true);
             }
         } catch (Exception e) {
             tv.setText("⚠️ حالة الأهلية: تأكد من التواريخ");

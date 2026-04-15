@@ -5,7 +5,10 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="25dp">
 
-    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -13,6 +16,7 @@
             android:padding="20dp"
             android:layoutDirection="rtl">
 
+            <!-- اسم المتبرع -->
             <TextView
                 android:id="@+id/tvDonorName"
                 android:layout_width="match_parent"
@@ -23,18 +27,104 @@
                 android:textColor="#FF4433"
                 android:text="اسم المتبرع" />
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="📞 رقم الهاتف" android:layout_marginTop="15dp" android:textColor="#333"/>
-            <EditText android:id="@+id/etPhone" android:layout_width="match_parent" android:layout_height="45dp" android:padding="10dp" android:textSize="14sp" android:inputType="phone" android:background="#F2F2F2" android:layout_marginTop="5dp"/>
+            <!-- رقم الهاتف -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📞 رقم الهاتف"
+                android:layout_marginTop="15dp"
+                android:textColor="#333"/>
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:inputType="phone"
+                android:background="#F2F2F2"
+                android:layout_marginTop="5dp"/>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="🧬 الأمراض" android:layout_marginTop="10dp" android:textColor="#333"/>
-            <EditText android:id="@+id/etDiseases" android:layout_width="match_parent" android:layout_height="45dp" android:padding="10dp" android:textSize="14sp" android:background="#F2F2F2" android:layout_marginTop="5dp"/>
+            <!-- الأمراض -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🧬 الأمراض"
+                android:layout_marginTop="10dp"
+                android:textColor="#333"/>
+            <EditText
+                android:id="@+id/etDiseases"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:background="#F2F2F2"
+                android:layout_marginTop="5dp"/>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="📅 تاريخ آخر تبرع" android:layout_marginTop="10dp" android:textColor="#333"/>
-            <EditText android:id="@+id/etLastDonation" android:layout_width="match_parent" android:layout_height="45dp" android:padding="10dp" android:textSize="14sp" android:background="#F2F2F2" android:layout_marginTop="5dp"/>
+            <!-- آخر تبرع -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📅 تاريخ آخر تبرع"
+                android:layout_marginTop="10dp"
+                android:textColor="#333"/>
+            <EditText
+                android:id="@+id/etLastDonation"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:background="#F2F2F2"
+                android:layout_marginTop="5dp"/>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="📝 ملاحظات إضافية" android:layout_marginTop="10dp" android:textColor="#333"/>
-            <EditText android:id="@+id/etNote" android:layout_width="match_parent" android:layout_height="45dp" android:padding="10dp" android:textSize="14sp" android:background="#F2F2F2" android:layout_marginTop="5dp"/>
+            <!-- آخر فحص دم -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🧪 تاريخ آخر فحص دم"
+                android:layout_marginTop="10dp"
+                android:textColor="#333"/>
+            <EditText
+                android:id="@+id/etLastBloodTest"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:background="#F2F2F2"
+                android:layout_marginTop="5dp"/>
 
+            <!-- إضافة بيانات -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📝 إضافة بيانات"
+                android:layout_marginTop="10dp"
+                android:textColor="#333"/>
+            <EditText
+                android:id="@+id/etNote"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:background="#F2F2F2"
+                android:layout_marginTop="5dp"/>
+
+            <!-- المستشفى -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🏥 المستشفى التي تبرع فيها"
+                android:layout_marginTop="10dp"
+                android:textColor="#333"/>
+            <EditText
+                android:id="@+id/etHospital"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:background="#F2F2F2"
+                android:layout_marginTop="5dp"/>
+
+            <!-- الأهلية -->
             <TextView
                 android:id="@+id/tvEligibility"
                 android:layout_width="match_parent"
@@ -51,20 +141,51 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginTop="10dp">
-                <RadioButton android:id="@+id/rbEligible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="مؤهل" android:textColor="#2E7D32" android:layout_marginEnd="15dp"/>
-                <RadioButton android:id="@+id/rbNotEligible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="غير مؤهل" android:textColor="#FF4433"/>
+                <RadioButton
+                    android:id="@+id/rbEligible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="مؤهل"
+                    android:textColor="#2E7D32"
+                    android:layout_marginEnd="15dp"/>
+                <RadioButton
+                    android:id="@+id/rbNotEligible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="غير مؤهل"
+                    android:textColor="#FF4433"/>
             </RadioGroup>
 
-            <Button
-                android:id="@+id/btnUpdate"
+            <!-- الأزرار -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="20dp"
-                android:text="حفظ التعديلات"
-                android:backgroundTint="#FF4433"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                app:cornerRadius="15dp" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
+
+                <Button
+                    android:id="@+id/btnCancel"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:layout_weight="1"
+                    android:text="إلغاء"
+                    android:backgroundTint="#757575"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    app:cornerRadius="15dp"/>
+
+                <Button
+                    android:id="@+id/btnUpdate"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:text="حفظ التعديلات"
+                    android:backgroundTint="#FF4433"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    app:cornerRadius="15dp"/>
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

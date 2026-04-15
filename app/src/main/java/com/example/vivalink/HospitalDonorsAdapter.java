@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,7 +26,7 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     @NonNull
     @Override
     public DonorVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.item_blood_requests, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.item_hospital_donors, parent, false);
         return new DonorVH(v);
     }
 
@@ -36,16 +35,12 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
         HospitalDonorsModel donor = list.get(position);
 
         holder.tvName.setText(donor.getFullName());
-        holder.tvCity.setText("📍 المدينة: " + donor.getCity());
-        holder.tvBloodType.setText("🩸 فصيلة الدم: " + donor.getBloodType());
-
-        // تعديل النصوص لتناسب بيانات المتبرع
+        holder.tvCity.setText("📍 " + donor.getCity());
+        holder.tvBloodType.setText("🩸 " + donor.getBloodType());
         holder.tvUnits.setText("عدد التبرعات: " + donor.getDonationCount());
-        holder.tvDepartment.setText("آخر فحص: " + donor.getLastBloodTest());
-        holder.tvDate.setText("تاريخ آخر تبرع: " + donor.getLastDonation());
+        holder.tvLastDonation.setText("آخر تبرع: " + donor.getLastDonation());
 
-        holder.btnDonate.setText("فتح الملف");
-        holder.btnDonate.setOnClickListener(v -> {
+        holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onDonorClick(donor);
         });
     }
@@ -53,18 +48,15 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     @Override public int getItemCount() { return list.size(); }
 
     public static class DonorVH extends RecyclerView.ViewHolder {
-        TextView tvName, tvCity, tvBloodType, tvUnits, tvDepartment, tvDate;
-        Button btnDonate;
+        TextView tvName, tvCity, tvBloodType, tvUnits, tvLastDonation;
 
         public DonorVH(@NonNull View v) {
             super(v);
-            tvName = v.findViewById(R.id.tvHospitalName);
+            tvName = v.findViewById(R.id.tvDonorName);
             tvCity = v.findViewById(R.id.tvCity);
             tvBloodType = v.findViewById(R.id.tvBloodType);
             tvUnits = v.findViewById(R.id.tvUnits);
-            tvDepartment = v.findViewById(R.id.tvDepartment);
-            tvDate = v.findViewById(R.id.tvDate);
-            btnDonate = v.findViewById(R.id.btnDonateItem);
+            tvLastDonation = v.findViewById(R.id.tvLastDonation);
         }
     }
 }

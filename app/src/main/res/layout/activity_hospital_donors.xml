@@ -1,62 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:layoutDirection="rtl">
 
-    <TextView
+    <!-- الهيدر -->
+    <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="#FF4433"
-        android:text="قائمة المتبرعين"
-        android:textColor="#FFFFFF"
-        android:gravity="center"
-        android:textSize="22sp"
-        android:textStyle="bold" />
+        android:background="#E62020"
+        android:padding="15dp">
 
-    <EditText
-        android:id="@+id/etSearch"
+        <TextView
+            android:id="@+id/tvHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="المتبرعون - جنين"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+    <!-- مربع البحث -->
+    <LinearLayout
+        android:id="@+id/searchContainer"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_margin="15dp"
-        android:hint="🔍 ابحث باسم المتبرع..."
-        android:padding="12dp"
-        android:background="#F2F2F2"
-        android:gravity="right|center_vertical"
-        android:layoutDirection="rtl" />
+        android:layout_below="@id/header"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:background="#F5F5F5"
+        android:padding="8dp">
 
+        <TextView
+            android:id="@+id/icSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔍"
+            android:textSize="18sp"
+            android:layout_gravity="center_vertical"/>
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="ابحث باسم المتبرع..."
+            android:background="@android:color/transparent"
+            android:paddingStart="10dp"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <!-- الفلاتر (زمرة الدم + الكل) -->
     <HorizontalScrollView
+        android:id="@+id/filterContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
+        android:layout_below="@id/searchContainer"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="5dp"
         android:scrollbars="none">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button android:id="@+id/btnAll" android:layout_width="wrap_content" android:layout_height="45dp"
-                android:text="الكل" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnFilterOPlus"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="+O"
+                android:backgroundTint="#E62020"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"/>
 
-            <Button android:id="@+id/btnOPlus" android:layout_width="wrap_content" android:layout_height="45dp"
-                android:text="O+" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnFilterBNeg"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="-B"
+                android:backgroundTint="#E62020"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"/>
 
-            <Button android:id="@+id/btnOMinus" android:layout_width="wrap_content" android:layout_height="45dp"
-                android:text="O-" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnFilterAPlus"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="+A"
+                android:backgroundTint="#E62020"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"/>
 
-            <Button android:id="@+id/btnAPlus" android:layout_width="wrap_content" android:layout_height="45dp"
-                android:text="A+" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnFilterANeg"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="-A"
+                android:backgroundTint="#E62020"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"/>
 
-            <Button android:id="@+id/btnBPlus" android:layout_width="wrap_content" android:layout_height="45dp"
-                android:text="B+" android:layout_margin="4dp" android:backgroundTint="#FF4433" android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/btnFilterAll"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="الكل"
+                android:backgroundTint="#757575"
+                android:textColor="#FFFFFF"/>
         </LinearLayout>
     </HorizontalScrollView>
 
+    <!-- قائمة المتبرعين -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvDonors"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp" />
+        android:layout_below="@id/filterContainer"
+        android:layout_above="@id/bottomNav"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
 
-</LinearLayout>
+    <!-- شريط التنقل -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="#F5F5F5"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="الإعدادات"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="المتبرعون"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="الطلبات"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="الرئيسية"/>
+    </LinearLayout>
+</RelativeLayout>
