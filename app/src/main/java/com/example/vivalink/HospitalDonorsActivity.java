@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -29,6 +31,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
     private HospitalDonorsAdapter adapter;
     private List<HospitalDonorsModel> donorList;
     private String hospitalCity = "";
+    private EditText etSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,28 @@ public class HospitalDonorsActivity extends AppCompatActivity {
 
         adapter = new HospitalDonorsAdapter(this, donorList, this::showDonorDetailsDialog);
         rvDonors.setAdapter(adapter);
+
+        etSearch = findViewById(R.id.etSearch);
+
+        // ✨ البحث بالاسم
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterByName(s.toString());
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        // ✨ فلترة بالفصيلة
+        findViewById(R.id.btnAPlus).setOnClickListener(v -> filterByBloodType("A+"));
+        findViewById(R.id.btnAMinus).setOnClickListener(v -> filterByBloodType("A-"));
+        findViewById(R.id.btnBPlus).setOnClickListener(v -> filterByBloodType("B+"));
+        findViewById(R.id.btnBMinus).setOnClickListener(v -> filterByBloodType("B-"));
+        findViewById(R.id.btnOPlus).setOnClickListener(v -> filterByBloodType("O+"));
+        findViewById(R.id.btnOMinus).setOnClickListener(v -> filterByBloodType("O-"));
+        findViewById(R.id.btnABPlus).setOnClickListener(v -> filterByBloodType("AB+"));
+        findViewById(R.id.btnABMinus).setOnClickListener(v -> filterByBloodType("AB-"));
+        findViewById(R.id.btnAll).setOnClickListener(v -> adapter.updateList(donorList));
 
         getHospitalInfo();
     }
@@ -79,10 +104,32 @@ public class HospitalDonorsActivity extends AppCompatActivity {
                                 donorList.add(donor);
                             }
                         }
-                        adapter.notifyDataSetChanged();
+                        adapter.updateList(donorList);
                     }
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
+    }
+
+    // ✨ فلترة بالاسم
+    private void filterByName(String query) {
+        List<HospitalDonorsModel> filteredList = new ArrayList<>();
+        for (HospitalDonorsModel donor : donorList) {
+            if (donor.getFullName().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(donor);
+            }
+        }
+        adapter.updateList(filteredList);
+    }
+
+    // ✨ فلترة بالفصيلة
+    private void filterByBloodType(String bloodType) {
+        List<HospitalDonorsModel> filteredList = new ArrayList<>();
+        for (HospitalDonorsModel donor : donorList) {
+            if (donor.getBloodType().equalsIgnoreCase(bloodType)) {
+                filteredList.add(donor);
+            }
+        }
+        adapter.updateList(filteredList);
     }
 
     private void showDonorDetailsDialog(HospitalDonorsModel donor) {
@@ -160,10 +207,13 @@ public class HospitalDonorsActivity extends AppCompatActivity {
             } else {
                 tv.setText("❌ غير مؤهل للتبرع");
                 tv.setTextColor(Color.RED);
-                rbNotEligible.setChecked(true);
+                rbNotEligible.setChecked(true); // إضافة تفعيل الخيار غير المؤهل
             }
         } catch (Exception e) {
-            tv.setText("⚠️ حالة الأهلية: تأكد من التواريخ");
+            // في حال وجود خطأ في التاريخ أو الخانات فارغة
+            tv.setText("⚠️ يرجى التأكد من تواريخ الفحص والتبرع");
+            tv.setTextColor(Color.GRAY);
         }
-    }
-}
+    } // إغلاق دالة checkEligibility
+
+} // إغلاق الكلاس HospitalDonorsActivity بالكامل

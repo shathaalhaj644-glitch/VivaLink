@@ -34,8 +34,8 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     public void onBindViewHolder(@NonNull DonorVH holder, int position) {
         HospitalDonorsModel donor = list.get(position);
 
-        holder.tvName.setText(donor.getFullName());
-        holder.tvCity.setText(donor.getCity());
+        holder.tvName.setText(donor.getFullName() + " 👤");
+        holder.tvCity.setText("📍 " + donor.getCity());
         holder.tvBloodType.setText(donor.getBloodType());
 
         holder.itemView.setOnClickListener(v -> {
@@ -44,6 +44,12 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     }
 
     @Override public int getItemCount() { return list.size(); }
+
+    // ✨ دالة جديدة لتحديث القائمة (مطلوبة للبحث والفلترة)
+    public void updateList(List<HospitalDonorsModel> newList) {
+        this.list = newList;
+        notifyDataSetChanged();
+    }
 
     public static class DonorVH extends RecyclerView.ViewHolder {
         TextView tvName, tvCity, tvBloodType;
