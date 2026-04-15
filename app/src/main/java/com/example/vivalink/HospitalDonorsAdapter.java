@@ -35,10 +35,8 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
         HospitalDonorsModel donor = list.get(position);
 
         holder.tvName.setText(donor.getFullName());
-        holder.tvCity.setText("📍 " + donor.getCity());
-        holder.tvBloodType.setText("🩸 " + donor.getBloodType());
-        holder.tvUnits.setText("عدد التبرعات: " + donor.getDonationCount());
-        holder.tvLastDonation.setText("آخر تبرع: " + donor.getLastDonation());
+        holder.tvCity.setText(donor.getCity());
+        holder.tvBloodType.setText(donor.getBloodType());
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onDonorClick(donor);
@@ -48,15 +46,13 @@ public class HospitalDonorsAdapter extends RecyclerView.Adapter<HospitalDonorsAd
     @Override public int getItemCount() { return list.size(); }
 
     public static class DonorVH extends RecyclerView.ViewHolder {
-        TextView tvName, tvCity, tvBloodType, tvUnits, tvLastDonation;
+        TextView tvName, tvCity, tvBloodType;
 
         public DonorVH(@NonNull View v) {
             super(v);
             tvName = v.findViewById(R.id.tvDonorName);
             tvCity = v.findViewById(R.id.tvCity);
             tvBloodType = v.findViewById(R.id.tvBloodType);
-            tvUnits = v.findViewById(R.id.tvUnits);
-            tvLastDonation = v.findViewById(R.id.tvLastDonation);
         }
     }
 }

@@ -54,6 +54,11 @@ public class HospitalDonorsActivity extends AppCompatActivity {
                     @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
                             hospitalCity = snapshot.child("city").getValue(String.class);
+
+                            // ✨ تحديث الهيدر ليظهر اسم المدينة
+                            TextView tvHeaderTitle = findViewById(R.id.tvHeaderTitle);
+                            tvHeaderTitle.setText("المتبرعون - " + hospitalCity);
+
                             loadDonorsFromSameCity();
                         }
                     }
