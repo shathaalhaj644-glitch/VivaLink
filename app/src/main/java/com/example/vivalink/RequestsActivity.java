@@ -2,6 +2,7 @@ package com.example.vivalink;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +16,7 @@ public class RequestsActivity extends AppCompatActivity {
     private RequestsAdapter adapter;
     private List<RequestModel> requestList;
     private FirebaseAuth mAuth;
+    private TextView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,16 +25,14 @@ public class RequestsActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         rvRequests = findViewById(R.id.rvRequests);
+        btnBack = findViewById(R.id.btnBack);
+
         rvRequests.setLayoutManager(new LinearLayoutManager(this));
         requestList = new ArrayList<>();
 
+        btnBack.setOnClickListener(v -> finish());
+
         adapter = new RequestsAdapter(requestList, (request, position) -> {
-
-            String uid = mAuth.getCurrentUser().getUid();
-            FirebaseDatabase.getInstance().getReference("Donors")
-                    .child(uid).child("myDonations").child(request.getRequestId()).setValue(true);
-
-
             Intent intent = new Intent(this, RequestsDetailsActivity.class);
             intent.putExtra("requestId", request.getRequestId());
             intent.putExtra("hospitalName", request.getHospitalName());
@@ -40,7 +40,8 @@ public class RequestsActivity extends AppCompatActivity {
             intent.putExtra("bloodType", request.getBloodType());
             intent.putExtra("department", request.getDepartment());
             intent.putExtra("units", request.getUnits());
-            intent.putExtra("date", request.getDate());
+            intent.putExtra("confirmedAt", request.getFormattedDate());
+            intent.putExtra("isDonated", request.isDonated());
             startActivity(intent);
         });
 
@@ -49,6 +50,7 @@ public class RequestsActivity extends AppCompatActivity {
     }
 
     private void loadUserFilterAndData() {
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
         DatabaseReference donorRef = FirebaseDatabase.getInstance().getReference("Donors").child(uid);
 
@@ -58,7 +60,6 @@ public class RequestsActivity extends AppCompatActivity {
                 if (donorSnapshot.exists()) {
                     String city = donorSnapshot.child("city").getValue(String.class);
                     String blood = donorSnapshot.child("bloodType").getValue(String.class);
-                    // جلب البيانات المفلترة مع فحص حالة التبرع السابقة
                     fetchRequests(city, blood, donorSnapshot);
                 }
             }
@@ -77,9 +78,23 @@ public class RequestsActivity extends AppCompatActivity {
                         for (DataSnapshot data : snapshot.getChildren()) {
                             RequestModel req = data.getValue(RequestModel.class);
                             if (req != null) {
+                                String status = data.child("status").getValue(String.class);
+
+                                // 1. إذا كان ملغي، نتخطى الطلب تماماً ولا نضيفه للقائمة
+                                if ("ملغي".equals(status)) {
+                                    continue;
+                                }
+
                                 req.setRequestId(data.getKey());
 
-                                req.setDonated(donorSnapshot.child("myDonations").hasChild(data.getKey()));
+                                // 2. فحص هل الطلب مغلق أو أن المستخدم تبرع له سابقاً
+                                // إذا كانت الحالة "مغلق" في الفايربيس، نجعل الكارد يظهر عليه "تم التبرع"
+                                boolean isClosed = "مغلق".equals(status);
+                                boolean isUserDonated = donorSnapshot.child("myDonations").hasChild(data.getKey());
+
+                                // إذا تحقق أحد الشرطين، نعتبره "تم التبرع" في التصميم
+                                req.setDonated(isClosed || isUserDonated);
+
                                 requestList.add(req);
                             }
                         }

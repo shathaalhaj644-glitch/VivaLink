@@ -6,10 +6,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Window;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.Toast;
@@ -29,45 +28,40 @@ public class HospitalDonorsActivity extends AppCompatActivity {
 
     private RecyclerView rvDonors;
     private HospitalDonorsAdapter adapter;
-    private List<HospitalDonorsModel> donorList;
+    private List<Donors> allDonors = new ArrayList<>();
+    private List<Donors> filteredList = new ArrayList<>();
     private String hospitalCity = "";
     private EditText etSearch;
+    private TextView tvHeaderTitle;
+    private String selectedBloodType = "الكل";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_donors);
 
+        initViews();
+        getHospitalInfo();
+    }
+
+    private void initViews() {
+        tvHeaderTitle = findViewById(R.id.tvHeaderTitle);
         rvDonors = findViewById(R.id.rvDonors);
-        rvDonors.setLayoutManager(new LinearLayoutManager(this));
-        donorList = new ArrayList<>();
-
-        adapter = new HospitalDonorsAdapter(this, donorList, this::showDonorDetailsDialog);
-        rvDonors.setAdapter(adapter);
-
         etSearch = findViewById(R.id.etSearch);
 
-        // ✨ البحث بالاسم
+        rvDonors.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new HospitalDonorsAdapter(this, filteredList, this::showDonorDetailsDialog);
+        rvDonors.setAdapter(adapter);
+
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterByName(s.toString());
+                applyFilters();
             }
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // ✨ فلترة بالفصيلة
-        findViewById(R.id.btnAPlus).setOnClickListener(v -> filterByBloodType("A+"));
-        findViewById(R.id.btnAMinus).setOnClickListener(v -> filterByBloodType("A-"));
-        findViewById(R.id.btnBPlus).setOnClickListener(v -> filterByBloodType("B+"));
-        findViewById(R.id.btnBMinus).setOnClickListener(v -> filterByBloodType("B-"));
-        findViewById(R.id.btnOPlus).setOnClickListener(v -> filterByBloodType("O+"));
-        findViewById(R.id.btnOMinus).setOnClickListener(v -> filterByBloodType("O-"));
-        findViewById(R.id.btnABPlus).setOnClickListener(v -> filterByBloodType("AB+"));
-        findViewById(R.id.btnABMinus).setOnClickListener(v -> filterByBloodType("AB-"));
-        findViewById(R.id.btnAll).setOnClickListener(v -> adapter.updateList(donorList));
-
-        getHospitalInfo();
+        setupFilterButtons();
     }
 
     private void getHospitalInfo() {
@@ -78,142 +72,162 @@ public class HospitalDonorsActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
-                            hospitalCity = snapshot.child("city").getValue(String.class);
-
-                            // ✨ تحديث الهيدر ليظهر اسم المدينة
-                            TextView tvHeaderTitle = findViewById(R.id.tvHeaderTitle);
+                            String city = snapshot.child("city").getValue(String.class);
+                            hospitalCity = (city != null) ? city.replace("📍", "").trim() : "";
                             tvHeaderTitle.setText("المتبرعون - " + hospitalCity);
-
-                            loadDonorsFromSameCity();
+                            loadDonorsFromServer();
                         }
                     }
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 
-    private void loadDonorsFromSameCity() {
+    private void loadDonorsFromServer() {
         FirebaseDatabase.getInstance().getReference("Donors")
-                .orderByChild("city").equalTo(hospitalCity)
                 .addValueEventListener(new ValueEventListener() {
                     @Override public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        donorList.clear();
+                        allDonors.clear();
                         for (DataSnapshot ds : snapshot.getChildren()) {
-                            HospitalDonorsModel donor = ds.getValue(HospitalDonorsModel.class);
-                            if (donor != null) {
-                                donor.setUid(ds.getKey());
-                                donorList.add(donor);
-                            }
+                            try {
+                                Donors d = new Donors();
+                                d.setUid(ds.getKey());
+                                d.setFullName(String.valueOf(ds.child("fullName").getValue()));
+                                d.setName(String.valueOf(ds.child("name").getValue()));
+                                d.setBloodType(String.valueOf(ds.child("bloodType").getValue()));
+                                d.setCity(String.valueOf(ds.child("city").getValue()));
+                                d.setPhone(String.valueOf(ds.child("phone").getValue()));
+                                d.setLastDonation(String.valueOf(ds.child("lastDonation").getValue()));
+                                d.setLastBloodTest(String.valueOf(ds.child("lastBloodTest").getValue()));
+                                d.setBloodTestStatus(String.valueOf(ds.child("bloodTestStatus").getValue()));
+                                d.setHasDisease(String.valueOf(ds.child("hasDisease").getValue()));
+                                d.setDonationCount(String.valueOf(ds.child("donationCount").getValue()));
+
+                                // فلترة المدينة (تنظيف من الإيموجي والمسافات للمقارنة فقط)
+                                String dCityClean = d.getCity().replace("📍", "").trim();
+                                if (dCityClean.equalsIgnoreCase(hospitalCity)) {
+                                    allDonors.add(d);
+                                }
+                            } catch (Exception e) { e.printStackTrace(); }
                         }
-                        adapter.updateList(donorList);
+                        applyFilters();
                     }
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 
-    // ✨ فلترة بالاسم
-    private void filterByName(String query) {
-        List<HospitalDonorsModel> filteredList = new ArrayList<>();
-        for (HospitalDonorsModel donor : donorList) {
-            if (donor.getFullName().toLowerCase().contains(query.toLowerCase())) {
-                filteredList.add(donor);
+    private void applyFilters() {
+        String query = etSearch.getText().toString().toLowerCase().trim();
+        filteredList.clear();
+
+        for (Donors d : allDonors) {
+            String name = (d.getFullName() != null && !d.getFullName().equals("null")) ? d.getFullName() : d.getName();
+            boolean matchesName = name.toLowerCase().contains(query);
+            boolean matchesBlood = selectedBloodType.equals("الكل") || d.getBloodType().trim().equalsIgnoreCase(selectedBloodType);
+
+            if (matchesName && matchesBlood) {
+                filteredList.add(d);
             }
         }
         adapter.updateList(filteredList);
     }
 
-    // ✨ فلترة بالفصيلة
-    private void filterByBloodType(String bloodType) {
-        List<HospitalDonorsModel> filteredList = new ArrayList<>();
-        for (HospitalDonorsModel donor : donorList) {
-            if (donor.getBloodType().equalsIgnoreCase(bloodType)) {
-                filteredList.add(donor);
-            }
-        }
-        adapter.updateList(filteredList);
-    }
-
-    private void showDonorDetailsDialog(HospitalDonorsModel donor) {
+    private void showDonorDetailsDialog(Donors donor) {
         Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_donor_details);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        TextView tvName = dialog.findViewById(R.id.tvDonorName);
-        EditText etPhone = dialog.findViewById(R.id.etPhone);
-        EditText etDiseases = dialog.findViewById(R.id.etDiseases);
+        if (dialog.getWindow() != null) {
+            int width = (int)(getResources().getDisplayMetrics().widthPixels * 0.90);
+            dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        TextView tvName = dialog.findViewById(R.id.tvName);
+        TextView tvBloodInfo = dialog.findViewById(R.id.tvBloodTypeInfo);
+        TextView tvCityInfo = dialog.findViewById(R.id.tvCityInfo);
+        TextView tvCountInfo = dialog.findViewById(R.id.tvDonationCountInfo);
+
         EditText etLastDonation = dialog.findViewById(R.id.etLastDonation);
-        EditText etLastBloodTest = dialog.findViewById(R.id.etLastBloodTest);
-        EditText etNote = dialog.findViewById(R.id.etNote);
-        EditText etHospital = dialog.findViewById(R.id.etHospital);
-        TextView tvEligibility = dialog.findViewById(R.id.tvEligibility);
-        RadioGroup rgEligibility = dialog.findViewById(R.id.rgEligibility);
-        RadioButton rbEligible = dialog.findViewById(R.id.rbEligible);
-        RadioButton rbNotEligible = dialog.findViewById(R.id.rbNotEligible);
-        Button btnCancel = dialog.findViewById(R.id.btnCancel);
-        Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
+        EditText etLastTest = dialog.findViewById(R.id.etLastTest);
+        EditText etAddInfo = dialog.findViewById(R.id.etAddInfo);
+        CheckBox cbEligible = dialog.findViewById(R.id.cbEligible);
+        TextView tvStatus = dialog.findViewById(R.id.tvEligibleStatus);
+        Button btnSave = dialog.findViewById(R.id.btnSave);
 
         // تعبئة البيانات
-        tvName.setText(donor.getFullName());
-        etPhone.setText(donor.getPhone());
-        etDiseases.setText(donor.isHasDisease() ? donor.getDiseaseName() : "");
-        etLastDonation.setText(donor.getLastDonation());
-        etLastBloodTest.setText(donor.getLastBloodTest());
-        etNote.setText("");
-        etHospital.setText(donor.getHospitalName());
+        tvName.setText(clean(donor.getFullName().equals("null") ? donor.getName() : donor.getFullName()));
+        tvBloodInfo.setText("🩸 فصيلة الدم: " + clean(donor.getBloodType()));
+        tvCityInfo.setText("📍 المدينة: " + clean(donor.getCity()));
+        tvCountInfo.setText("🔢 عدد التبرعات: " + clean(donor.getDonationCount()));
 
-        // فحص الأهلية
-        checkEligibility(donor.getLastBloodTest(), donor.getLastDonation(), tvEligibility, rbEligible, rbNotEligible);
+        etLastDonation.setText(clean(donor.getLastDonation()));
+        etLastTest.setText(clean(donor.getLastBloodTest()));
+        etAddInfo.setText(clean(donor.getBloodTestStatus()));
 
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        // فحص الأهلية تلقائياً (شرط الـ 4 شهور)
+        boolean isEligible = checkEligibility(donor.getLastDonation(), donor.getLastBloodTest(), donor.getHasDisease());
+        cbEligible.setChecked(isEligible);
+        updateUI(isEligible, tvStatus);
 
-        btnUpdate.setOnClickListener(v -> {
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Donors").child(donor.getUid());
-            ref.child("phone").setValue(etPhone.getText().toString());
-            ref.child("diseaseName").setValue(etDiseases.getText().toString());
-            ref.child("lastDonation").setValue(etLastDonation.getText().toString());
-            ref.child("lastBloodTest").setValue(etLastBloodTest.getText().toString());
-            ref.child("hospitalName").setValue(etHospital.getText().toString());
-            ref.child("hasDisease").setValue(!etDiseases.getText().toString().isEmpty());
+        cbEligible.setOnClickListener(v -> updateUI(cbEligible.isChecked(), tvStatus));
 
-            if (rbEligible.isChecked()) {
-                tvEligibility.setText("✅ مؤهل للتبرع");
-                tvEligibility.setTextColor(Color.parseColor("#2E7D32"));
-            } else {
-                tvEligibility.setText("❌ غير مؤهل للتبرع");
-                tvEligibility.setTextColor(Color.RED);
-            }
+        btnSave.setOnClickListener(v -> {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("lastDonation", etLastDonation.getText().toString());
+            map.put("lastBloodTest", etLastTest.getText().toString());
+            map.put("bloodTestStatus", etAddInfo.getText().toString());
 
-            Toast.makeText(this, "تم حفظ التعديلات بنجاح", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+            FirebaseDatabase.getInstance().getReference("Donors").child(donor.getUid())
+                    .updateChildren(map).addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "تم حفظ البيانات بنجاح ✅", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    });
         });
 
+        dialog.findViewById(R.id.tvClose).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
-    private void checkEligibility(String testDateStr, String donationDateStr, TextView tv, RadioButton rbEligible, RadioButton rbNotEligible) {
+    private boolean checkEligibility(String lastDonation, String lastTest, String hasDisease) {
+        if (hasDisease.equalsIgnoreCase("Yes") || hasDisease.equals("نعم")) return false;
+
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
-            Date testDate = sdf.parse(testDateStr);
-            Date donationDate = sdf.parse(donationDateStr);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+            long now = System.currentTimeMillis();
+            long fourMonthsInMs = 4L * 30 * 24 * 60 * 60 * 1000;
 
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.MONTH, -4);
-            Date fourMonthsAgo = cal.getTime();
-
-            if (testDate.before(fourMonthsAgo) || donationDate.before(fourMonthsAgo)) {
-                tv.setText("✅ مؤهل للتبرع");
-                tv.setTextColor(Color.parseColor("#2E7D32"));
-                rbEligible.setChecked(true);
-            } else {
-                tv.setText("❌ غير مؤهل للتبرع");
-                tv.setTextColor(Color.RED);
-                rbNotEligible.setChecked(true); // إضافة تفعيل الخيار غير المؤهل
+            if (lastDonation != null && lastDonation.length() > 5) {
+                Date dDate = sdf.parse(lastDonation);
+                if (now - dDate.getTime() < fourMonthsInMs) return false;
             }
-        } catch (Exception e) {
-            // في حال وجود خطأ في التاريخ أو الخانات فارغة
-            tv.setText("⚠️ يرجى التأكد من تواريخ الفحص والتبرع");
-            tv.setTextColor(Color.GRAY);
-        }
-    } // إغلاق دالة checkEligibility
+            if (lastTest != null && lastTest.length() > 5) {
+                Date tDate = sdf.parse(lastTest);
+                if (now - tDate.getTime() < fourMonthsInMs) return false;
+            }
+        } catch (Exception e) { return true; }
+        return true;
+    }
 
-} // إغلاق الكلاس HospitalDonorsActivity بالكامل
+    private void setupFilterButtons() {
+        findViewById(R.id.btnAll).setOnClickListener(v -> { selectedBloodType = "الكل"; applyFilters(); });
+        findViewById(R.id.btnAPlus).setOnClickListener(v -> { selectedBloodType = "A+"; applyFilters(); });
+        findViewById(R.id.btnAMinus).setOnClickListener(v -> { selectedBloodType = "A-"; applyFilters(); });
+        findViewById(R.id.btnBPlus).setOnClickListener(v -> { selectedBloodType = "B+"; applyFilters(); });
+        findViewById(R.id.btnBMinus).setOnClickListener(v -> { selectedBloodType = "B-"; applyFilters(); });
+        findViewById(R.id.btnOPlus).setOnClickListener(v -> { selectedBloodType = "O+"; applyFilters(); });
+        findViewById(R.id.btnOMinus).setOnClickListener(v -> { selectedBloodType = "O-"; applyFilters(); });
+        findViewById(R.id.btnABPlus).setOnClickListener(v -> { selectedBloodType = "AB+"; applyFilters(); });
+        findViewById(R.id.btnABMinus).setOnClickListener(v -> { selectedBloodType = "AB-"; applyFilters(); });
+    }
+
+    private String clean(String s) { return (s == null || s.equals("null")) ? "" : s; }
+
+    private void updateUI(boolean isChecked, TextView tv) {
+        if (isChecked) {
+            tv.setText("✅ مؤهل للتبرع");
+            tv.setTextColor(Color.parseColor("#4CAF50"));
+        } else {
+            tv.setText("❌ غير مؤهل حالياً");
+            tv.setTextColor(Color.RED);
+        }
+    }
+}

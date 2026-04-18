@@ -56,27 +56,42 @@
                     android:background="#FFF5F5"
                     android:gravity="right">
 
-                    <TextView android:id="@+id/tvBloodType" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="فصيلة الدم: B+" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
-                    <TextView android:id="@+id/tvHospitalName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="مستشفى النجاح الوطني الجامعي" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
-                    <TextView android:id="@+id/tvCity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="نابلس" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
-                    <TextView android:id="@+id/tvDepartment" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="طوارئ" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
-                    <TextView android:id="@+id/tvUnits" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الوحدات: 3 " android:textColor="#333" android:textSize="17sp"/>
+                    <TextView android:id="@+id/tvBloodType" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="فصيلة الدم: --" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp" android:textStyle="bold"/>
+                    <TextView android:id="@+id/tvHospitalName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اسم المستشفى" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvCity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="المدينة" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvDepartment" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="القسم" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
+                    <TextView android:id="@+id/tvUnits" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الوحدات: --" android:textColor="#333" android:textSize="17sp" android:layout_marginBottom="8dp"/>
+
+                    <TextView android:id="@+id/tvRequestDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅 تاريخ الطلب: --"
+                        android:textColor="#333"
+                        android:textSize="17sp"
+                        android:layout_marginBottom="8dp"
+                        android:paddingRight="2dp"
+                        android:textStyle="normal"
+                        android:gravity="right"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="وقت الوصول للمستشفى"
+                android:text="وقت وصولك المتوقع (بالدقائق)"
                 android:gravity="right"
                 android:textColor="#D32F2F"
                 android:layout_marginBottom="5dp"
                 android:textStyle="bold"/>
 
-            <Spinner
-                android:id="@+id/spinnerTime"
+            <EditText
+                android:id="@+id/etMinutes"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:hint="مثلاً: 40"
+                android:inputType="number"
+                android:gravity="right"
+                android:paddingEnd="15dp"
                 android:background="@android:drawable/editbox_background"
                 android:layout_marginBottom="15dp"
                 android:textDirection="rtl"/>
@@ -85,7 +100,7 @@
                 android:id="@+id/etPhone"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:hint="رقم الهاتف"
+                android:hint="رقم الهاتف للتواصل"
                 android:inputType="phone"
                 android:gravity="right"
                 android:paddingEnd="15dp"
@@ -115,7 +130,6 @@
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:layout_marginBottom="12dp"
-                        android:drawableRight="@android:drawable/ic_menu_info_details"
                         android:drawablePadding="8dp"/>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="تناول وجبة خفيفة قبل التبرع 🍽️" android:textSize="15sp" android:layout_marginBottom="6dp" android:gravity="right"/>
@@ -130,7 +144,7 @@
                 android:id="@+id/btnConfirmDonation"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
-                android:text="❤️ تأكيد التبرع"
+                android:text=" تأكيد التبرع"
                 android:backgroundTint="#FF4B4B"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"

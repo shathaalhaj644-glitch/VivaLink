@@ -20,7 +20,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_margin="24dp"
-        android:contentDescription="إضافة طلب"
+        android:contentDescription="إضافة طلب جديد ➕"
         app:backgroundTint="#D32F2F"
         app:srcCompat="@android:drawable/ic_input_add"
         app:tint="#FFFFFF"

@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class CreateRequestActivity extends AppCompatActivity {
@@ -27,7 +28,7 @@ public class CreateRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_request);
 
-
+        // 1. ربط العناصر بالـ XML
         tvPageTitle = findViewById(R.id.tvPageTitle);
         et_city = findViewById(R.id.et_city);
         et_hospitalName = findViewById(R.id.et_hospitalName);
@@ -36,20 +37,20 @@ public class CreateRequestActivity extends AppCompatActivity {
         sp_bloodType = findViewById(R.id.sp_bloodType);
         btn_create_request = findViewById(R.id.btn_create_request);
 
-
+        // 2. إعداد قائمة فصائل الدم
         String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, bloodTypes);
         sp_bloodType.setAdapter(adapter);
 
         db = FirebaseDatabase.getInstance().getReference("Requests");
 
-
+        // 3. جلب بيانات المستشفى (الاسم والمدينة) تلقائياً
         fetchHospitalProfile();
 
-
+        // 4. فحص إذا كان "تعديل" لطلب قديم أو "إنشاء" جديد
         requestId = getIntent().getStringExtra("requestId");
         if (requestId != null) {
-            tvPageTitle.setText("تعديل الطلب ✏️");
+            tvPageTitle.setText("تعديل الطلب");
             btn_create_request.setText("تحديث الآن");
             et_units.setText(getIntent().getStringExtra("units"));
             et_department.setText(getIntent().getStringExtra("dept"));
@@ -87,41 +88,40 @@ public class CreateRequestActivity extends AppCompatActivity {
         String hospStr = et_hospitalName.getText().toString().trim();
         String deptStr = et_department.getText().toString().trim();
 
+        // فحص الحقول الفارغة
         if (TextUtils.isEmpty(unitsStr) || TextUtils.isEmpty(deptStr)) {
             Toast.makeText(this, "يرجى تعبئة كافة الحقول ⚠️", Toast.LENGTH_SHORT).show();
             return;
         }
 
-
-
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale.US);
-        String fullDateTime = sdf.format(new Date());
+        // 1. إنشاء وقت الطلب بصيغة ISO المتوافقة مع كود المتبرع
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
+        String currentTime = sdf.format(new Date());
 
         String hId = FirebaseAuth.getInstance().getUid();
 
-
+        // 2. المفتاح المركب (نص صافي للمقارنة الصحيحة في الفلترة)
         String combined = cityStr + "_" + blood;
 
         String currentId = (requestId != null) ? requestId : db.push().getKey();
 
-
-        HospitalRequestModel request = new HospitalRequestModel(
-                currentId,
-                blood,
-                "📍 " + cityStr,
-                "🏥 " + hospStr,
-                "💉 " + unitsStr,
-                "مفتوح",
-                "🏢 " + deptStr,
-                fullDateTime,
-                "",
-                hId,
-                hospitalPhone,
-                combined
-        );
+        // 3. تخزين البيانات كنصوص صافية (تمت إزالة السمايلات 📍🏥💉🏢 من هنا)
+        HashMap<String, Object> requestMap = new HashMap<>();
+        requestMap.put("requestId", currentId);
+        requestMap.put("bloodType", blood);
+        requestMap.put("city", cityStr);
+        requestMap.put("hospitalName", hospStr);
+        requestMap.put("units", unitsStr);
+        requestMap.put("department", deptStr);
+        requestMap.put("status", "مفتوح");
+        requestMap.put("confirmedAt", currentTime); // الحقل الجديد للوقت
+        requestMap.put("hospitalId", hId);
+        requestMap.put("phone", hospitalPhone);
+        requestMap.put("city_bloodType", combined); // حقل الفلترة الأساسي
+        requestMap.put("donatedCount", 0);
 
         if (currentId != null) {
-            db.child(currentId).setValue(request).addOnCompleteListener(task -> {
+            db.child(currentId).setValue(requestMap).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(this, "تم الحفظ وإبلاغ المتبرعين بنجاح ✅", Toast.LENGTH_SHORT).show();
                     finish();

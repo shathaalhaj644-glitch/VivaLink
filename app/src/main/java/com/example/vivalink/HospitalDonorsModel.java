@@ -1,12 +1,29 @@
 package com.example.vivalink;
 
 public class HospitalDonorsModel {
-    private String uid, fullName, bloodType, city, phone, lastDonation, lastBloodTest, diseaseName, hospitalName;
+    private String uid;
+    private String fullName;
+    private String bloodType;
+    private String city;
+    private String phone;
+    private String lastDonation;
+    private String lastBloodTest;
+    private String diseaseName;
+    private String hospitalName;
+
+    // الحقول الجديدة من قاعدة البيانات
     private Integer donationCount;
     private boolean hasDisease;
+    private String bloodLevel;
+    private String bloodTestStatus;
+    private String role;
+    private String status;
+    private String confirmedAt;
+    private boolean confirmedByStaff;
 
     public HospitalDonorsModel() {}
 
+    // Getters & Setters
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 
@@ -39,4 +56,22 @@ public class HospitalDonorsModel {
 
     public boolean isHasDisease() { return hasDisease; }
     public void setHasDisease(boolean hasDisease) { this.hasDisease = hasDisease; }
+
+    public String getBloodLevel() { return bloodLevel; }
+    public void setBloodLevel(String bloodLevel) { this.bloodLevel = bloodLevel; }
+
+    public String getBloodTestStatus() { return bloodTestStatus; }
+    public void setBloodTestStatus(String bloodTestStatus) { this.bloodTestStatus = bloodTestStatus; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getConfirmedAt() { return confirmedAt; }
+    public void setConfirmedAt(String confirmedAt) { this.confirmedAt = confirmedAt; }
+
+    public boolean isConfirmedByStaff() { return confirmedByStaff; }
+    public void setConfirmedByStaff(boolean confirmedByStaff) { this.confirmedByStaff = confirmedByStaff; }
 }

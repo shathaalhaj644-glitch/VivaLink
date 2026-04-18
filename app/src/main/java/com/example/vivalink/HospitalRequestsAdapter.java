@@ -35,27 +35,27 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
     public void onBindViewHolder(@NonNull VH holder, int position) {
         HospitalRequestModel m = list.get(position);
 
-
+        // 1. عرض البيانات وإضافة الإيموجي في الواجهة فقط (لأننا حذفناها من قاعدة البيانات)
         holder.tvBloodType.setText("🩸 " + m.bloodType);
-        holder.tvUnits.setText(m.units + " وحدات");
-        holder.tvDept.setText(m.department);
-        holder.tvCity.setText(m.city);
+        holder.tvUnits.setText("🧪 عدد الوحدات: " + m.units);
+        holder.tvDept.setText("🏢 القسم: " + m.department);
+        holder.tvCity.setText("📍 المدينة: " + m.city);
 
+        // 2. عرض الحالة
+        holder.tvStatusBadge.setText("الحالة: " + m.status);
 
-        holder.tvStatusBadge.setText(m.status);
+        // 3. عرض التاريخ باستخدام الدالة الجديدة getFormattedDate التي أضفناها للموديل
+        holder.tvDateTime.setText("🕒 " + m.getFormattedDate());
 
-
-        holder.tvDateTime.setText("🕒 " + m.date);
-
-
-
+        // 4. التحكم في ظهور علامة "تم التبرع" أو "مغلق"
         if ("مغلق".equals(m.status)) {
             holder.tvDonatedTag.setVisibility(View.VISIBLE);
+            holder.tvDonatedTag.setText("تم التبرع ✅ (" + m.donatedCount + ")");
         } else {
             holder.tvDonatedTag.setVisibility(View.GONE);
         }
 
-
+        // 5. تغيير حالة الطلب (Popup Menu)
         holder.btnChangeStatus.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(context, v);
             popup.getMenu().add("مفتوح");
@@ -73,7 +73,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
             popup.show();
         });
 
-
+        // 6. حذف الطلب
         holder.btnDelete.setOnClickListener(v -> {
             FirebaseDatabase.getInstance().getReference("Requests")
                     .child(m.requestId).removeValue()
@@ -83,9 +83,8 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list != null ? list.size() : 0;
     }
-
 
     public static class VH extends RecyclerView.ViewHolder {
         TextView tvBloodType, tvStatusBadge, tvUnits, tvDept, tvCity, tvDateTime, tvDonatedTag;

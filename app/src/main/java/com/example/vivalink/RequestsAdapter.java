@@ -1,6 +1,5 @@
 package com.example.vivalink;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.RequestViewHolder> {
     private List<RequestModel> requestList;
@@ -39,18 +35,12 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
         RequestModel request = requestList.get(position);
 
-
-        holder.cardView.setCardBackgroundColor(Color.parseColor("#FFF5F5"));
-
         holder.tvHospital.setText(request.getHospitalName());
         holder.tvLocation.setText("📍 المدينة: " + request.getCity());
         holder.tvBloodType.setText("🩸 فصيلة الدم: " + request.getBloodType());
-        holder.tvUnits.setText("💉 عدد الوحدات: " + request.getUnits());
+        holder.tvUnits.setText("🧪 عدد الوحدات: " + request.getUnits());
         holder.tvDepartment.setText("🏢 القسم: " + request.getDepartment());
-
-
-        holder.tvDate.setText("📅 تاريخ الطلب: " + formatBloodDateToEnglish(request.getDate()));
-
+        holder.tvDate.setText("📅 تاريخ الطلب: " + request.getFormattedDate());
 
         if (request.isDonated()) {
             holder.btnDonate.setVisibility(View.GONE);
@@ -63,22 +53,6 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         holder.btnDonate.setOnClickListener(v -> listener.onRequestClick(request, position));
     }
 
-
-    private String formatBloodDateToEnglish(String rawDate) {
-        if (rawDate == null) return "";
-        try {
-
-            SimpleDateFormat parser = new SimpleDateFormat("EEE MMM dd HH:mm:ss 'GMT'Z yyyy", Locale.ENGLISH);
-            Date date = parser.parse(rawDate);
-
-            // المنسق مع Locale.ENGLISH لإجبار الأرقام الإنجليزية
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.ENGLISH);
-            return formatter.format(date);
-        } catch (Exception e) {
-            return rawDate;
-        }
-    }
-
     @Override
     public int getItemCount() { return requestList.size(); }
 
@@ -86,10 +60,9 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.Reques
         TextView tvBloodType, tvHospital, tvLocation, tvDepartment, tvUnits, tvDate;
         Button btnDonate;
         LinearLayout layoutDonated;
-        CardView cardView;
+
         public RequestViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardView = (CardView) itemView;
             tvBloodType = itemView.findViewById(R.id.tvBloodType);
             tvHospital = itemView.findViewById(R.id.tvHospitalName);
             tvLocation = itemView.findViewById(R.id.tvCity);

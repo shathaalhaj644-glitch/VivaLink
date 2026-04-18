@@ -1,51 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="15dp"
-    app:cardElevation="4dp">
+    android:orientation="horizontal"
+    android:padding="15dp"
+    android:layout_margin="5dp"
+    android:background="#EEEEEE"
+    android:layoutDirection="rtl">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:background="#FFF0F0">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <!-- اسم المتبرع -->
         <TextView
             android:id="@+id/tvDonorName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="اسم المتبرع"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333"
-            android:layout_alignParentRight="true"/>
+            android:textStyle="bold" />
 
-        <!-- المدينة تحت الاسم -->
         <TextView
             android:id="@+id/tvCity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="الخليل"
-            android:textSize="14sp"
-            android:textColor="#666"
-            android:layout_below="@id/tvDonorName"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="4dp"/>
+            android:text="المدينة"
+            android:textColor="#666666" />
+    </LinearLayout>
 
-        <!-- زمرة الدم على اليسار باللون الأحمر -->
-        <TextView
-            android:id="@+id/tvBloodType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="+O"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#E62020"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
-    </RelativeLayout>
-</androidx.cardview.widget.CardView>
+    <TextView
+        android:id="@+id/tvBloodType"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="#CC0000"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:text="A+"
+        android:textStyle="bold" />
+
+</LinearLayout>
