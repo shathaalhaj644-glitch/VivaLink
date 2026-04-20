@@ -121,7 +121,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
 
         for (Donors d : allDonors) {
             String name = (d.getFullName() != null && !d.getFullName().equals("null")) ? d.getFullName() : d.getName();
-            boolean matchesName = name.toLowerCase().contains(query);
+            boolean matchesName = (name != null && name.toLowerCase().contains(query));
             boolean matchesBlood = selectedBloodType.equals("الكل") || d.getBloodType().trim().equalsIgnoreCase(selectedBloodType);
 
             if (matchesName && matchesBlood) {
@@ -136,7 +136,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         dialog.setContentView(R.layout.dialog_donor_details);
 
         if (dialog.getWindow() != null) {
-            int width = (int)(getResources().getDisplayMetrics().widthPixels * 0.90);
+            int width = (int)(getResources().getDisplayMetrics().widthPixels * 0.95);
             dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
@@ -145,6 +145,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         TextView tvBloodInfo = dialog.findViewById(R.id.tvBloodTypeInfo);
         TextView tvCityInfo = dialog.findViewById(R.id.tvCityInfo);
         TextView tvCountInfo = dialog.findViewById(R.id.tvDonationCountInfo);
+        TextView tvHospitalsHistory = dialog.findViewById(R.id.tvHospitalsHistory); // الحقل الجديد
 
         EditText etLastDonation = dialog.findViewById(R.id.etLastDonation);
         EditText etLastTest = dialog.findViewById(R.id.etLastTest);
@@ -153,7 +154,6 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         TextView tvStatus = dialog.findViewById(R.id.tvEligibleStatus);
         Button btnSave = dialog.findViewById(R.id.btnSave);
 
-        // تعبئة البيانات
         tvName.setText(clean(donor.getFullName().equals("null") ? donor.getName() : donor.getFullName()));
         tvBloodInfo.setText("🩸 فصيلة الدم: " + clean(donor.getBloodType()));
         tvCityInfo.setText("📍 المدينة: " + clean(donor.getCity()));
@@ -163,7 +163,9 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         etLastTest.setText(clean(donor.getLastBloodTest()));
         etAddInfo.setText(clean(donor.getBloodTestStatus()));
 
-        // فحص الأهلية تلقائياً (شرط الـ 4 شهور)
+        // جلب سجل أسماء المستشفيات
+        fetchHospitalsHistory(donor.getUid(), tvHospitalsHistory);
+
         boolean isEligible = checkEligibility(donor.getLastDonation(), donor.getLastBloodTest(), donor.getHasDisease());
         cbEligible.setChecked(isEligible);
         updateUI(isEligible, tvStatus);
@@ -175,10 +177,11 @@ public class HospitalDonorsActivity extends AppCompatActivity {
             map.put("lastDonation", etLastDonation.getText().toString());
             map.put("lastBloodTest", etLastTest.getText().toString());
             map.put("bloodTestStatus", etAddInfo.getText().toString());
+            map.put("isEligible", cbEligible.isChecked());
 
             FirebaseDatabase.getInstance().getReference("Donors").child(donor.getUid())
                     .updateChildren(map).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "تم حفظ البيانات بنجاح ✅", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "تم الحفظ بنجاح ✅", Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     });
         });
@@ -187,9 +190,61 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private boolean checkEligibility(String lastDonation, String lastTest, String hasDisease) {
-        if (hasDisease.equalsIgnoreCase("Yes") || hasDisease.equals("نعم")) return false;
+    // الدالة المسؤولة عن جلب أسماء المستشفيات من سجل myDonations
 
+    private void fetchHospitalsHistory(String donorUid, TextView tvHistory) {
+        DatabaseReference donationsRef = FirebaseDatabase.getInstance().getReference("Donors").child(donorUid).child("myDonations");
+        DatabaseReference requestsRef = FirebaseDatabase.getInstance().getReference("Requests");
+
+        donationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    tvHistory.setText("لا يوجد سجل سابق");
+                    return;
+                }
+
+                // مصفوفة لتخزين الأسماء لمنع التكرار
+                Set<String> hospitalNames = new HashSet<>();
+                final int total = (int) snapshot.getChildrenCount();
+                final int[] count = {0};
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    String requestId = ds.getKey();
+
+                    requestsRef.child(requestId).child("hospitalName").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot requestSnapshot) {
+                            count[0]++;
+                            if (requestSnapshot.exists()) {
+                                // إضافة الاسم للمجموعة (Set) لمنع التكرار
+                                hospitalNames.add(requestSnapshot.getValue(String.class));
+                            }
+
+                            // عند معالجة جميع الطلبات، نقوم بعرض الأسماء فقط
+                            if (count[0] == total) {
+                                if (hospitalNames.isEmpty()) {
+                                    tvHistory.setText("بيانات المستشفى غير متوفرة");
+                                } else {
+                                    StringBuilder namesOnly = new StringBuilder();
+                                    for (String name : hospitalNames) {
+                                        if (namesOnly.length() > 0) namesOnly.append("\n");
+                                        namesOnly.append("• ").append(name); // إضافة نقطة بسيطة للتنسيق
+                                    }
+                                    tvHistory.setText(namesOnly.toString());
+                                }
+                            }
+                        }
+                        @Override public void onCancelled(@NonNull DatabaseError error) {}
+                    });
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private boolean checkEligibility(String lastDonation, String lastTest, String hasDisease) {
+        if (hasDisease != null && (hasDisease.equalsIgnoreCase("Yes") || hasDisease.equals("نعم"))) return false;
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             long now = System.currentTimeMillis();
@@ -198,10 +253,6 @@ public class HospitalDonorsActivity extends AppCompatActivity {
             if (lastDonation != null && lastDonation.length() > 5) {
                 Date dDate = sdf.parse(lastDonation);
                 if (now - dDate.getTime() < fourMonthsInMs) return false;
-            }
-            if (lastTest != null && lastTest.length() > 5) {
-                Date tDate = sdf.parse(lastTest);
-                if (now - tDate.getTime() < fourMonthsInMs) return false;
             }
         } catch (Exception e) { return true; }
         return true;
