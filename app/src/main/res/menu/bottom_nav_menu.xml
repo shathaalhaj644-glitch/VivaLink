@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:title="الرئيسية" />
+
+    <item
+        android:id="@+id/nav_donors"
+        android:icon="@drawable/ic_donors"
+        android:title="المتبرعون" />
+
+    <item
+        android:id="@+id/nav_requests"
+        android:icon="@drawable/ic_requests"
+        android:title="الطلبات" />
+
+    <item
+        android:id="@+id/nav_notifications"
+        android:icon="@drawable/ic_notifications"
+        android:title="الاشعارات" />
+
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="الاعدادات" />
+
+</menu>

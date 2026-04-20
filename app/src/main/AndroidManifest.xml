@@ -35,6 +35,7 @@
         <activity android:name=".HospitalEditProfileActivity" android:exported="false" />
         <activity android:name=".HospitalChangePassward" android:exported="false" />
         <activity android:name=".RequestsDetailsActivity" />
+        <activity android:name=".BloodBankHomeActivity" android:exported="false" />
 
     </application>
 </manifest>

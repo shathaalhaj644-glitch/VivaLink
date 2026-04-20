@@ -1,43 +1,57 @@
 package com.example.vivalink;
 
-import com.example.vivalink.BloodBankStaff;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+
+import java.util.HashMap;
 
 public class BloodBankStaffHelper {
 
     private DatabaseReference dbRef;
 
     public BloodBankStaffHelper() {
-
-        dbRef = FirebaseDatabase.getInstance().getReference("Staff");
+        // الربط مع الجدول الرئيسي للموظفين
+        dbRef = FirebaseDatabase.getInstance().getReference("BloodBankStaff");
     }
 
-
-    public Task<Void> addStaff(BloodBankStaff staff) {
-        return dbRef.child(staff.getStaffId()).setValue(staff);
+    // إضافة أو تحديث بيانات الموظف
+    public Task<Void> addStaff(String userId, BloodBankStaff staff) {
+        return dbRef.child(userId).setValue(staff);
     }
 
-
-    public Query getStaffById(String staffId) {
-        return dbRef.child(staffId);
+    // جلب مرجع الموظف (أفضل من Query للتعامل المباشر)
+    public DatabaseReference getStaffReference(String userId) {
+        return dbRef.child(userId);
     }
 
-
-    public Task<Void> updateStaff(String staffId, BloodBankStaff staff) {
-        return dbRef.child(staffId).setValue(staff);
+    // تحديث حقل واحد فقط (مثلاً تحديث رقم الهاتف دون مسح باقي البيانات)
+    public Task<Void> updateStaffField(String userId, String fieldName, Object value) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(fieldName, value);
+        return dbRef.child(userId).updateChildren(map);
     }
 
-
-    public Task<Void> deleteStaff(String staffId) {
-        return dbRef.child(staffId).removeValue();
+    // حذف حساب موظف
+    public Task<Void> deleteStaff(String userId) {
+        return dbRef.child(userId).removeValue();
     }
 
-
+    // جلب كل الموظفين
     public Query getAllStaff() {
         return dbRef;
     }
-}
 
+    // --- فلاتر البحث ---
+
+    // البحث حسب المدينة
+    public Query getStaffByCity(String city) {
+        return dbRef.orderByChild("city").equalTo(city);
+    }
+
+    // البحث حسب المشفى (مهم جداً لمشروعك)
+    public Query getStaffByHospital(String hospitalId) {
+        return dbRef.orderByChild("hospitalId").equalTo(hospitalId);
+    }
+}

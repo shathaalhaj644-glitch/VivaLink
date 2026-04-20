@@ -1,43 +1,49 @@
 package com.example.vivalink;
 
 public class BloodBankStaff {
-    private String staffId;
-    private String userId;
-    private String bankId;
-    private String fullName;
-    private String employeeNumber;
-    private String position;
+    // الحقول كما هي في قاعدة البيانات تماماً
+    private String name;
+    private String email;
+    private String phone;
+    private String city;
+    private String hospitalName;
+    private String hospitalId; // هاد اللي كان اسمه bankId أو hospitalID
+    private String role;       // اللي هو BankStaff
 
-
+    // 1. الـ Constructor الفاضي (إجباري للـ Firebase)
     public BloodBankStaff() {}
 
-
-    public BloodBankStaff(String staffId, String userId, String bankId,
-                          String fullName, String employeeNumber, String position) {
-        this.staffId = staffId;
-        this.userId = userId;
-        this.bankId = bankId;
-        this.fullName = fullName;
-        this.employeeNumber = employeeNumber;
-        this.position = position;
+    // 2. الـ Constructor الكامل (لتسهيل إضافة بيانات الموظف)
+    public BloodBankStaff(String name, String email, String phone, String city,
+                          String hospitalName, String hospitalId, String role) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.city = city;
+        this.hospitalName = hospitalName;
+        this.hospitalId = hospitalId;
+        this.role = role;
     }
 
+    // 3. الـ Getters والـ Setters (عشان الأندرويد يقدر يقرأ ويكتب الحقول)
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getStaffId() { return staffId; }
-    public void setStaffId(String staffId) { this.staffId = staffId; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public String getBankId() { return bankId; }
-    public void setBankId(String bankId) { this.bankId = bankId; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getHospitalName() { return hospitalName; }
+    public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
 
-    public String getEmployeeNumber() { return employeeNumber; }
-    public void setEmployeeNumber(String employeeNumber) { this.employeeNumber = employeeNumber; }
+    public String getHospitalId() { return hospitalId; }
+    public void setHospitalId(String hospitalId) { this.hospitalId = hospitalId; }
 
-    public String getPosition() { return position; }
-    public void setPosition(String position) { this.position = position; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

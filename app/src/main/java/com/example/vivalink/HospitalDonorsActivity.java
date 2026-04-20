@@ -102,7 +102,10 @@ public class HospitalDonorsActivity extends AppCompatActivity {
                                 d.setHasDisease(String.valueOf(ds.child("hasDisease").getValue()));
                                 d.setDonationCount(String.valueOf(ds.child("donationCount").getValue()));
 
-                                // فلترة المدينة (تنظيف من الإيموجي والمسافات للمقارنة فقط)
+                                if (ds.hasChild("isEligible")) {
+                                    d.setEligible(Boolean.TRUE.equals(ds.child("isEligible").getValue(Boolean.class)));
+                                }
+
                                 String dCityClean = d.getCity().replace("📍", "").trim();
                                 if (dCityClean.equalsIgnoreCase(hospitalCity)) {
                                     allDonors.add(d);
@@ -145,8 +148,10 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         TextView tvBloodInfo = dialog.findViewById(R.id.tvBloodTypeInfo);
         TextView tvCityInfo = dialog.findViewById(R.id.tvCityInfo);
         TextView tvCountInfo = dialog.findViewById(R.id.tvDonationCountInfo);
-        TextView tvHospitalsHistory = dialog.findViewById(R.id.tvHospitalsHistory); // الحقل الجديد
+        TextView tvHospitalsHistory = dialog.findViewById(R.id.tvHospitalsHistory);
 
+        EditText etPhone = dialog.findViewById(R.id.etPhone);
+        etPhone.setTextColor(Color.BLACK);
         EditText etLastDonation = dialog.findViewById(R.id.etLastDonation);
         EditText etLastTest = dialog.findViewById(R.id.etLastTest);
         EditText etAddInfo = dialog.findViewById(R.id.etAddInfo);
@@ -154,16 +159,18 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         TextView tvStatus = dialog.findViewById(R.id.tvEligibleStatus);
         Button btnSave = dialog.findViewById(R.id.btnSave);
 
-        tvName.setText(clean(donor.getFullName().equals("null") ? donor.getName() : donor.getFullName()));
+        String displayName = (donor.getFullName() == null || donor.getFullName().equals("null")) ? donor.getName() : donor.getFullName();
+        tvName.setText(clean(displayName));
+
         tvBloodInfo.setText("🩸 فصيلة الدم: " + clean(donor.getBloodType()));
         tvCityInfo.setText("📍 المدينة: " + clean(donor.getCity()));
         tvCountInfo.setText("🔢 عدد التبرعات: " + clean(donor.getDonationCount()));
 
+        etPhone.setText(clean(donor.getPhone()));
         etLastDonation.setText(clean(donor.getLastDonation()));
         etLastTest.setText(clean(donor.getLastBloodTest()));
         etAddInfo.setText(clean(donor.getBloodTestStatus()));
 
-        // جلب سجل أسماء المستشفيات
         fetchHospitalsHistory(donor.getUid(), tvHospitalsHistory);
 
         boolean isEligible = checkEligibility(donor.getLastDonation(), donor.getLastBloodTest(), donor.getHasDisease());
@@ -190,8 +197,6 @@ public class HospitalDonorsActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // الدالة المسؤولة عن جلب أسماء المستشفيات من سجل myDonations
-
     private void fetchHospitalsHistory(String donorUid, TextView tvHistory) {
         DatabaseReference donationsRef = FirebaseDatabase.getInstance().getReference("Donors").child(donorUid).child("myDonations");
         DatabaseReference requestsRef = FirebaseDatabase.getInstance().getReference("Requests");
@@ -204,34 +209,19 @@ public class HospitalDonorsActivity extends AppCompatActivity {
                     return;
                 }
 
-                // مصفوفة لتخزين الأسماء لمنع التكرار
+                tvHistory.setText(""); // مسح النص فوراً للبدء بالتحميل
                 Set<String> hospitalNames = new HashSet<>();
-                final int total = (int) snapshot.getChildrenCount();
-                final int[] count = {0};
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    String requestId = ds.getKey();
-
-                    requestsRef.child(requestId).child("hospitalName").addListenerForSingleValueEvent(new ValueEventListener() {
+                    requestsRef.child(ds.getKey()).child("hospitalName").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot requestSnapshot) {
-                            count[0]++;
                             if (requestSnapshot.exists()) {
-                                // إضافة الاسم للمجموعة (Set) لمنع التكرار
-                                hospitalNames.add(requestSnapshot.getValue(String.class));
-                            }
-
-                            // عند معالجة جميع الطلبات، نقوم بعرض الأسماء فقط
-                            if (count[0] == total) {
-                                if (hospitalNames.isEmpty()) {
-                                    tvHistory.setText("بيانات المستشفى غير متوفرة");
-                                } else {
-                                    StringBuilder namesOnly = new StringBuilder();
-                                    for (String name : hospitalNames) {
-                                        if (namesOnly.length() > 0) namesOnly.append("\n");
-                                        namesOnly.append("• ").append(name); // إضافة نقطة بسيطة للتنسيق
-                                    }
-                                    tvHistory.setText(namesOnly.toString());
+                                String name = requestSnapshot.getValue(String.class);
+                                if (name != null && !hospitalNames.contains(name)) {
+                                    hospitalNames.add(name);
+                                    if (tvHistory.getText().length() > 0) tvHistory.append("\n");
+                                    tvHistory.append("• " + name);
                                 }
                             }
                         }
@@ -250,9 +240,9 @@ public class HospitalDonorsActivity extends AppCompatActivity {
             long now = System.currentTimeMillis();
             long fourMonthsInMs = 4L * 30 * 24 * 60 * 60 * 1000;
 
-            if (lastDonation != null && lastDonation.length() > 5) {
+            if (lastDonation != null && lastDonation.length() > 5 && !lastDonation.equals("null")) {
                 Date dDate = sdf.parse(lastDonation);
-                if (now - dDate.getTime() < fourMonthsInMs) return false;
+                if (dDate != null && (now - dDate.getTime() < fourMonthsInMs)) return false;
             }
         } catch (Exception e) { return true; }
         return true;
