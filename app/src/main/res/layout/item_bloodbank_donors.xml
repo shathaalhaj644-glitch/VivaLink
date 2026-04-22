@@ -23,11 +23,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:background="#9E9E9E" android:padding="8dp"
+                android:background="#9E9E9E"
+                android:padding="8dp"
                 android:text="A+"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,8 +148,78 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:cornerRadius="8dp" />
-
             </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutTestSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="10dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginBottom="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="صورة الفحص المرفوعة:"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"/>
+
+            <ImageView
+                android:id="@+id/imgTestProof"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:scaleType="centerInside"
+                android:background="#F0F0F0"
+                android:src="@android:drawable/ic_menu_gallery" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <Button
+                    android:id="@+id/btnAcceptTest"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="قبول"
+                    android:backgroundTint="#2E7D32"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginEnd="5dp"
+                    app:cornerRadius="8dp"/>
+
+                <Button
+                    android:id="@+id/btnRejectTest"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="رفض"
+                    android:backgroundTint="#C62828"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="5dp"
+                    app:cornerRadius="8dp"/>
+                <Button
+                    android:id="@+id/btnDeleteTest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="حذف الفحص نهائياً"
+                    android:backgroundTint="#000000"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    app:cornerRadius="8dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

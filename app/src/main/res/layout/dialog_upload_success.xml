@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="25dp"
+    app:cardElevation="8dp"
+    android:layout_gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="25dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ تم الرفع بنجاح"
+            android:textColor="#2E7D32"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="شكراً لك! صورتك الآن قيد المراجعة. رقم المرجع الخاص بك هو:"
+            android:textColor="#555555"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginBottom="15dp"/>
+
+        <TextView
+            android:id="@+id/tvRefNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REF-2026-0000"
+            android:textColor="#FF4433"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="#FFF5F5"
+            android:padding="10dp"
+            android:layout_marginBottom="20dp"/>
+
+        <Button
+            android:id="@+id/btnDone"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="تم"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="#FF4433"
+            app:cornerRadius="15dp"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

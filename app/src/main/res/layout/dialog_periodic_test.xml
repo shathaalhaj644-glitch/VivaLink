@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="25dp"
+    app:cardElevation="10dp"
+    android:layout_gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="25dp"
+        android:gravity="center"
+        android:layoutDirection="rtl"> <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="15dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="فحص دوري مطلوب"
+            android:textColor="#333333"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" 🧪"
+            android:textSize="22sp"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="لقد مر عدد الأيام المسموح به على آخر فحص لك، يرجى رفع صورة فحص دم جديدة لقبول تبرعك."
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="25dp"
+            android:lineSpacingExtra="4dp"/>
+
+        <Button
+            android:id="@+id/btnUploadNow"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="رفع الآن"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="#8E24AA"
+            app:cornerRadius="15dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"/>
+
+        <TextView
+            android:id="@+id/tvLater"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="لاحقاً"
+            android:textColor="#999999"
+            android:textSize="16sp"
+            android:layout_marginTop="15dp"
+            android:padding="10dp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

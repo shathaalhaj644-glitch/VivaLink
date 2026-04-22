@@ -29,6 +29,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-analytics'
+    // --- إضافة جديدة: Firebase Storage لرفع صور الفحوصات ---
+    implementation 'com.google.firebase:firebase-storage'
+
+    // --- إضافة جديدة: مكتبة Glide لعرض الصور وسرعة تحميلها ---
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit

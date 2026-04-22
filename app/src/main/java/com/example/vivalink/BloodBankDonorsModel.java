@@ -6,7 +6,12 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class BloodBankDonorsModel {
     private String uid, name, fullName, phone, bloodType, city, lastDonation;
     private Object donationCount; // Object لمنع الكراش
-    private String bloodTestStatus, note;
+    private String note;
+
+    // الحقول الجديدة للفحوصات
+    private String bloodTestStatus;
+    private String bloodTestProofUrl; // لتخزين نص الصورة Base64
+    private String lastBloodTest; // تاريخ آخر فحص مقبول
 
     public BloodBankDonorsModel() {}
 
@@ -14,7 +19,7 @@ public class BloodBankDonorsModel {
         return (fullName != null && !fullName.isEmpty() && !fullName.equals("null")) ? fullName : name;
     }
 
-    // Getters & Setters
+    // Getters & Setters القديمة
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
     public String getName() { return name; }
@@ -33,4 +38,16 @@ public class BloodBankDonorsModel {
     public void setDonationCount(Object donationCount) { this.donationCount = donationCount; }
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+
+    // Getters & Setters الجديدة (ضرورية لعمل الفحوصات)
+    public String getBloodTestStatus() {
+        return (bloodTestStatus == null || bloodTestStatus.isEmpty()) ? "غير متوفر" : bloodTestStatus;
+    }
+    public void setBloodTestStatus(String bloodTestStatus) { this.bloodTestStatus = bloodTestStatus; }
+
+    public String getBloodTestProofUrl() { return bloodTestProofUrl; }
+    public void setBloodTestProofUrl(String bloodTestProofUrl) { this.bloodTestProofUrl = bloodTestProofUrl; }
+
+    public String getLastBloodTest() { return lastBloodTest; }
+    public void setLastBloodTest(String lastBloodTest) { this.lastBloodTest = lastBloodTest; }
 }
