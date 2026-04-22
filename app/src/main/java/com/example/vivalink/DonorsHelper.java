@@ -68,6 +68,16 @@ public class DonorsHelper {
         return dbRef.child(donorId).child("bloodTestSubmittedAt").setValue(submittedAt);
     }
 
+    // ✅ تحديث حالة الأهلية فقط
+    public Task<Void> updateEligibility(String donorId, boolean isEligible) {
+        return dbRef.child(donorId).child("isEligible").setValue(isEligible);
+    }
+
+    // ✅ جلب المتبرعين حسب الأهلية
+    public Query getDonorsByEligibility(boolean isEligible) {
+        return dbRef.orderByChild("isEligible").equalTo(isEligible);
+    }
+
     // التحقق من صحة بيانات المتبرع
     public static String validateDonor(String fullName, String phone, String bloodType, String city) {
         if (fullName == null || fullName.trim().isEmpty()) return "اسم المتبرع مطلوب ✅";

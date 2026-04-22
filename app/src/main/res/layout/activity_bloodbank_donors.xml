@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layoutDirection="rtl">
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#D32F2F"
+        app:tabTextColor="#FFFFFF"
+        app:tabSelectedTextColor="#FFEB3B"
+        app:tabMode="fixed" />
+
+    <EditText
+        android:id="@+id/etSearchName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:hint="ابحث باسم المتبرع..."
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <Button
+                android:id="@+id/btnToday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="اليوم فقط"
+                android:backgroundTint="#9E9E9E"
+                android:textColor="#FFFFFF"
+                android:layout_margin="2dp" />
+
+            <Button
+                android:id="@+id/btnAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="الكل"
+                android:backgroundTint="#9E9E9E"
+                android:textColor="#FFFFFF"
+                android:layout_margin="2dp" />
+
+            <Button android:id="@+id/btnAPlus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="A+" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnAMinus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="A-" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnBPlus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="B+" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnBMinus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="B-" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnOPlus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="O+" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnOMinus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="O-" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnABPlus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AB+" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+            <Button android:id="@+id/btnABMinus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AB-" android:backgroundTint="#9E9E9E" android:layout_margin="2dp" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDonorsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

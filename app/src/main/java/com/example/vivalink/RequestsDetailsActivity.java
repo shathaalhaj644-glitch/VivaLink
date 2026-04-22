@@ -19,7 +19,7 @@ public class RequestsDetailsActivity extends AppCompatActivity {
     private CardView cardTimer, cardDonatedSuccess;
     private String requestId;
     private int minutesToArrive;
-    private CountDownTimer countDownTimer; // تعريف التايمر كمتغير للتحكم به
+    private CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +51,6 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         minutesToArrive = getIntent().getIntExtra("minutes", 0);
         boolean alreadyDonated = getIntent().getBooleanExtra("isDonated", false);
 
-        // إعداد البيانات الأساسية
         tvBlood.setText("🩸 فصيلة الدم: " + getIntent().getStringExtra("bloodType"));
         tvHospital.setText("🏥 المستشفى: " + getIntent().getStringExtra("hospitalName"));
         tvCity.setText("📍 المدينة: " + getIntent().getStringExtra("city"));
@@ -66,7 +65,6 @@ public class RequestsDetailsActivity extends AppCompatActivity {
             cardDonatedSuccess.setVisibility(View.GONE);
             startCountdown(minutesToArrive);
         } else {
-            // في حال الدخول من صفحة الطلبات العادية بدون تايمر
             cardTimer.setVisibility(View.GONE);
             cardDonatedSuccess.setVisibility(View.GONE);
         }
@@ -106,14 +104,16 @@ public class RequestsDetailsActivity extends AppCompatActivity {
 
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
 
-        // 1. تحديث حالة الطلب الأساسية ليكون "مغلق" عند الجميع
+        // 1. حقن معرف المتبرع داخل الطلب (السر في الربط)
+        db.child("Requests").child(requestId).child("donorId").setValue(uid);
+
+        // 2. تحديث الحالة لـ "مغلق"
         db.child("Requests").child(requestId).child("status").setValue("مغلق")
                 .addOnSuccessListener(aVoid -> {
 
-                    // 2. تسجيل التبرع في حساب المتبرع الشخصي
+                    // 3. تسجيل في سجل تبرعات المتبرع
                     db.child("Donors").child(uid).child("myDonations").child(requestId).setValue(true);
 
-                    // 3. تحديث واجهة التطبيق فوراً
                     showSuccessStatus();
                     Toast.makeText(this, "تم إغلاق الطلب بنجاح. شكراً لإنقاذك حياة! ✅", Toast.LENGTH_LONG).show();
                 })
@@ -123,7 +123,7 @@ public class RequestsDetailsActivity extends AppCompatActivity {
     }
 
     private void showSuccessStatus() {
-        if (countDownTimer != null) countDownTimer.cancel(); // إيقاف التايمر إذا كان يعمل
+        if (countDownTimer != null) countDownTimer.cancel();
         cardTimer.setVisibility(View.GONE);
         cardDonatedSuccess.setVisibility(View.VISIBLE);
     }
@@ -131,6 +131,6 @@ public class RequestsDetailsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (countDownTimer != null) countDownTimer.cancel(); // لتجنب تسريب الذاكرة
+        if (countDownTimer != null) countDownTimer.cancel();
     }
 }

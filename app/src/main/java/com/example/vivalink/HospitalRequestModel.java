@@ -3,15 +3,19 @@ package com.example.vivalink;
 public class HospitalRequestModel {
     // الحقول الأساسية التي يتم تخزينها في Firebase
     public String requestId, bloodType, city, hospitalName, status, department, confirmedAt, hospitalId, units, phone, city_bloodType;
+
+    // الحقل السحري الذي يربط الطلب بالمتبرع (للتعديل التلقائي)
+    public String donorId;
+
     public int donatedCount; // عدد الأشخاص الذين تبرعوا لهذا الطلب
 
-    // Constructor فارغ مطلوب من أجل Firebase (DataSnapshot.getValue)
+    // Constructor فارغ مطلوب من أجل Firebase (ضروري جداً للباك إند)
     public HospitalRequestModel() {}
 
-    // Constructor كامل لإنشاء الكائن في الكود
+    // Constructor كامل لإنشاء الكائن في الكود (تمت إضافة donorId هنا)
     public HospitalRequestModel(String requestId, String bloodType, String city, String hospitalName,
                                 String units, String status, String department, String confirmedAt,
-                                String hospitalId, String phone, String city_bloodType, int donatedCount) {
+                                String hospitalId, String phone, String city_bloodType, int donatedCount, String donorId) {
         this.requestId = requestId;
         this.bloodType = bloodType;
         this.city = city;
@@ -24,6 +28,7 @@ public class HospitalRequestModel {
         this.phone = phone;
         this.city_bloodType = city_bloodType;
         this.donatedCount = donatedCount;
+        this.donorId = donorId; // تعيين المعرف
     }
 
     /**

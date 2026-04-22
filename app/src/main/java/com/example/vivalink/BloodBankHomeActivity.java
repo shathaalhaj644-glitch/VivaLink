@@ -1,7 +1,9 @@
 package com.example.vivalink;
 
+import android.content.Intent; // تأكدي من وجود هذا السطر
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -27,6 +29,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bloodbank_home);
 
+        // تعريف العناصر من الواجهة
         tvWelcomeMain = findViewById(R.id.tvWelcomeMain);
         tvSubLocation = findViewById(R.id.tvSubLocation);
         tvHospitalDetail = findViewById(R.id.tvHospitalDetail);
@@ -37,10 +40,12 @@ public class BloodBankHomeActivity extends AppCompatActivity {
 
         dbRef = FirebaseDatabase.getInstance().getReference();
 
+        // التأكد من تسجيل الدخول وجلب بيانات الموظف
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadStaffData(FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
 
+        // إعداد شريط التنقل السفلي
         setupNavigation();
     }
 
@@ -66,6 +71,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
     }
 
     private void calculateStatistics() {
+        // إحصائيات المتبرعين في نفس المدينة
         dbRef.child("Donors").orderByChild("city").equalTo(currentStaffCity)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -81,6 +87,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                     @Override public void onCancelled(@NonNull DatabaseError e) {}
                 });
 
+        // إحصائيات تبرعات اليوم
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         dbRef.child("Donations").orderByChild("date").equalTo(today)
                 .addValueEventListener(new ValueEventListener() {
@@ -91,6 +98,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                     @Override public void onCancelled(@NonNull DatabaseError e) {}
                 });
 
+        // إحصائيات الطلبات المفتوحة للمستشفى
         if (currentHospitalId != null) {
             dbRef.child("Requests").orderByChild("hospitalId").equalTo(currentHospitalId)
                     .addValueEventListener(new ValueEventListener() {
@@ -110,5 +118,20 @@ public class BloodBankHomeActivity extends AppCompatActivity {
     private void setupNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
         bottomNav.setSelectedItemId(R.id.nav_home);
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                return true; // نحن بالفعل في الهوم
+            } else if (id == R.id.nav_donors) {
+                // الانتقال لصفحة المتبرعون
+                Intent intent = new Intent(BloodBankHomeActivity.this, BloodBankDonorsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            // يمكنك إضافة حالات (else if) لبقية الأزرار هنا
+            return false;
+        });
     }
 }
