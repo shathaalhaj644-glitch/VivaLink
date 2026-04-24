@@ -24,7 +24,9 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
         void onRegisterDonation(BloodBankDonorsModel d);
         void onAddNote(BloodBankDonorsModel d);
         void onUpdateTestStatus(BloodBankDonorsModel d, String status);
-        void onDeleteTest(BloodBankDonorsModel d); // دالة الحذف
+        void onDeleteTest(BloodBankDonorsModel d);
+        // أضفنا هذه الدالة لتأكيد الوصول
+        void onConfirmArrival(BloodBankDonorsModel d);
     }
 
     public BloodBankDonorsAdapter(List<BloodBankDonorsModel> list, OnDonorActionListener listener) {
@@ -47,17 +49,22 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
         h.tvDonationCount.setText(d.getDonationCount());
         h.tvCity.setText(d.getCity());
 
-        // الوصول للـ TabLayout للتحقق من التاب الحالي
+        // التحقق من التاب الحالي
         TabLayout tabLayout = ((BloodBankDonorsActivity) h.itemView.getContext()).findViewById(R.id.tabLayout);
         int selectedTab = tabLayout.getSelectedTabPosition();
 
-        // منطق تاب "الفحوصات" (رقم 2)
+        // إعادة تصفير الرؤية (مهم جداً للـ RecyclerView)
+        h.layoutTestSection.setVisibility(View.GONE);
+        h.layoutIncomingSection.setVisibility(View.GONE);
+        h.expandLayout.setVisibility(View.GONE);
+        h.btnExpand.setVisibility(View.VISIBLE);
+
+        // --- استبدلي من هون ---
         if (selectedTab == 2) {
+            // منطق تاب "الفحوصات"
             h.layoutTestSection.setVisibility(View.VISIBLE);
-            h.expandLayout.setVisibility(View.GONE);
             h.btnExpand.setVisibility(View.GONE);
 
-            // عرض صورة الفحص من Base64
             if (d.getBloodTestProofUrl() != null && !d.getBloodTestProofUrl().isEmpty()) {
                 try {
                     byte[] decodedString = Base64.decode(d.getBloodTestProofUrl(), Base64.DEFAULT);
@@ -68,24 +75,32 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
                 }
             }
 
-            // أزرار القبول والرفض
             h.btnAcceptTest.setOnClickListener(v -> listener.onUpdateTestStatus(d, "مقبول"));
             h.btnRejectTest.setOnClickListener(v -> listener.onUpdateTestStatus(d, "مرفوض"));
 
-            // منطق إظهار زر الحذف فقط في حالة المرفوض
             if ("مرفوض".equals(d.getBloodTestStatus())) {
                 h.btnDeleteTest.setVisibility(View.VISIBLE);
             } else {
                 h.btnDeleteTest.setVisibility(View.GONE);
             }
-
             h.btnDeleteTest.setOnClickListener(v -> listener.onDeleteTest(d));
+
+        } else if (selectedTab == 1) {
+            // منطق تاب "قيد الوصول"
+            h.layoutIncomingSection.setVisibility(View.VISIBLE);
+            h.btnExpand.setVisibility(View.GONE);
+            h.btnConfirmArrival.setOnClickListener(v -> listener.onConfirmArrival(d));
+
+        } else if (selectedTab == 3) {
+            // منطق تاب "السجل"
+            h.btnExpand.setVisibility(View.GONE);
+            h.layoutTestSection.setVisibility(View.GONE);
+            h.layoutIncomingSection.setVisibility(View.GONE);
+            h.expandLayout.setVisibility(View.GONE);
 
         } else {
             // منطق تاب "المتبرعون"
-            h.layoutTestSection.setVisibility(View.GONE);
             h.btnExpand.setVisibility(View.VISIBLE);
-
             h.btnExpand.setOnClickListener(v -> {
                 h.expandLayout.setVisibility(h.expandLayout.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
                 h.btnExpand.setRotation(h.expandLayout.getVisibility() == View.VISIBLE ? 180 : 0);
@@ -94,15 +109,15 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             h.btnRegister.setOnClickListener(v -> listener.onRegisterDonation(d));
             h.btnNote.setOnClickListener(v -> listener.onAddNote(d));
         }
-    }
+    } // هاد القوس تبع نهاية دالة onBindViewHolder
 
     @Override public int getItemCount() { return list.size(); }
 
     class VH extends RecyclerView.ViewHolder {
         TextView tvName, tvPhone, tvBloodType, tvLastDonation, tvDonationCount, tvCity;
         ImageButton btnExpand;
-        LinearLayout expandLayout, layoutTestSection;
-        Button btnRegister, btnNote, btnAcceptTest, btnRejectTest, btnDeleteTest;
+        LinearLayout expandLayout, layoutTestSection, layoutIncomingSection;
+        Button btnRegister, btnNote, btnAcceptTest, btnRejectTest, btnDeleteTest, btnConfirmArrival;
         ImageView imgTestProof;
 
         VH(View v) {
@@ -116,12 +131,13 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             btnExpand = v.findViewById(R.id.btnExpand);
             expandLayout = v.findViewById(R.id.expandLayout);
 
-            // العناصر الجديدة
             layoutTestSection = v.findViewById(R.id.layoutTestSection);
+            layoutIncomingSection = v.findViewById(R.id.layoutIncomingSection); // تأكدي من وجوده في XML
             imgTestProof = v.findViewById(R.id.imgTestProof);
             btnAcceptTest = v.findViewById(R.id.btnAcceptTest);
             btnRejectTest = v.findViewById(R.id.btnRejectTest);
-            btnDeleteTest = v.findViewById(R.id.btnDeleteTest); // ربط زر الحذف
+            btnDeleteTest = v.findViewById(R.id.btnDeleteTest);
+            btnConfirmArrival = v.findViewById(R.id.btnConfirmArrival); // تأكدي من وجوده في XML
 
             btnRegister = v.findViewById(R.id.btnRegister);
             btnNote = v.findViewById(R.id.btnNote);

@@ -39,7 +39,10 @@
         <activity android:name=".RequestsDetailsActivity" />
         <activity android:name=".BloodBankHomeActivity" android:exported="false" />
         <activity android:name=".BloodBankDonorsActivity" android:exported="false" />
-
+        <activity android:name=".BloodBankRequestsActivity" android:exported="false" />
+        <activity android:name=".BloodBankCreateRequestActivity" android:exported="false" />
+        <activity android:name=".BloodBankSettingsActivity" android:exported="false" />
+        <activity android:name=".BloodBankChangePassward" android:exported="false" />
 
     </application>
 </manifest>

@@ -103,22 +103,24 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         if (uid == null || requestId == null) return;
 
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+        String today = new java.text.SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).format(new java.util.Date());
 
-        // 1. حقن معرف المتبرع داخل الطلب (السر في الربط)
-        db.child("Requests").child(requestId).child("donorId").setValue(uid);
+        // إنشاء كائن بيانات لإرساله لجدول "قيد الوصول"
+        java.util.Map<String, Object> arrivalData = new java.util.HashMap<>();
+        arrivalData.put("donorId", uid);
+        arrivalData.put("requestId", requestId);
+        arrivalData.put("status", "قادم"); // لكي يظهر عند الموظف في تاب "قيد الوصول"
+        arrivalData.put("displayName", getIntent().getStringExtra("donorName")); // تأكدي من تمريره في Intent
+        arrivalData.put("bloodType", getIntent().getStringExtra("bloodType"));
 
-        // 2. تحديث الحالة لـ "مغلق"
-        db.child("Requests").child(requestId).child("status").setValue("مغلق")
+        // 1. الإضافة لجدول القادمين لكي يراه الموظف
+        db.child("IncomingDonations").child(uid).setValue(arrivalData)
                 .addOnSuccessListener(aVoid -> {
-
-                    // 3. تسجيل في سجل تبرعات المتبرع
-                    db.child("Donors").child(uid).child("myDonations").child(requestId).setValue(true);
+                    // 2. تحديث حالة الطلب العام (اختياري حسب منطق مشروعك)
+                    db.child("Requests").child(requestId).child("currentStatus").setValue("المتبرع في الموقع");
 
                     showSuccessStatus();
-                    Toast.makeText(this, "تم إغلاق الطلب بنجاح. شكراً لإنقاذك حياة! ✅", Toast.LENGTH_LONG).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "فشل في تحديث الحالة، تحقق من الاتصال", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "تم إرسال إشعار للمستشفى بوجودك. شكراً لك! ✅", Toast.LENGTH_LONG).show();
                 });
     }
 

@@ -123,15 +123,20 @@ public class BloodBankHomeActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                return true; // نحن بالفعل في الهوم
+                return true;
             } else if (id == R.id.nav_donors) {
-                // الانتقال لصفحة المتبرعون
-                Intent intent = new Intent(BloodBankHomeActivity.this, BloodBankDonorsActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(BloodBankHomeActivity.this, BloodBankDonorsActivity.class));
+                return true;
+            } else if (id == R.id.nav_requests) {
+                startActivity(new Intent(BloodBankHomeActivity.this, BloodBankRequestsActivity.class));
                 return true;
             }
-            // يمكنك إضافة حالات (else if) لبقية الأزرار هنا
+            // 🔥 أضيفي هذا الجزء هنا لفتح صفحة الإعدادات
+            else if (id == R.id.nav_settings) { // تأكدي أن هذا هو الـ ID الموجود في ملف الـ menu
+                startActivity(new Intent(BloodBankHomeActivity.this, BloodBankSettingsActivity.class));
+                return true;
+            }
+
             return false;
         });
-    }
-}
+    } }

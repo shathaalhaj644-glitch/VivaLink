@@ -4,42 +4,68 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class BloodBankDonorsModel {
-    private String uid, name, fullName, phone, bloodType, city, lastDonation;
-    private Object donationCount; // Object لمنع الكراش
+    private String uid; // معرف السجل
+    private String name, fullName, phone, bloodType, city, lastDonation;
+    private Object donationCount; // لمنع الكراش
     private String note;
 
-    // الحقول الجديدة للفحوصات
+    // الحقول الخاصة بالفحوصات
     private String bloodTestStatus;
-    private String bloodTestProofUrl; // لتخزين نص الصورة Base64
-    private String lastBloodTest; // تاريخ آخر فحص مقبول
+    private String bloodTestProofUrl;
+    private String lastBloodTest;
 
-    public BloodBankDonorsModel() {}
+    // 🔥 الحقول الخاصة بتاب "قيد الوصول" والربط البرمجي
+    private String donorId;      // ID المتبرع (للوصول لبياناته في جدول Donors)
+    private String requestId;    // ID الطلب الأصلي (لإغلاق الطلب وتغيير حالته لـ مغلق)
+    private String status;       // حالة المتبرع (قادم)
+    private String hospitalId;
+    private String nextDonationDate; // 🔥 التاريخ الذي يسمح فيه بالتبرع مرة أخرى (بعد 4 أشهر)
 
-    public String getDisplayName() {
-        return (fullName != null && !fullName.isEmpty() && !fullName.equals("null")) ? fullName : name;
+    public BloodBankDonorsModel() {
+        // ضروري لـ Firebase
     }
 
-    // Getters & Setters القديمة
+    // دالة ذكية لجلب الاسم المتوفر
+    public String getDisplayName() {
+        if (fullName != null && !fullName.isEmpty() && !fullName.equals("null")) {
+            return fullName;
+        }
+        return (name != null) ? name : "متبرع غير معروف";
+    }
+
+    // --- Getters & Setters الأساسية ---
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
+
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+
     public String getBloodType() { return bloodType; }
     public void setBloodType(String bloodType) { this.bloodType = bloodType; }
+
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
-    public String getLastDonation() { return (lastDonation == null || lastDonation.isEmpty()) ? "لا يوجد" : lastDonation; }
+
+    public String getLastDonation() {
+        return (lastDonation == null || lastDonation.isEmpty() || lastDonation.equals("--")) ? "لا يوجد" : lastDonation;
+    }
     public void setLastDonation(String lastDonation) { this.lastDonation = lastDonation; }
-    public String getDonationCount() { return donationCount == null ? "0" : String.valueOf(donationCount); }
+
+    public String getDonationCount() {
+        return donationCount == null ? "0" : String.valueOf(donationCount);
+    }
     public void setDonationCount(Object donationCount) { this.donationCount = donationCount; }
+
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
 
-    // Getters & Setters الجديدة (ضرورية لعمل الفحوصات)
+    // --- Getters & Setters للفحوصات ---
     public String getBloodTestStatus() {
         return (bloodTestStatus == null || bloodTestStatus.isEmpty()) ? "غير متوفر" : bloodTestStatus;
     }
@@ -50,4 +76,21 @@ public class BloodBankDonorsModel {
 
     public String getLastBloodTest() { return lastBloodTest; }
     public void setLastBloodTest(String lastBloodTest) { this.lastBloodTest = lastBloodTest; }
+
+    // --- 🔥 Getters & Setters المضافة لحل الأخطاء وتطبيق الشروط ---
+
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String requestId) { this.requestId = requestId; }
+
+    public String getDonorId() { return donorId; }
+    public void setDonorId(String donorId) { this.donorId = donorId; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getHospitalId() { return hospitalId; }
+    public void setHospitalId(String hospitalId) { this.hospitalId = hospitalId; }
+
+    public String getNextDonationDate() { return nextDonationDate; }
+    public void setNextDonationDate(String nextDonationDate) { this.nextDonationDate = nextDonationDate; }
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="#FFFFFF"
+    android:elevation="4dp"
+    android:orientation="vertical"
+    android:padding="15dp"
+    android:layoutDirection="rtl">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:background="#FFF3E0"
+            android:padding="4dp"
+            android:text="● مفتوح"
+            android:textColor="#EF6C00"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvHospitalName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="مستشفى بيت جالا"
+            android:textColor="#333333"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/tvBloodType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="الفصيلة: A+"
+            android:textColor="#555555" />
+
+        <TextView
+            android:id="@+id/tvUnits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="الوحدات: 3 وحدات"
+            android:textColor="#555555" />
+
+        <TextView
+            android:id="@+id/tvDepartment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="القسم: طوارئ"
+            android:textColor="#555555" />
+
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="24\04\2026 22:15"
+            android:textColor="#999999"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCloseRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#4CAF50"
+        android:text="إغلاق الطلب ✓"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+</LinearLayout>
