@@ -205,7 +205,9 @@
         android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="#FFEBEE"
         app:cardCornerRadius="20dp"
-        app:layout_constraintTop_toBottomOf="@id/layoutButtons">
+        app:layout_constraintTop_toBottomOf="@id/layoutButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -221,6 +223,45 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="إدارة مخزون الدم"
+                android:textColor="#D32F2F"
+                android:textStyle="bold"
+                android:textSize="16sp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnNotificationsCard"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardBackgroundColor="#FFEBEE"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintTop_toBottomOf="@id/btnInventoryCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔔"
+                android:textSize="24sp"
+                android:layout_marginEnd="12dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="إشعارات"
                 android:textColor="#D32F2F"
                 android:textStyle="bold"
                 android:textSize="16sp"/>

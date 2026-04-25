@@ -1,6 +1,7 @@
 package com.example.vivalink;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.NonNull;
@@ -41,7 +42,6 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup p, int viewType) {
         if (viewType == TYPE_HEADER) {
-            // إنشاء الهيدر الأحمر برمجياً بدل ملف XML جديد
             LinearLayout header = new LinearLayout(p.getContext());
             header.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
             header.setOrientation(LinearLayout.VERTICAL);
@@ -52,10 +52,9 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             title.setText("مخزون الدم الفائض");
             title.setTextColor(Color.WHITE);
             title.setTextSize(20);
-            title.setTypeface(null, android.graphics.Typeface.BOLD);
+            title.setTypeface(null, Typeface.BOLD);
 
             TextView info = new TextView(p.getContext());
-            info.setId(View.generateViewId());
             info.setTextColor(Color.WHITE);
             info.setTextSize(14);
             header.addView(title);
@@ -79,8 +78,12 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             if (tab == 0) { // تاب مخزوني
                 v.type.setText(m.bloodType);
-                v.units.setText("إجمالي الوحدات: " + (m.units + m.threshold));
+                v.units.setVisibility(View.VISIBLE);
+                v.units.setText("الوحدات: " + (m.units + m.threshold));
+                v.layoutInfo.setGravity(Gravity.CENTER);
+                v.layoutInfo.setVisibility(View.VISIBLE);
                 v.itemView.setOnClickListener(x -> listener.onMyClick(m));
+
             } else if (tab == 1) { // تاب المستشفيات
                 v.layoutInfo.setVisibility(View.VISIBLE);
                 v.btn.setVisibility(View.VISIBLE);
@@ -89,15 +92,28 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 v.units.setText(m.units + " وحدة متاحة");
                 v.type.setText(m.bloodType);
                 v.btn.setOnClickListener(x -> listener.onRequest(m));
-            } else { // تاب الطلبات (التعديل المطلوب)
+
+            } else { // تاب الطلبات
                 v.layoutInfo.setVisibility(View.VISIBLE);
-                v.layoutActions.setVisibility(View.VISIBLE);
                 v.name.setText("طلب من: " + m.fromHospitalName);
-                v.city.setText("المدينة: " + (m.city != null ? m.city : "")); // تأكدي من تخزين المدينة في الطلب
+                v.city.setText("المدينة: " + (m.city != null ? m.city : ""));
                 v.type.setText(m.bloodType);
                 v.units.setText("الكمية المطلوبة: " + m.requestedUnits);
-                v.accept.setOnClickListener(x -> listener.onAccept(m));
-                v.reject.setOnClickListener(x -> listener.onReject(m));
+
+                if ("مقبول".equals(m.status)) {
+                    v.layoutActions.setVisibility(View.GONE);
+                    v.units.setText("الكمية: " + m.requestedUnits + "\n(تم قبول هذا الطلب)");
+                    v.units.setTextColor(Color.parseColor("#4CAF50"));
+                } else if ("مرفوض".equals(m.status)) {
+                    v.layoutActions.setVisibility(View.GONE);
+                    v.units.setText("الكمية: " + m.requestedUnits + "\n(تم رفض هذا الطلب)");
+                    v.units.setTextColor(Color.parseColor("#F44336"));
+                } else {
+                    v.layoutActions.setVisibility(View.VISIBLE);
+                    v.units.setTextColor(Color.BLACK);
+                    v.accept.setOnClickListener(x -> listener.onAccept(m));
+                    v.reject.setOnClickListener(x -> listener.onReject(m));
+                }
             }
         }
     }

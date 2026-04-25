@@ -131,8 +131,12 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                 startActivity(new Intent(BloodBankHomeActivity.this, BloodBankRequestsActivity.class));
                 return true;
             }
-            // 🔥 أضيفي هذا الجزء هنا لفتح صفحة الإعدادات
-            else if (id == R.id.nav_settings) { // تأكدي أن هذا هو الـ ID الموجود في ملف الـ menu
+            // 🔥 تفعيل زر الإشعارات هنا
+            else if (id == R.id.nav_notifications) { // تأكدي أن هذا الـ ID هو نفسه الموجود في ملف الـ menu
+                startActivity(new Intent(BloodBankHomeActivity.this, BloodBankNotificationActivity.class));
+                return true;
+            }
+            else if (id == R.id.nav_settings) {
                 startActivity(new Intent(BloodBankHomeActivity.this, BloodBankSettingsActivity.class));
                 return true;
             }

@@ -15,17 +15,18 @@ import com.google.firebase.database.*;
 public class HospitalHomeActivity extends AppCompatActivity {
 
     private TextView tvHospitalName, tvHospitalLocation, valTotalRequests, valPending, valDonors;
-    private CardView btnCreateRequestCard, btnViewDonorsCard, btnSettingsCard;
+    private CardView btnCreateRequestCard, btnViewDonorsCard, btnSettingsCard, btnNotificationsCard, btnInventoryCard; // أضفت btnNotificationsCard هنا
 
     private DatabaseReference dbRef;
     private String currentHospitalUid;
     private String hospitalCity = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_home);
 
-
+        // ربط العناصر بالـ ID
         tvHospitalName = findViewById(R.id.tvHospitalName);
         tvHospitalLocation = findViewById(R.id.tvHospitalLocation);
         valTotalRequests = findViewById(R.id.valTotalRequests);
@@ -35,9 +36,9 @@ public class HospitalHomeActivity extends AppCompatActivity {
         btnCreateRequestCard = findViewById(R.id.btnCreateRequestCard);
         btnViewDonorsCard = findViewById(R.id.btnViewDonorsCard);
         btnSettingsCard = findViewById(R.id.btnSettingsCard);
-// أضيفي هذا السطر لفتح الصفحة الجديدة عند الضغط على الزر
-        findViewById(R.id.btnInventoryCard).setOnClickListener(v ->
-                startActivity(new Intent(this, BloodInventoryActivity.class)));
+        btnInventoryCard = findViewById(R.id.btnInventoryCard); // ربط مخزون الدم
+        btnNotificationsCard = findViewById(R.id.btnNotificationsCard); // السطر المضاف: ربط زر الإشعارات
+
         currentHospitalUid = FirebaseAuth.getInstance().getUid();
         dbRef = FirebaseDatabase.getInstance().getReference();
 
@@ -45,6 +46,15 @@ public class HospitalHomeActivity extends AppCompatActivity {
             loadHospitalData();
         }
 
+        // إعداد المستمعات (Listeners) لفتح الصفحات
+
+        // فتح صفحة المخزون
+        btnInventoryCard.setOnClickListener(v ->
+                startActivity(new Intent(this, BloodInventoryActivity.class)));
+
+        // السطر المضاف: فتح صفحة الإشعارات للمستشفى
+        btnNotificationsCard.setOnClickListener(v ->
+                startActivity(new Intent(this, HospitalNotificationActivity.class)));
 
         btnCreateRequestCard.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalRequestsActivity.class)));
@@ -56,17 +66,12 @@ public class HospitalHomeActivity extends AppCompatActivity {
                 startActivity(new Intent(this, HospitalSettingsActivity.class)));
     }
 
-
     private void loadHospitalData() {
-
         dbRef.child("Hospitals").child(currentHospitalUid)
                 .addValueEventListener(new ValueEventListener() {
-
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                         if (snapshot.exists()) {
-
                             String name = snapshot.child("hospitalName").getValue(String.class);
                             hospitalCity = snapshot.child("city").getValue(String.class);
 
@@ -85,29 +90,21 @@ public class HospitalHomeActivity extends AppCompatActivity {
                 });
     }
 
-
     private void fetchRequests() {
-
         dbRef.child("Requests")
                 .orderByChild("hospitalId")
                 .equalTo(currentHospitalUid)
                 .addValueEventListener(new ValueEventListener() {
-
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                         int total = (int) snapshot.getChildrenCount();
                         int pending = 0;
-
                         for (DataSnapshot ds : snapshot.getChildren()) {
-
                             String status = ds.child("status").getValue(String.class);
-
                             if (status != null && status.equalsIgnoreCase("مفتوح")) {
                                 pending++;
                             }
                         }
-
                         valTotalRequests.setText(String.valueOf(total));
                         valPending.setText(String.valueOf(pending));
                     }
@@ -117,21 +114,15 @@ public class HospitalHomeActivity extends AppCompatActivity {
                 });
     }
 
-
     private void fetchDonors() {
-
         if (hospitalCity == null || hospitalCity.isEmpty()) return;
-
         dbRef.child("Donors")
                 .orderByChild("city")
                 .equalTo(hospitalCity)
                 .addValueEventListener(new ValueEventListener() {
-
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                         int count = (int) snapshot.getChildrenCount();
-
                         valDonors.setText(String.valueOf(count));
                     }
 

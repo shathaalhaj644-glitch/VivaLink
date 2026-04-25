@@ -43,6 +43,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
     private DatabaseReference dbRef;
     private String userId;
+    private CardView btnNotificationsCard; // السطر المراد إضافته
     private String lastDonationDateFromDB, donorBloodType, donorCity, donorName;
     private String hospitalName, bloodType, units, confirmedAt, department, city, requestId, currentStatus;
 
@@ -60,7 +61,9 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
 
         btnViewRequests.setOnClickListener(v -> startActivity(new Intent(this, RequestsActivity.class)));
-
+// فتح صفحة الإشعارات للمتبرع
+        btnNotificationsCard.setOnClickListener(v ->
+                startActivity(new Intent(this, DonorNotificationActivity.class)));
         btnGoToDonate.setOnClickListener(v -> {
             // 1. إذا كان طلب المستشفى أصلاً مغلق
             if ("مغلق".equals(currentStatus)) {
@@ -122,7 +125,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         tvDaysSinceLastTest = findViewById(R.id.tvDaysSinceLastTest);
         btnMarkBloodTest = findViewById(R.id.btnMarkBloodTest);
-
+        btnNotificationsCard = findViewById(R.id.btnNotificationsCard); // ربط الكارد بالـ ID
         btnViewRequests = findViewById(R.id.btnViewRequests);
         btnGoToDonate = findViewById(R.id.btnGoToDonate);
         btnGoToProfile = findViewById(R.id.btnGoToProfile);
@@ -279,9 +282,11 @@ public class DonorsHomeActivity extends AppCompatActivity {
         updates.put("testSubmittedAt", timestamp);
 
         dbRef.child("Donors").child(userId).updateChildren(updates).addOnSuccessListener(aVoid -> {
-            // إنشاء إشعار للموظف
-            createNotificationForAdmin(refNum);
-            // إظهار نافذة النجاح للمتبرع (الصورة الرابعة)
+            // --- السطر الجديد والمهم هنا ---
+            // إرسال إشعار للموظف باستخدام BloodBankNotificationModel
+            DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
+            notifRef.setValue(BloodBankNotificationModel.notifyAdminOfTest(donorName, userId, refNum));
+
             showSuccessDialog(refNum);
         });
     }

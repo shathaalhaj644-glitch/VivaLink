@@ -141,8 +141,24 @@ public class BloodInventoryActivity extends AppCompatActivity {
         rv.setAdapter(new BloodInventoryAdapter(list, tab, hName, hCity, new BloodInventoryAdapter.Listener() {
             @Override public void onMyClick(BloodInventoryModel m) { openDialog(m, true); }
             @Override public void onRequest(BloodInventoryModel m) { openDialog(m, false); }
-            @Override public void onAccept(BloodInventoryModel m) { db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مقبول"); }
-            @Override public void onReject(BloodInventoryModel m) { db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مرفوض"); }
+
+            @Override
+            public void onAccept(BloodInventoryModel m) {
+                // تحديث حالة الطلب إلى "مقبول" في قاعدة البيانات باستخدام الـ requestId
+                if (m.requestId != null) {
+                    db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مقبول")
+                            .addOnSuccessListener(aVoid -> Toast.makeText(BloodInventoryActivity.this, "تم قبول الطلب بنجاح", Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onReject(BloodInventoryModel m) {
+                // تحديث حالة الطلب إلى "مرفوض" في قاعدة البيانات
+                if (m.requestId != null) {
+                    db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مرفوض")
+                            .addOnSuccessListener(aVoid -> Toast.makeText(BloodInventoryActivity.this, "تم رفض الطلب", Toast.LENGTH_SHORT).show());
+                }
+            }
         }));
     }
 

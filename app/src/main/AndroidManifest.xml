@@ -45,6 +45,8 @@
         <activity android:name=".BloodBankChangePassward" android:exported="false" />
 
         <activity android:name=".BloodInventoryActivity" android:exported="false" />
-
+        <activity android:name=".BloodBankNotificationActivity" android:exported="false" />
+        <activity android:name=".DonorNotificationActivity" android:exported="false" />
+        <activity android:name=".HospitalNotificationActivity" android:exported="false" />
     </application>
 </manifest>
