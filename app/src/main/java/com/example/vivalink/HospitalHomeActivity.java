@@ -35,7 +35,9 @@ public class HospitalHomeActivity extends AppCompatActivity {
         btnCreateRequestCard = findViewById(R.id.btnCreateRequestCard);
         btnViewDonorsCard = findViewById(R.id.btnViewDonorsCard);
         btnSettingsCard = findViewById(R.id.btnSettingsCard);
-
+// أضيفي هذا السطر لفتح الصفحة الجديدة عند الضغط على الزر
+        findViewById(R.id.btnInventoryCard).setOnClickListener(v ->
+                startActivity(new Intent(this, BloodInventoryActivity.class)));
         currentHospitalUid = FirebaseAuth.getInstance().getUid();
         dbRef = FirebaseDatabase.getInstance().getReference();
 

@@ -44,5 +44,7 @@
         <activity android:name=".BloodBankSettingsActivity" android:exported="false" />
         <activity android:name=".BloodBankChangePassward" android:exported="false" />
 
+        <activity android:name=".BloodInventoryActivity" android:exported="false" />
+
     </application>
 </manifest>
