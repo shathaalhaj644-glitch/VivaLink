@@ -144,10 +144,47 @@ public class BloodInventoryActivity extends AppCompatActivity {
 
             @Override
             public void onAccept(BloodInventoryModel m) {
-                // تحديث حالة الطلب إلى "مقبول" في قاعدة البيانات باستخدام الـ requestId
+                // 1. تحديث حالة الطلب إلى "مقبول" في قاعدة بيانات طلبات النقل
                 if (m.requestId != null) {
                     db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مقبول")
-                            .addOnSuccessListener(aVoid -> Toast.makeText(BloodInventoryActivity.this, "تم قبول الطلب بنجاح", Toast.LENGTH_SHORT).show());
+                            .addOnSuccessListener(aVoid -> {
+
+                                // --- [بداية كود الإشعار الثالث: الموافقة على نقل الدم] ---
+
+                                // إنشاء مرجع جديد في نود الإشعارات
+                                DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
+                                String notifId = notifRef.getKey();
+
+                                if (notifId != null) {
+                                    HashMap<String, Object> notifData = new HashMap<>();
+                                    notifData.put("notificationId", notifId);
+                                    notifData.put("title", "✅ موافقة على طلب نقل دم");
+
+                                    // رسالة توضح اسم المستشفى المزوّد (أنتِ) والكمية والفصيلة
+                                    String msg = "وافق " + (hName != null ? hName : "بنك الدم") +
+                                            " على تزويدكم بـ " + m.requestedUnits +
+                                            " وحدة من فصيلة " + m.bloodType;
+
+                                    notifData.put("message", msg);
+                                    notifData.put("type", "blood_transfer_approved"); // النوع الخاص بأيقونة النقل
+                                    notifData.put("targetType", "HOSPITAL"); // الفئة المستهدفة هي المستشفيات
+                                    notifData.put("targetUserId", m.fromHospitalId); // إرسال الإشعار للمستشفى الذي طلب حصراً
+                                    notifData.put("createdAt", System.currentTimeMillis());
+                                    notifData.put("isRead", false);
+
+                                    // حفظ الإشعار في الفايربيس
+                                    notifRef.setValue(notifData);
+                                }
+
+                                // --- [نهاية كود الإشعار] ---
+
+                                Toast.makeText(BloodInventoryActivity.this, "تم قبول الطلب وإرسال إشعار للمستشفى ✅", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(BloodInventoryActivity.this, "فشل في تحديث الطلب: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                } else {
+                    Toast.makeText(BloodInventoryActivity.this, "خطأ: معرف الطلب غير موجود", Toast.LENGTH_SHORT).show();
                 }
             }
 

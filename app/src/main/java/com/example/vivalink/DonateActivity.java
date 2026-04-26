@@ -2,13 +2,19 @@ package com.example.vivalink;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.*;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference; // هام جداً
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -52,13 +58,11 @@ public class DonateActivity extends AppCompatActivity {
     private void getUserNameFromFirebase() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid != null) {
-            // ملاحظة: تأكدي أن اسم الحقل في الفايربيس هو "fullName" أو "name" كما في الـ Model
             FirebaseDatabase.getInstance().getReference("Donors").child(uid)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
-                                // محاولة جلب الاسم من أكثر من حقل لضمان عدم بقائه "متبرع"
                                 if (snapshot.hasChild("fullName")) userName = snapshot.child("fullName").getValue(String.class);
                                 else if (snapshot.hasChild("name")) userName = snapshot.child("name").getValue(String.class);
                                 else if (snapshot.hasChild("displayName")) userName = snapshot.child("displayName").getValue(String.class);
@@ -72,7 +76,7 @@ public class DonateActivity extends AppCompatActivity {
     private void displayPassedData() {
         if (getIntent() != null) {
             requestId = getIntent().getStringExtra("requestId");
-            tvBloodType.setText(getIntent().getStringExtra("bloodType")); // أزلت النص الثابت لأن الـ XML غالباً يحتوي عليه أو لتجنب التكرار
+            tvBloodType.setText(getIntent().getStringExtra("bloodType"));
             tvHospitalName.setText(getIntent().getStringExtra("hospitalName"));
             tvCity.setText(getIntent().getStringExtra("city"));
             tvDepartment.setText(getIntent().getStringExtra("department"));
@@ -90,45 +94,63 @@ public class DonateActivity extends AppCompatActivity {
             return;
         }
 
-        int selectedMinutes = Integer.parseInt(minutesStr);
-        String userId = FirebaseAuth.getInstance().getUid();
+        final int selectedMinutes = Integer.parseInt(minutesStr);
+        final String userId = FirebaseAuth.getInstance().getUid();
         if (userId == null) return;
 
-        // تجهيز البيانات لجدول القادمين (IncomingDonations) لكي يراها الموظف
+        // مرجع قاعدة البيانات الأساسي
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        // 1. تجهيز البيانات لجدول القادمين
         Map<String, Object> incomingData = new HashMap<>();
-        incomingData.put("uid", userId); // معرف المتبرع ليكون هو مفتاح الطلب
+        incomingData.put("uid", userId);
         incomingData.put("donorId", userId);
-        incomingData.put("requestId", requestId); // ربطه بطلب المستشفى الأصلي
+        incomingData.put("requestId", requestId);
         incomingData.put("displayName", userName);
         incomingData.put("phone", phone);
         incomingData.put("bloodType", getIntent().getStringExtra("bloodType"));
         incomingData.put("city", getIntent().getStringExtra("city"));
-        incomingData.put("status", "قادم"); // نفس الكلمة اللي بفلتر عليها الموظف
+        incomingData.put("status", "قادم");
         incomingData.put("arrivalMinutes", selectedMinutes);
 
-        // الحفظ في جدول IncomingDonations
-        FirebaseDatabase.getInstance().getReference("IncomingDonations")
-                .child(userId) // نستخدم ID المتبرع كمفتاح لسهولة الوصول إليه وحذفه لاحقاً
-                .setValue(incomingData)
+        // 2. الحفظ في IncomingDonations
+        database.getReference("IncomingDonations").child(userId).setValue(incomingData)
                 .addOnSuccessListener(aVoid -> {
 
-                    // الانتقال لصفحة التفاصيل (التايمر)
-                    Intent intent = new Intent(this, RequestsDetailsActivity.class);
+                    // --- [حل مشكلة الإشعارات] ---
+                    DatabaseReference notifRef = database.getReference("Notifications").push();
+                    String notifId = notifRef.getKey();
+
+                    if (notifId != null) {
+                        HashMap<String, Object> notifData = new HashMap<>();
+                        notifData.put("notificationId", notifId);
+                        notifData.put("title", "🏃 متبرع في الطريق");
+                        notifData.put("message", "المتبرع " + userName + " سيكون هنا خلال " + selectedMinutes + " دقيقة.");
+                        notifData.put("type", "donation_confirmed");
+                        notifData.put("donorId", userId);
+                        notifData.put("targetType", "ADMIN");
+                        notifData.put("createdAt", System.currentTimeMillis());
+                        notifData.put("isRead", false);
+
+                        notifRef.setValue(notifData);
+                    }
+
+                    // 3. الانتقال لصفحة التايمر
+                    Intent intent = new Intent(DonateActivity.this, RequestsDetailsActivity.class);
                     intent.putExtra("requestId", requestId);
-                    intent.putExtra("minutes", selectedMinutes); // نمرر الدقائق للتايمر
+                    intent.putExtra("minutes", selectedMinutes);
                     intent.putExtra("bloodType", getIntent().getStringExtra("bloodType"));
                     intent.putExtra("hospitalName", getIntent().getStringExtra("hospitalName"));
                     intent.putExtra("city", getIntent().getStringExtra("city"));
                     intent.putExtra("department", getIntent().getStringExtra("department"));
                     intent.putExtra("units", getIntent().getStringExtra("units"));
                     intent.putExtra("confirmedAt", getIntent().getStringExtra("confirmedAt"));
-                    // نمرر اسم المتبرع لصفحة التفاصيل عشان نستخدمه هناك إذا احتجنا
                     intent.putExtra("donorName", userName);
 
                     startActivity(intent);
-                    Toast.makeText(this, "تم تأكيد الذهاب، رافقتك السلامة ✅", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DonateActivity.this, "تم تأكيد الذهاب، رافقتك السلامة ✅", Toast.LENGTH_SHORT).show();
                     finish();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "خطأ: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(DonateActivity.this, "خطأ: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 }

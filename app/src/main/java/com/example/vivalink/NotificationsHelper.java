@@ -1,70 +1,67 @@
 package com.example.vivalink;
 
-import com.example.vivalink.Notifications;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import androidx.core.app.NotificationCompat;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
+import com.google.firebase.database.*;
 
 public class NotificationsHelper {
 
     private DatabaseReference dbRef;
+    public static final String CHANNEL_ID = "vivalink_channel";
 
     public NotificationsHelper() {
-
         dbRef = FirebaseDatabase.getInstance().getReference("Notifications");
     }
 
-
+    // إضافة إشعار جديد
     public Task<Void> addNotification(Notifications notification) {
         return dbRef.child(notification.getNotificationId()).setValue(notification);
     }
 
-
-    public Query getAllNotifications() {
-        return dbRef;
-    }
-
-
-    public Query getNotificationById(String notificationId) {
-        return dbRef.child(notificationId);
-    }
-
-
+    // تحويل الحالة لمقروء
     public Task<Void> markAsRead(String notificationId) {
         return dbRef.child(notificationId).child("isRead").setValue(true);
     }
 
-
-    public Task<Void> updateNotification(String notificationId, Notifications updatedNotification) {
-        return dbRef.child(notificationId).setValue(updatedNotification);
+    // نص الحالة (مقروء/غير مقروء) بدون صور
+    public String getReadStatusLabel(boolean isRead) {
+        return isRead ? "Status: Read" : "Status: Unread";
     }
 
+    // إظهار الإشعار باستخدام أيقونة النظام الافتراضية
+    public void showSystemNotification(Context context, String title, String message) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-    public Task<Void> deleteNotification(String notificationId) {
-        return dbRef.child(notificationId).removeValue();
-    }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "VivaLink Alerts", NotificationManager.IMPORTANCE_HIGH);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
 
-    public Query getNotificationsByUser(String userId) {
-        return dbRef.orderByChild("userId").equalTo(userId);
-    }
+        Intent intent = new Intent(context, DonorNotificationActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-    public Query getUnreadNotifications(String userId) {
-        return dbRef.orderByChild("userId").equalTo(userId);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                // استخدام أيقونة النظام الافتراضية لتجنب خطأ Drawable
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
 
-    }
-
-    public static String validateNotification(String title, String message, String userId) {
-        if (userId == null || userId.trim().isEmpty()) return "رقم المستخدم مطلوب ✅";
-        if (title == null || title.trim().isEmpty()) return "عنوان الإشعار مطلوب ✅";
-        if (message == null || message.trim().isEmpty()) return "نص الإشعار مطلوب ✅";
-
-        return null;
-    }
-
-
-    public static String getReadStatusLabel(boolean isRead) {
-        return isRead ? "مقروء ✅" : "غير مقروء 🔔";
+        if (notificationManager != null) {
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
     }
 }
