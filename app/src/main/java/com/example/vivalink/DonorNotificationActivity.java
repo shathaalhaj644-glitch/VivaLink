@@ -1,6 +1,8 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,11 +15,10 @@ public class DonorNotificationActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private BloodBankNotificationAdapter adapter;
-    // التعديل هنا: القائمة يجب أن تكون من نوع Notifications
-    private List<Notifications> list = new ArrayList<>();
+    private List<BloodBankNotificationModel> list = new ArrayList<>();
     private DatabaseReference dbRef;
-    private String myId;
-    private String myBloodType, myCity;
+    private String myId, myBloodType, myCity;
+    private TextView tvNoNotifications;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,18 +26,16 @@ public class DonorNotificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_donor_notification);
 
         rv = findViewById(R.id.rvNotifications);
+        tvNoNotifications = findViewById(R.id.tvNoNotifications);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        // الآن القائمة متوافقة مع الأدابتر المعدل
         adapter = new BloodBankNotificationAdapter(list);
         rv.setAdapter(adapter);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         myId = FirebaseAuth.getInstance().getUid();
 
-        if (myId != null) {
-            fetchDonorDetailsAndLoadNotifications();
-        }
+        if (myId != null) { fetchDonorDetailsAndLoadNotifications(); }
     }
 
     private void fetchDonorDetailsAndLoadNotifications() {
@@ -59,23 +58,21 @@ public class DonorNotificationActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    // التعديل هنا: جلب البيانات كـ Notifications
-                    Notifications n = ds.getValue(Notifications.class);
-
-                    if (n != null) {
-                        // 1. إشعارات موجهة لهذا المتبرع شخصياً
-                        if (myId.equals(n.getUserId())) {
-                            list.add(0, n);
-                        }
-                        // 2. إشعارات عامة (طلبات تبرع) تعتمد على الفصيلة والمدينة
-                        else if (n.getMessage() != null && myCity != null && myBloodType != null) {
-                            if (n.getMessage().contains(myCity) && n.getMessage().contains(myBloodType)) {
+                    try {
+                        BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
+                        if (n != null) {
+                            if (myId.equals(n.getTargetUserId())) {
                                 list.add(0, n);
+                            } else if ("DONOR".equals(n.getTargetType()) && n.getMessage() != null) {
+                                if (myCity != null && myBloodType != null && n.getMessage().contains(myCity) && n.getMessage().contains(myBloodType)) {
+                                    list.add(0, n);
+                                }
                             }
                         }
-                    }
+                    } catch (Exception e) {}
                 }
                 adapter.notifyDataSetChanged();
+                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });

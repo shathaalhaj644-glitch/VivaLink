@@ -1,7 +1,8 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,32 +15,24 @@ public class HospitalNotificationActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private BloodBankNotificationAdapter adapter;
-
-    // التعديل الجوهري: تغيير نوع القائمة ليتوافق مع الأدابتر الجديد
-    private List<Notifications> list = new ArrayList<>();
+    private List<BloodBankNotificationModel> list = new ArrayList<>();
     private String currentHospitalId;
+    private TextView tvNoNotifications;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_notification);
 
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            currentHospitalId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        }
-
         rv = findViewById(R.id.rvNotifications);
+        tvNoNotifications = findViewById(R.id.tvNoNotifications);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
-        // الآن التوافق تام: القائمة Notifications والأدابتر يتوقع Notifications
         adapter = new BloodBankNotificationAdapter(list);
         rv.setAdapter(adapter);
 
-        if (currentHospitalId != null) {
-            loadHospitalNotifications();
-        } else {
-            Toast.makeText(this, "يرجى تسجيل الدخول أولاً", Toast.LENGTH_SHORT).show();
-        }
+        currentHospitalId = FirebaseAuth.getInstance().getUid();
+        if (currentHospitalId != null) { loadHospitalNotifications(); }
     }
 
     private void loadHospitalNotifications() {
@@ -49,27 +42,17 @@ public class HospitalNotificationActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         list.clear();
                         for (DataSnapshot ds : snapshot.getChildren()) {
-                            // التعديل: جلب البيانات باستخدام كلاس Notifications الموحد
-                            Notifications n = ds.getValue(Notifications.class);
-
-                            if (n != null) {
-                                // ملاحظة: تأكدي أن كلاس Notifications يحتوي على الدوال getTargetType و getUserId
-                                // إذا لم يكن لديه getTargetType، استخدمي n.getUserId() فقط للفلترة
-
-                                String targetUserId = n.getUserId(); // في كلاسنا الموحد استخدمنا userId
-
-                                if (currentHospitalId.equals(targetUserId)) {
+                            try {
+                                BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
+                                if (n != null && "ADMIN".equals(n.getTargetType()) && currentHospitalId.equals(n.getTargetUserId())) {
                                     list.add(0, n);
                                 }
-                            }
+                            } catch (Exception e) {}
                         }
                         adapter.notifyDataSetChanged();
+                        tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(HospitalNotificationActivity.this, "فشل تحميل الإشعارات", Toast.LENGTH_SHORT).show();
-                    }
+                    @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 }

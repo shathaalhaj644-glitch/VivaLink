@@ -2,9 +2,9 @@ package com.example.vivalink;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.view.View;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,8 +21,8 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
     DatabaseReference dbRef;
     BloodBankNotificationAdapter adapter;
 
-    // التعديل الجوهري: تغيير نوع القائمة إلى Notifications ليتوافق مع الأدابتر
-    List<Notifications> incomingList = new ArrayList<>();
+    // الحل الجذري: توحيد نوع القائمة لتطابق الموديل والأدابتر تماماً
+    List<BloodBankNotificationModel> incomingList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         dbRef = FirebaseDatabase.getInstance().getReference("Notifications");
         initViews();
 
+        // منطق تبديل التبويبات (Tabs)
         tabSend.setOnClickListener(v -> {
             layoutSend.setVisibility(View.VISIBLE);
             rvIncoming.setVisibility(View.GONE);
@@ -44,7 +45,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
             rvIncoming.setVisibility(View.VISIBLE);
             tabSend.setTextColor(Color.parseColor("#757575"));
             tabReceive.setTextColor(Color.parseColor("#D32F2F"));
-            loadIncomingNotifications();
+            loadIncomingNotifications(); // تحميل الإشعارات الواردة للموظف
         });
 
         btnSend.setOnClickListener(v -> sendNotificationToDonors());
@@ -60,7 +61,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
 
         rvIncoming.setLayoutManager(new LinearLayoutManager(this));
 
-        // الآن القائمة نوعها Notifications والأدابتر رح يقبلها بدون أي إيرور
+        // ربط الأدابتر بالقائمة الموحدة BloodBankNotificationModel
         adapter = new BloodBankNotificationAdapter(incomingList);
         rvIncoming.setAdapter(adapter);
     }
@@ -72,9 +73,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
             return;
         }
 
-        String requiredBloodType = "A+"; // مثال
-        String currentHospitalCity = "نابلس"; // مثال
-
+        // ملاحظة: هنا يمكنك وضع منطق اختيار المدينة والفصيلة
         DatabaseReference donorsRef = FirebaseDatabase.getInstance().getReference("Donors");
 
         donorsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -82,54 +81,47 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int count = 0;
                 for (DataSnapshot donorSnap : snapshot.getChildren()) {
-                    String dBlood = donorSnap.child("bloodType").getValue(String.class);
-                    String dCity = donorSnap.child("city").getValue(String.class);
                     String donorId = donorSnap.getKey();
 
-                    if (requiredBloodType.equals(dBlood) && currentHospitalCity.equals(dCity)) {
-                        DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
-                        String id = notifRef.getKey();
+                    // إنشاء إشعار جديد يتبع الموديل المعتمد
+                    DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
+                    String id = notifRef.getKey();
 
-                        HashMap<String, Object> note = new HashMap<>();
-                        note.put("notificationId", id);
-                        note.put("title", "🚨 طلب دم عاجل في مدينتك");
-                        note.put("message", msg);
-                        note.put("type", "urgent");
-                        note.put("targetType", "DONOR");
-                        note.put("userId", donorId); // تأكدي إن الحقل في كلاس Notifications هو userId وليس targetUserId
-                        note.put("createdAt", System.currentTimeMillis());
-                        note.put("isRead", false);
+                    HashMap<String, Object> note = new HashMap<>();
+                    note.put("notificationId", id);
+                    note.put("title", "🚨 طلب دم عاجل");
+                    note.put("message", msg);
+                    note.put("type", "urgent");
+                    note.put("targetType", "DONOR"); // موجه للمتبرعين
+                    note.put("targetUserId", donorId); // المعرف الخاص بالمتبرع
+                    note.put("createdAt", System.currentTimeMillis());
+                    note.put("isRead", false);
 
-                        if (id != null) notifRef.setValue(note);
-                        count++;
-                    }
+                    if (id != null) notifRef.setValue(note);
+                    count++;
                 }
-
-                if (count > 0) {
-                    Toast.makeText(BloodBankNotificationActivity.this, "تم إرسال " + count + " تنبيه ✅", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(BloodBankNotificationActivity.this, "لا يوجد متبرعين مطابقين حالياً", Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(BloodBankNotificationActivity.this, "تم الإرسال لـ " + count + " متبرع", Toast.LENGTH_SHORT).show();
                 etMessage.setText("");
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(BloodBankNotificationActivity.this, "خطأ في الوصول للمتبرعين", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
     private void loadIncomingNotifications() {
+        // فلترة الإشعارات الموجهة للموظف (ADMIN)
         dbRef.orderByChild("targetType").equalTo("ADMIN")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         incomingList.clear();
                         for (DataSnapshot ds : snapshot.getChildren()) {
-                            // التعديل: تحويل البيانات إلى كلاس Notifications الموحد
-                            Notifications m = ds.getValue(Notifications.class);
-                            if (m != null) incomingList.add(0, m);
+                            try {
+                                // التحويل للموديل الموحد لمنع الكراش
+                                BloodBankNotificationModel m = ds.getValue(BloodBankNotificationModel.class);
+                                if (m != null) incomingList.add(0, m);
+                            } catch (Exception e) {
+                                // تجاهل البيانات التالفة
+                            }
                         }
                         adapter.notifyDataSetChanged();
                     }

@@ -41,6 +41,7 @@
             android:textColor="#757575"
             android:textStyle="bold"
             android:background="?attr/selectableItemBackground"/>
+
     </LinearLayout>
 
     <View
@@ -91,9 +92,10 @@
                         android:id="@+id/tvLocationInfo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="المدينة: بيت لحم - المستشفى: الحسين"
+                        android:text="جاري التحميل..."
                         android:textColor="#FFCDD2"
                         android:textSize="12sp" />
+
                 </LinearLayout>
 
                 <TextView
@@ -108,18 +110,21 @@
                     android:layout_height="wrap_content"
                     android:stretchColumns="*"
                     android:layout_marginTop="5dp">
+
                     <TableRow>
                         <CheckBox android:id="@+id/cbAp" android:text="A+" />
                         <CheckBox android:id="@+id/cbAn" android:text="A-" />
                         <CheckBox android:id="@+id/cbBp" android:text="B+" />
                         <CheckBox android:id="@+id/cbBn" android:text="B-" />
                     </TableRow>
+
                     <TableRow>
                         <CheckBox android:id="@+id/cbOp" android:text="O+" />
                         <CheckBox android:id="@+id/cbOn" android:text="O-" />
                         <CheckBox android:id="@+id/cbABp" android:text="AB+" />
                         <CheckBox android:id="@+id/cbABn" android:text="AB-" />
                     </TableRow>
+
                 </TableLayout>
 
                 <TextView
@@ -153,10 +158,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="20dp"
-                    android:background="#D32F2F"
+                    android:backgroundTint="#D32F2F"
                     android:text="إرسال الإشعار"
                     android:textColor="#FFFFFF" />
+
             </LinearLayout>
+
         </ScrollView>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -167,4 +174,5 @@
             android:padding="5dp"/>
 
     </FrameLayout>
+
 </LinearLayout>
