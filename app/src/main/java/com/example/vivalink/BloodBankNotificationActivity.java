@@ -15,35 +15,32 @@ import java.util.*;
 
 public class BloodBankNotificationActivity extends AppCompatActivity {
 
-    // تعريف العناصر
-    TextView tabSend, tabReceive, tvLocationInfo;
-    View layoutSend;
-    RecyclerView rvIncoming;
-    EditText etMessage;
-    Button btnSend;
-    CheckBox cbAp, cbAn, cbBp, cbBn, cbOp, cbOn, cbABp, cbABn;
+    private TextView tabSend, tabReceive, tvLocationInfo;
+    private View layoutSend;
+    private RecyclerView rvIncoming;
+    private EditText etMessage;
+    private Button btnSend;
 
-    // الفايربيس والأدابتر
-    DatabaseReference dbRef;
-    BloodBankNotificationAdapter adapter;
-    List<BloodBankNotificationModel> incomingList = new ArrayList<>();
+    // تعريف الـ 8 فصائل
+    private CheckBox cbAp, cbAn, cbBp, cbBn, cbOp, cbOn, cbABp, cbABn;
 
-    // متغيرات حفظ الموقع
-    String currentCity = "";
-    String hospitalName = "";
+    private DatabaseReference dbRef;
+    private BloodBankNotificationAdapter adapter;
+    private List<BloodBankNotificationModel> incomingList = new ArrayList<>();
+
+    private String currentCity = "";
+    private String hospitalName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bloodbank_notification);
 
-        // المرجع الرئيسي للإشعارات
         dbRef = FirebaseDatabase.getInstance().getReference("Notifications");
 
         initViews();
         fetchCurrentHospitalOrStaffData();
 
-        // تنقل بين التبويبات
         tabSend.setOnClickListener(v -> {
             layoutSend.setVisibility(View.VISIBLE);
             rvIncoming.setVisibility(View.GONE);
@@ -62,47 +59,6 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         btnSend.setOnClickListener(v -> sendNotificationToDonors());
     }
 
-    private void fetchCurrentHospitalOrStaffData() {
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
-
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-        // المحاولة الأولى: البحث في موظفي بنك الدم
-        database.getReference("BloodBankStaff").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    currentCity = snapshot.child("city").getValue(String.class);
-                    hospitalName = snapshot.child("hospitalName").getValue(String.class);
-                    applyDataToUI();
-                } else {
-                    // المحاولة الثانية: البحث في المستشفيات
-                    database.getReference("Hospitals").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                currentCity = snapshot.child("city").getValue(String.class);
-                                hospitalName = snapshot.child("hospitalName").getValue(String.class);
-                                applyDataToUI();
-                            } else {
-                                tvLocationInfo.setText("خطأ: لم يتم العثور على بيانات الحساب");
-                            }
-                        }
-                        @Override public void onCancelled(@NonNull DatabaseError error) {}
-                    });
-                }
-            }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
-        });
-    }
-
-    private void applyDataToUI() {
-        if (currentCity != null && hospitalName != null) {
-            tvLocationInfo.setText("المدينة: " + currentCity + " | " + hospitalName);
-        }
-    }
-
     private void initViews() {
         tabSend = findViewById(R.id.tabSend);
         tabReceive = findViewById(R.id.tabReceive);
@@ -112,9 +68,10 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         btnSend = findViewById(R.id.btnSendNotification);
         tvLocationInfo = findViewById(R.id.tvLocationInfo);
 
-        cbAp = findViewById(R.id.cbAp); cbAn = findViewById(R.id.cbAn);
-        cbBp = findViewById(R.id.cbBp); cbBn = findViewById(R.id.cbBn);
-        cbOp = findViewById(R.id.cbOp); cbOn = findViewById(R.id.cbOn);
+        // ربط الـ 8 CheckBoxes
+        cbAp = findViewById(R.id.cbAp);   cbAn = findViewById(R.id.cbAn);
+        cbBp = findViewById(R.id.cbBp);   cbBn = findViewById(R.id.cbBn);
+        cbOp = findViewById(R.id.cbOp);   cbOn = findViewById(R.id.cbOn);
         cbABp = findViewById(R.id.cbABp); cbABn = findViewById(R.id.cbABn);
 
         rvIncoming.setLayoutManager(new LinearLayoutManager(this));
@@ -122,13 +79,40 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         rvIncoming.setAdapter(adapter);
     }
 
+    private void fetchCurrentHospitalOrStaffData() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        FirebaseDatabase.getInstance().getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                DataSnapshot staff = snapshot.child("BloodBankStaff").child(uid);
+                DataSnapshot hosp = snapshot.child("Hospitals").child(uid);
+
+                if (staff.exists()) {
+                    currentCity = staff.child("city").getValue(String.class);
+                    hospitalName = staff.child("hospitalName").getValue(String.class);
+                } else if (hosp.exists()) {
+                    currentCity = hosp.child("city").getValue(String.class);
+                    hospitalName = hosp.child("hospitalName").getValue(String.class);
+                }
+
+                if (currentCity != null) {
+                    tvLocationInfo.setText("المدينة: " + currentCity + " | " + hospitalName);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     private void sendNotificationToDonors() {
         String msg = etMessage.getText().toString().trim();
-        if (msg.isEmpty() || currentCity.isEmpty()) {
+        if (msg.isEmpty() || currentCity == null || currentCity.isEmpty()) {
             Toast.makeText(this, "يرجى كتابة الرسالة وانتظار تحميل الموقع", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // تجميع الفصائل المختارة من الـ 8 خيارات
         List<String> selectedBloods = new ArrayList<>();
         if (cbAp.isChecked()) selectedBloods.add("A+");
         if (cbAn.isChecked()) selectedBloods.add("A-");
@@ -153,45 +137,73 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
                     String dCity = donorSnap.child("city").getValue(String.class);
                     String dBlood = donorSnap.child("bloodType").getValue(String.class);
 
-                    if (currentCity.equalsIgnoreCase(dCity) && selectedBloods.contains(dBlood)) {
-                        DatabaseReference newNotif = dbRef.push();
-                        HashMap<String, Object> data = new HashMap<>();
-                        data.put("notificationId", newNotif.getKey());
-                        data.put("title", "🚨 طلب دم: " + hospitalName);
-                        data.put("message", "مطلوب " + dBlood + " في " + currentCity + "\n" + msg);
-                        data.put("targetType", "DONOR");
-                        data.put("targetUserId", donorSnap.getKey());
-                        data.put("createdAt", System.currentTimeMillis());
-                        data.put("isRead", false);
+                    if (dCity != null && dBlood != null) {
+                        String cleanDonorCity = normalizeArabic(dCity);
+                        String cleanCurrentCity = normalizeArabic(currentCity);
 
-                        newNotif.setValue(data);
-                        count++;
+                        if (cleanDonorCity.equals(cleanCurrentCity)) {
+                            for (String blood : selectedBloods) {
+                                if (isBloodMatching(dBlood, blood)) {
+                                    pushToFirebase(donorSnap.getKey(), dBlood, msg);
+                                    count++;
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
-                Toast.makeText(BloodBankNotificationActivity.this, "تم الإرسال لـ " + count + " متبرع", Toast.LENGTH_SHORT).show();
-                etMessage.setText("");
+
+                if (count > 0) {
+                    Toast.makeText(BloodBankNotificationActivity.this, "تم الإرسال لـ " + count + " متبرع", Toast.LENGTH_LONG).show();
+                    etMessage.setText("");
+                } else {
+                    Toast.makeText(BloodBankNotificationActivity.this, "لم يتم العثور على متطابقين في: " + currentCity, Toast.LENGTH_LONG).show();
+                }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
+    private String normalizeArabic(String text) {
+        return text.trim().replace(" ", "").replace("ة", "ه").replace("أ", "ا").replace("إ", "ا").replace("آ", "ا");
+    }
+
+    private boolean isBloodMatching(String donorBlood, String selectedBlood) {
+        String b1 = donorBlood.trim().replace(" ", "");
+        String b2 = selectedBlood.trim().replace(" ", "");
+        if (b1.equalsIgnoreCase(b2)) return true;
+        String reversed = (b1.length() >= 2) ? b1.substring(b1.length()-1) + b1.substring(0, b1.length()-1) : b1;
+        return reversed.equalsIgnoreCase(b2);
+    }
+
+    private void pushToFirebase(String donorId, String blood, String message) {
+        DatabaseReference newNotif = dbRef.push();
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("notificationId", newNotif.getKey());
+        data.put("title", "🚨 طلب دم عاجل: " + hospitalName);
+        data.put("message", "مطلوب فصيلة " + blood + " في " + currentCity + "\n" + message);
+        data.put("targetType", "DONOR");
+        data.put("userId", donorId);
+        data.put("createdAt", System.currentTimeMillis());
+        data.put("isRead", false);
+        data.put("type", "urgent_request");
+        newNotif.setValue(data);
+    }
+
     private void loadIncomingNotifications() {
-        dbRef.orderByChild("targetType").equalTo("ADMIN")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        incomingList.clear();
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            try {
-                                BloodBankNotificationModel m = ds.getValue(BloodBankNotificationModel.class);
-                                if (m != null) incomingList.add(0, m);
-                            } catch (Exception e) {
-                                Log.e("FirebaseError", "Error parsing: " + ds.getKey());
-                            }
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
-                });
+        dbRef.orderByChild("targetType").equalTo("ADMIN").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                incomingList.clear();
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    try {
+                        BloodBankNotificationModel m = ds.getValue(BloodBankNotificationModel.class);
+                        if (m != null) incomingList.add(0, m);
+                    } catch (Exception e) { Log.e("Error", "Read Error"); }
+                }
+                adapter.notifyDataSetChanged();
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 }
