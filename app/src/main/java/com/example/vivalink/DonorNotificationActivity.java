@@ -2,6 +2,7 @@ package com.example.vivalink;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,20 +62,39 @@ public class DonorNotificationActivity extends AppCompatActivity {
                     try {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
                         if (n != null) {
-                            if (myId.equals(n.getTargetUserId())) {
+                            // 1. إذا كان الإشعار موجهاً للمتبرع الحالي بشكل خاص (عن طريق الـ ID)
+                            if (myId != null && myId.equals(n.getTargetUserId())) {
                                 list.add(0, n);
-                            } else if ("DONOR".equals(n.getTargetType()) && n.getMessage() != null) {
-                                if (myCity != null && myBloodType != null && n.getMessage().contains(myCity) && n.getMessage().contains(myBloodType)) {
+                            }
+                            // 2. إذا كان إشعاراً عاماً للمتبرعين (يجب أن تطابق المدينة والفصيلة)
+                            else if ("DONOR".equals(n.getTargetType())) {
+
+                                // المقارنة البرمجية الصحيحة بدل البحث في النص
+                                boolean cityMatch = myCity != null && myCity.equalsIgnoreCase(n.getCity());
+                                boolean bloodMatch = myBloodType != null && myBloodType.equals(n.getBloodType());
+
+                                if (cityMatch && bloodMatch) {
                                     list.add(0, n);
                                 }
                             }
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 adapter.notifyDataSetChanged();
-                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+
+                // إظهار نص "لا يوجد إشعارات" إذا كانت القائمة فارغة
+                if (list.isEmpty()) {
+                    tvNoNotifications.setVisibility(View.VISIBLE);
+                } else {
+                    tvNoNotifications.setVisibility(View.GONE);
+                }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(DonorNotificationActivity.this, "خطأ في التحميل: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
-    }
-}
+    } }
