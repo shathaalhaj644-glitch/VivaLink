@@ -65,23 +65,29 @@ public class DonorNotificationActivity extends AppCompatActivity {
 
                         if (n == null || !"DONOR".equals(n.getTargetType())) continue;
 
-                        // ✅ 1. إشعارات شخصية (مهم)
+                        // ✅ 1. إشعارات شخصية موجهة لـ ID المتبرع (مثل قبول التبرع)
                         if (n.getUserId() != null && n.getUserId().equals(myId)) {
                             list.add(0, n);
-                            continue;
+                            continue; // ننتقل للإشعار التالي ولا نكمل الفحص أدناه
                         }
 
-                        // ✅ 2. إشعارات عامة حسب المدينة والفصيلة
-                        if (n.getCity() != null && n.getBloodType() != null) {
+                        // ✅ 2. فحص نوع الإشعار (يجب أن يكون طلب عاجل لتطبيق فلترة الفصيلة والمدينة)
+                        if ("urgent_request".equals(n.getType())) {
 
-                            String cleanMyCity = normalizeArabic(myCity);
-                            String cleanNotifCity = normalizeArabic(n.getCity());
+                            // التأكد من أن الإشعار يحتوي على مدينة وفصيلة
+                            if (n.getCity() != null && n.getBloodType() != null) {
 
-                            boolean cityMatch = cleanMyCity.equals(cleanNotifCity);
-                            boolean bloodMatch = myBloodType != null && myBloodType.equals(n.getBloodType());
+                                String cleanMyCity = normalizeArabic(myCity);
+                                String cleanNotifCity = normalizeArabic(n.getCity());
 
-                            if (cityMatch && bloodMatch) {
-                                list.add(0, n);
+                                boolean cityMatch = cleanMyCity.equals(cleanNotifCity);
+
+                                // 🔥 هنا التأكد من مطابقة الفصيلة بدقة
+                                boolean bloodMatch = myBloodType != null && myBloodType.trim().equalsIgnoreCase(n.getBloodType().trim());
+
+                                if (cityMatch && bloodMatch) {
+                                    list.add(0, n);
+                                }
                             }
                         }
 

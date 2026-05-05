@@ -299,6 +299,7 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("bloodTestStatus", status);
 
+        // إذا تم القبول، نحدث تاريخ الفحص لليوم ليتمكن من التبرع
         if ("مقبول".equals(status)) {
             String today = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(new Date());
             updates.put("lastBloodTest", today);
@@ -306,7 +307,7 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
 
         dbRef.child("Donors").child(d.getUid()).updateChildren(updates).addOnSuccessListener(aVoid -> {
 
-            // --- [إضافة كود الإشعار الخامس: نتيجة الفحص] ---
+            // --- إرسال الإشعار للمتبرع ---
             DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
             String notifId = notifRef.getKey();
 
@@ -314,26 +315,28 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
                 HashMap<String, Object> notifData = new HashMap<>();
                 notifData.put("notificationId", notifId);
 
-                // تخصيص نص الإشعار بناءً على الحالة (مقبول أو مرفوض)
                 if ("مقبول".equals(status)) {
-                    notifData.put("title", "✅ نتيجة فحص الدم: مقبول");
-                    notifData.put("message", "تم قبول فحصك الدوري بنجاح. يمكنك الآن التوجه لأقرب مركز للتبرع.");
-                } else {
-                    notifData.put("title", "❌ نتيجة فحص الدم: مرفوض");
-                    notifData.put("message", "نعتذر، تم رفض فحصك الحالي. يرجى مراجعة المركز لمزيد من التفاصيل.");
+                    notifData.put("title", "✅ تم قبول فحص الدم");
+                    notifData.put("message", "تم التحقق من فحصك الدوري بنجاح. يمكنك الآن التوجه للتبرع بالدم.");
+                } else if ("مرفوض".equals(status)) {
+                    notifData.put("title", "❌ تعذر قبول فحص الدم");
+                    notifData.put("message", "نعتذر منك، تم رفض صورة الفحص المرفوعة. يرجى التأكد من وضوح الصورة وإعادة رفعها.");
                 }
 
-                notifData.put("type", "blood_test_result"); // النوع لعرض أيقونة النتيجة
+                notifData.put("type", "test_result");
                 notifData.put("targetType", "DONOR");
-                notifData.put("targetUserId", d.getUid()); // إرسال الإشعار للمتبرع صاحب الفحص حصراً
+
+                // ملاحظة: تأكدي أن كود المتبرع يقرأ الحقل باسم "userId" أو "targetUserId"
+                // حسب ما هو مبرمج في DonorNotificationActivity
+                notifData.put("userId", d.getUid());
+
                 notifData.put("createdAt", System.currentTimeMillis());
                 notifData.put("isRead", false);
 
                 notifRef.setValue(notifData);
             }
-            // ----------------------------------------------
 
-            Toast.makeText(this, "تم التحديث وإرسال إشعار للمتبرع: " + status, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "تم تحديث الحالة وإرسال إشعار للمتبرع", Toast.LENGTH_SHORT).show();
         });
     }
     private void filterHistory(String query) {

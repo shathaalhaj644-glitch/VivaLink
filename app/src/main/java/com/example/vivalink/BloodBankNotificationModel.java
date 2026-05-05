@@ -6,6 +6,7 @@ public class BloodBankNotificationModel {
     private String notificationId;
     private String title;
     private String message;
+    private String hospitalId; // 👈 المعرف الخاص بالمستشفى صاحب الطلب
     private String type;
 
     // 🔹 الفلترة والتحكم
@@ -51,7 +52,13 @@ public class BloodBankNotificationModel {
     public void setMessage(String message) {
         this.message = message;
     }
+    public String getHospitalId() {
+        return hospitalId;
+    }
 
+    public void setHospitalId(String hospitalId) {
+        this.hospitalId = hospitalId;
+    }
     public String getType() {
         return type;
     }

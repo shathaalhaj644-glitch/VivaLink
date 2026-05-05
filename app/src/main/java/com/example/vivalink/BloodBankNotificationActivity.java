@@ -1,10 +1,6 @@
 package com.example.vivalink;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,14 +8,12 @@ import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class BloodBankNotificationActivity extends AppCompatActivity {
@@ -37,7 +31,10 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
     private List<BloodBankNotificationModel> incomingList = new ArrayList<>();
 
     private String currentCity = "";
+    private String staffCity = "";
     private String hospitalName = "";
+
+    // 🔥 الجديد
     private String hospitalId = "";
 
     @Override
@@ -49,17 +46,19 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
 
         initViews();
         fetchCurrentHospitalOrStaffData();
-        createChannel();
 
         tabSend.setOnClickListener(v -> {
             layoutSend.setVisibility(View.VISIBLE);
             rvIncoming.setVisibility(View.GONE);
+            tabSend.setTextColor(Color.parseColor("#D32F2F"));
+            tabReceive.setTextColor(Color.parseColor("#757575"));
         });
 
         tabReceive.setOnClickListener(v -> {
             layoutSend.setVisibility(View.GONE);
             rvIncoming.setVisibility(View.VISIBLE);
-            loadIncomingNotifications();
+            tabSend.setTextColor(Color.parseColor("#757575"));
+            tabReceive.setTextColor(Color.parseColor("#D32F2F"));
         });
 
         btnSend.setOnClickListener(v -> sendNotificationToDonors());
@@ -74,9 +73,9 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         btnSend = findViewById(R.id.btnSendNotification);
         tvLocationInfo = findViewById(R.id.tvLocationInfo);
 
-        cbAp = findViewById(R.id.cbAp); cbAn = findViewById(R.id.cbAn);
-        cbBp = findViewById(R.id.cbBp); cbBn = findViewById(R.id.cbBn);
-        cbOp = findViewById(R.id.cbOp); cbOn = findViewById(R.id.cbOn);
+        cbAp = findViewById(R.id.cbAp);   cbAn = findViewById(R.id.cbAn);
+        cbBp = findViewById(R.id.cbBp);   cbBn = findViewById(R.id.cbBn);
+        cbOp = findViewById(R.id.cbOp);   cbOn = findViewById(R.id.cbOn);
         cbABp = findViewById(R.id.cbABp); cbABn = findViewById(R.id.cbABn);
 
         rvIncoming.setLayoutManager(new LinearLayoutManager(this));
@@ -85,13 +84,14 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
     }
 
     private void fetchCurrentHospitalOrStaffData() {
-        String uid = FirebaseAuth.getInstance().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         FirebaseDatabase.getInstance().getReference()
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                         DataSnapshot staff = snapshot.child("BloodBankStaff").child(uid);
                         DataSnapshot hosp = snapshot.child("Hospitals").child(uid);
 
@@ -105,120 +105,118 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
                             hospitalId = uid;
                         }
 
-                        tvLocationInfo.setText(currentCity + " | " + hospitalName);
-                    }
+                        tvLocationInfo.setText("المدينة: " + currentCity + " | " + hospitalName);
 
+                        // 🔥 التعديل الجوهري: استدعاء الدالة هنا لضمان وجود hospitalId
+                        loadIncomingNotifications();
+                    }
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
                 });
     }
 
     private void sendNotificationToDonors() {
-
         String msg = etMessage.getText().toString().trim();
-        if (msg.isEmpty()) return;
 
-        List<String> bloods = new ArrayList<>();
-        if (cbAp.isChecked()) bloods.add("A+");
-        if (cbAn.isChecked()) bloods.add("A-");
-        if (cbBp.isChecked()) bloods.add("B+");
-        if (cbBn.isChecked()) bloods.add("B-");
-        if (cbOp.isChecked()) bloods.add("O+");
-        if (cbOn.isChecked()) bloods.add("O-");
-        if (cbABp.isChecked()) bloods.add("AB+");
-        if (cbABn.isChecked()) bloods.add("AB-");
+        if (msg.isEmpty() || currentCity == null || currentCity.isEmpty()) {
+            Toast.makeText(this, "يرجى كتابة الرسالة وانتظار تحميل الموقع", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        for (String blood : bloods) {
+        if (hospitalId == null || hospitalId.isEmpty()) {
+            Toast.makeText(this, "خطأ: لم يتم العثور على المستشفى", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        List<String> selectedBloods = new ArrayList<>();
+        if (cbAp.isChecked()) selectedBloods.add("A+");
+        if (cbAn.isChecked()) selectedBloods.add("A-");
+        if (cbBp.isChecked()) selectedBloods.add("B+");
+        if (cbBn.isChecked()) selectedBloods.add("B-");
+        if (cbOp.isChecked()) selectedBloods.add("O+");
+        if (cbOn.isChecked()) selectedBloods.add("O-");
+        if (cbABp.isChecked()) selectedBloods.add("AB+");
+        if (cbABn.isChecked()) selectedBloods.add("AB-");
+
+        if (selectedBloods.isEmpty()) {
+            Toast.makeText(this, "حدد فصيلة واحدة على الأقل", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        for (String blood : selectedBloods) {
+
+            // ✅ إرسال للمستشفى الصحيح
             pushToFirebase(hospitalId, "ADMIN", blood, msg);
+
+            // ✅ إرسال للمتبرعين
             pushToFirebase(null, "DONOR", blood, msg);
         }
 
-        Toast.makeText(this, "تم الإرسال", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "تم إرسال الطلب بنجاح", Toast.LENGTH_LONG).show();
+        etMessage.setText("");
     }
 
     private void pushToFirebase(String targetUserId, String targetType, String blood, String message) {
+        DatabaseReference newNotif = dbRef.push();
 
-        DatabaseReference ref = dbRef.push();
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("notificationId", newNotif.getKey());
+        data.put("title", "🚨 طلب دم عاجل: " + hospitalName);
+        data.put("message", "مطلوب فصيلة " + blood + " في " + currentCity + "\n" + message);
 
-        long time = System.currentTimeMillis();
-        String formattedTime = new SimpleDateFormat("dd/MM/yyyy - HH:mm", Locale.getDefault())
-                .format(new Date(time));
+        data.put("targetType", targetType);
+        data.put("targetUserId", targetUserId);
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("notificationId", ref.getKey());
-        map.put("title", "طلب دم: " + hospitalName);
-        map.put("message", message);
-        map.put("bloodType", blood);
-        map.put("city", currentCity);
-        map.put("targetType", targetType);
-        map.put("targetUserId", targetUserId);
-        map.put("createdAt", time);
-        map.put("timeText", formattedTime); // 🔥 الجديد
-        map.put("isRead", false);
+        data.put("bloodType", blood);
+        data.put("city", currentCity);
 
-        ref.setValue(map);
+        data.put("createdAt", System.currentTimeMillis());
+        data.put("isRead", false);
+        data.put("type", "urgent_request");
 
-        // 🔔 إشعار للهاتف (مهم)
-        if ("ADMIN".equals(targetType)) {
-            showNotification("طلب دم جديد", message);
-        }
+        newNotif.setValue(data);
     }
 
+    // ابحثي عن هذه الدالة في BloodBankNotificationActivity
     private void loadIncomingNotifications() {
-
         String myId = FirebaseAuth.getInstance().getUid();
 
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 incomingList.clear();
-
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    try {
+                        BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
+                        if (n == null) continue;
 
-                    BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
+                        // 1. فحص إشعارات رفع الفحوصات الجديدة (حسب المدينة)
+                        if ("new_test_upload".equals(n.getType())) {
+                            // هنا نستخدم currentCity التي تم جلبها عند فتح الصفحة
+                            if (currentCity != null && !currentCity.isEmpty() && currentCity.equals(n.getCity())) {
+                                incomingList.add(0, n);
+                            }
+                        }
 
-                    if (n != null &&
-                            "ADMIN".equals(n.getTargetType()) &&
-                            myId.equals(n.getTargetUserId())) {
+                        // 2. فحص الإشعارات الموجهة للموظف/المستشفى شخصياً (كطلبات الدم)
+                        else if ("ADMIN".equals(n.getTargetType())) {
+                            if (myId != null && myId.equals(n.getTargetUserId())) {
+                                incomingList.add(0, n);
+                            }
+                        }
+                        else if ("donor_arrival".equals(n.getType())) {
+                            // الفلترة تتم بناءً على معرف المستشفى (hospitalId) الخاص بالموظف
+                            if (hospitalId != null && hospitalId.equals(n.getTargetUserId())) {
+                                incomingList.add(0, n);
+                            }
+                        }
 
-                        incomingList.add(0, n);
+                    } catch (Exception e) {
+                        Log.e("VivaLink", "Read Error: " + e.getMessage());
                     }
                 }
-
                 adapter.notifyDataSetChanged();
             }
-
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
-    }
-
-    // 🔔 Notification system
-    private void createChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "blood_channel",
-                    "Blood Notifications",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
-    }
-
-    private void showNotification(String title, String message) {
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this, "blood_channel")
-                        .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                        .setContentTitle(title)
-                        .setContentText(message)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-        NotificationManager manager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        manager.notify(new Random().nextInt(), builder.build());
     }
 }

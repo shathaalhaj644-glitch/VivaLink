@@ -291,31 +291,32 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         dbRef.child("Donors").child(userId).updateChildren(updates).addOnSuccessListener(aVoid -> {
 
-            // --- كود الإشعار الموحد لمنع الكراش ---
+            // --- إرسال إشعار لموظف بنك الدم ---
             DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
-            String notifId = notifRef.getKey();
 
             HashMap<String, Object> notifData = new HashMap<>();
-            notifData.put("notificationId", notifId);
-            notifData.put("title", "فحص دم جديد 🔬");
-            notifData.put("message", "قام المتبرع " + donorName + " برفع صورة فحصه الدوري. رقم المرجع: " + refNum);
-            notifData.put("type", "new_test");
+            notifData.put("notificationId", notifRef.getKey());
+            notifData.put("title", "🔬 فحص دم جديد للمراجعة");
+            notifData.put("message", "قام المتبرع (" + donorName + ") برفع صورة الفحص الدوري. رقم المرجع: " + refNum);
 
-            // التعديل الضروري: استخدام userId ليطابق كلاس Notifications الموحد
-            notifData.put("userId", userId);
-
+            // التوجيه للموظف
             notifData.put("targetType", "ADMIN");
-            notifData.put("createdAt", String.valueOf(System.currentTimeMillis())); // تحويل الوقت لنص ليتوافق مع الموديل
-            notifData.put("isRead", false);
+            // نضع الـ targetUserId قيمة فارغة أو عامة ليراها جميع الموظفين في نفس المدينة،
+            // أو إذا كنتِ تريدين لموظف محدد يجب جلب الـ ID الخاص به.
+            // لكن الأفضل في مشروعك حالياً هو تركها لتظهر في تبويب الـ Receive عند الموظفين.
+            notifData.put("targetUserId", "");
 
-            if (notifId != null) {
-                notifRef.setValue(notifData);
-            }
+            notifData.put("type", "new_test_upload");
+            notifData.put("createdAt", System.currentTimeMillis());
+            notifData.put("isRead", false);
+            notifData.put("city", donorCity); // لفلترة الإشعار حسب مدينة الموظف
+
+            notifRef.setValue(notifData);
             // ---------------------------------------
 
             showSuccessDialog(refNum);
         }).addOnFailureListener(e -> {
-            Toast.makeText(this, "فشل في رفع البيانات", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "فشل رفع الصورة: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
 

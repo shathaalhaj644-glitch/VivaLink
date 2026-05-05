@@ -1,8 +1,8 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,9 +19,8 @@ public class HospitalNotificationActivity extends AppCompatActivity {
     private RecyclerView rv;
     private BloodBankNotificationAdapter adapter;
     private List<BloodBankNotificationModel> list = new ArrayList<>();
-    private TextView tvNo;
-
-    private String myId;
+    private String currentHospitalId;
+    private TextView tvNoNotifications;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,18 +28,21 @@ public class HospitalNotificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hospital_notification);
 
         rv = findViewById(R.id.rvNotifications);
-        tvNo = findViewById(R.id.tvNoNotifications);
+        tvNoNotifications = findViewById(R.id.tvNoNotifications);
 
         rv.setLayoutManager(new LinearLayoutManager(this));
+
         adapter = new BloodBankNotificationAdapter(list);
         rv.setAdapter(adapter);
 
-        myId = FirebaseAuth.getInstance().getUid();
+        currentHospitalId = FirebaseAuth.getInstance().getUid();
 
-        loadData();
+        if (currentHospitalId != null) {
+            loadHospitalNotifications();
+        }
     }
 
-    private void loadData() {
+    private void loadHospitalNotifications() {
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Notifications");
 
@@ -51,22 +53,31 @@ public class HospitalNotificationActivity extends AppCompatActivity {
                 list.clear();
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    try {
+                        BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
 
-                    BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
+                        if (n == null) continue;
 
-                    if (n != null &&
-                            "ADMIN".equals(n.getTargetType()) &&
-                            myId.equals(n.getTargetUserId())) {
+                        // ✅ فقط إشعارات موجهة للمستشفى
+                        if ("ADMIN".equals(n.getTargetType())
+                                && n.getTargetUserId() != null
+                                && n.getTargetUserId().equals(currentHospitalId)) {
 
-                        list.add(0, n);
+                            list.add(0, n);
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
 
                 adapter.notifyDataSetChanged();
-                tvNo.setVisibility(list.isEmpty() ? TextView.VISIBLE : TextView.GONE);
+                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         });
     }
 }
