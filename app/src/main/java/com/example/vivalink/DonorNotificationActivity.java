@@ -58,43 +58,48 @@ public class DonorNotificationActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
+
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     try {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
-                        if (n != null) {
-                            // 1. إذا كان الإشعار موجهاً للمتبرع الحالي بشكل خاص (عن طريق الـ ID)
-                            if (myId != null && myId.equals(n.getTargetUserId())) {
+
+                        if (n == null || !"DONOR".equals(n.getTargetType())) continue;
+
+                        // ✅ 1. إشعارات شخصية (مهم)
+                        if (n.getUserId() != null && n.getUserId().equals(myId)) {
+                            list.add(0, n);
+                            continue;
+                        }
+
+                        // ✅ 2. إشعارات عامة حسب المدينة والفصيلة
+                        if (n.getCity() != null && n.getBloodType() != null) {
+
+                            String cleanMyCity = normalizeArabic(myCity);
+                            String cleanNotifCity = normalizeArabic(n.getCity());
+
+                            boolean cityMatch = cleanMyCity.equals(cleanNotifCity);
+                            boolean bloodMatch = myBloodType != null && myBloodType.equals(n.getBloodType());
+
+                            if (cityMatch && bloodMatch) {
                                 list.add(0, n);
                             }
-                            // 2. إذا كان إشعاراً عاماً للمتبرعين (يجب أن تطابق المدينة والفصيلة)
-                            else if ("DONOR".equals(n.getTargetType())) {
-
-                                // المقارنة البرمجية الصحيحة بدل البحث في النص
-                                boolean cityMatch = myCity != null && myCity.equalsIgnoreCase(n.getCity());
-                                boolean bloodMatch = myBloodType != null && myBloodType.equals(n.getBloodType());
-
-                                if (cityMatch && bloodMatch) {
-                                    list.add(0, n);
-                                }
-                            }
                         }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+
                 adapter.notifyDataSetChanged();
-
-                // إظهار نص "لا يوجد إشعارات" إذا كانت القائمة فارغة
-                if (list.isEmpty()) {
-                    tvNoNotifications.setVisibility(View.VISIBLE);
-                } else {
-                    tvNoNotifications.setVisibility(View.GONE);
-                }
+                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(DonorNotificationActivity.this, "خطأ في التحميل: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+
+    // دالة توحيد الحروف العربية (مهمة جداً لنجاح المقارنة)
+    private String normalizeArabic(String text) {
+        if (text == null) return "";
+        return text.trim().replace(" ", "").replace("ة", "ه").replace("أ", "ا").replace("إ", "ا").replace("آ", "ا");
     } }

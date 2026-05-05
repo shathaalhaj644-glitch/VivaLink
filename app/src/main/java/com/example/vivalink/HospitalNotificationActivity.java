@@ -1,23 +1,27 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HospitalNotificationActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private BloodBankNotificationAdapter adapter;
     private List<BloodBankNotificationModel> list = new ArrayList<>();
-    private String currentHospitalId;
-    private TextView tvNoNotifications;
+    private TextView tvNo;
+
+    private String myId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,34 +29,44 @@ public class HospitalNotificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hospital_notification);
 
         rv = findViewById(R.id.rvNotifications);
-        tvNoNotifications = findViewById(R.id.tvNoNotifications);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        tvNo = findViewById(R.id.tvNoNotifications);
 
+        rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new BloodBankNotificationAdapter(list);
         rv.setAdapter(adapter);
 
-        currentHospitalId = FirebaseAuth.getInstance().getUid();
-        if (currentHospitalId != null) { loadHospitalNotifications(); }
+        myId = FirebaseAuth.getInstance().getUid();
+
+        loadData();
     }
 
-    private void loadHospitalNotifications() {
-        FirebaseDatabase.getInstance().getReference("Notifications")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        list.clear();
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            try {
-                                BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
-                                if (n != null && "ADMIN".equals(n.getTargetType()) && currentHospitalId.equals(n.getTargetUserId())) {
-                                    list.add(0, n);
-                                }
-                            } catch (Exception e) {}
-                        }
-                        adapter.notifyDataSetChanged();
-                        tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+    private void loadData() {
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Notifications");
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                list.clear();
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+
+                    BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
+
+                    if (n != null &&
+                            "ADMIN".equals(n.getTargetType()) &&
+                            myId.equals(n.getTargetUserId())) {
+
+                        list.add(0, n);
                     }
-                    @Override public void onCancelled(@NonNull DatabaseError error) {}
-                });
+                }
+
+                adapter.notifyDataSetChanged();
+                tvNo.setVisibility(list.isEmpty() ? TextView.VISIBLE : TextView.GONE);
+            }
+
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 }
