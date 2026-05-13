@@ -25,7 +25,7 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
         void onAddNote(BloodBankDonorsModel d);
         void onUpdateTestStatus(BloodBankDonorsModel d, String status);
         void onDeleteTest(BloodBankDonorsModel d);
-        // أضفنا هذه الدالة لتأكيد الوصول
+
         void onConfirmArrival(BloodBankDonorsModel d);
     }
 
@@ -41,7 +41,7 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
     @Override public void onBindViewHolder(@NonNull VH h, int p) {
         BloodBankDonorsModel d = list.get(p);
 
-        // البيانات الأساسية
+
         h.tvName.setText(d.getDisplayName());
         h.tvPhone.setText(d.getPhone());
         h.tvBloodType.setText(d.getBloodType());
@@ -49,19 +49,19 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
         h.tvDonationCount.setText(d.getDonationCount());
         h.tvCity.setText(d.getCity());
 
-        // التحقق من التاب الحالي
+
         TabLayout tabLayout = ((BloodBankDonorsActivity) h.itemView.getContext()).findViewById(R.id.tabLayout);
         int selectedTab = tabLayout.getSelectedTabPosition();
 
-        // إعادة تصفير الرؤية (مهم جداً للـ RecyclerView)
+
         h.layoutTestSection.setVisibility(View.GONE);
         h.layoutIncomingSection.setVisibility(View.GONE);
         h.expandLayout.setVisibility(View.GONE);
         h.btnExpand.setVisibility(View.VISIBLE);
 
-        // --- استبدلي من هون ---
+
         if (selectedTab == 2) {
-            // منطق تاب "الفحوصات"
+
             h.layoutTestSection.setVisibility(View.VISIBLE);
             h.btnExpand.setVisibility(View.GONE);
 
@@ -86,20 +86,20 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             h.btnDeleteTest.setOnClickListener(v -> listener.onDeleteTest(d));
 
         } else if (selectedTab == 1) {
-            // منطق تاب "قيد الوصول"
+
             h.layoutIncomingSection.setVisibility(View.VISIBLE);
             h.btnExpand.setVisibility(View.GONE);
             h.btnConfirmArrival.setOnClickListener(v -> listener.onConfirmArrival(d));
 
         } else if (selectedTab == 3) {
-            // منطق تاب "السجل"
+
             h.btnExpand.setVisibility(View.GONE);
             h.layoutTestSection.setVisibility(View.GONE);
             h.layoutIncomingSection.setVisibility(View.GONE);
             h.expandLayout.setVisibility(View.GONE);
 
         } else {
-            // منطق تاب "المتبرعون"
+
             h.btnExpand.setVisibility(View.VISIBLE);
             h.btnExpand.setOnClickListener(v -> {
                 h.expandLayout.setVisibility(h.expandLayout.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
@@ -109,8 +109,7 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             h.btnRegister.setOnClickListener(v -> listener.onRegisterDonation(d));
             h.btnNote.setOnClickListener(v -> listener.onAddNote(d));
         }
-    } // هاد القوس تبع نهاية دالة onBindViewHolder
-
+    }
     @Override public int getItemCount() { return list.size(); }
 
     class VH extends RecyclerView.ViewHolder {
@@ -132,12 +131,12 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             expandLayout = v.findViewById(R.id.expandLayout);
 
             layoutTestSection = v.findViewById(R.id.layoutTestSection);
-            layoutIncomingSection = v.findViewById(R.id.layoutIncomingSection); // تأكدي من وجوده في XML
+            layoutIncomingSection = v.findViewById(R.id.layoutIncomingSection);
             imgTestProof = v.findViewById(R.id.imgTestProof);
             btnAcceptTest = v.findViewById(R.id.btnAcceptTest);
             btnRejectTest = v.findViewById(R.id.btnRejectTest);
             btnDeleteTest = v.findViewById(R.id.btnDeleteTest);
-            btnConfirmArrival = v.findViewById(R.id.btnConfirmArrival); // تأكدي من وجوده في XML
+            btnConfirmArrival = v.findViewById(R.id.btnConfirmArrival);
 
             btnRegister = v.findViewById(R.id.btnRegister);
             btnNote = v.findViewById(R.id.btnNote);

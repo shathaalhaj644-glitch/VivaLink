@@ -23,6 +23,7 @@ public class DonorNotificationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donor_notification);
 
@@ -68,48 +69,82 @@ public class DonorNotificationActivity extends AppCompatActivity {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
                         if (n == null || !"DONOR".equals(n.getTargetType())) continue;
 
-                        String cleanMyCity = normalizeArabic(myCity);
-                        String cleanNotifCity = normalizeArabic(n.getCity());
+                        // -------------------------------------------------------
+                        // 1. الجزء الخاص بإشعارات "نتائج الفحص" (قبول/رفض)
+                        // -------------------------------------------------------
+                        if ("test_result".equals(n.getType())) {
+                            // يظهر فقط للمتبرع المعني (صاحب الفحص)
+                            if (myId != null && myId.equals(n.getTargetUserId())) {
+                                if (!list.contains(n)) {
+                                    list.add(0, n);
+                                }
+                            }
+                            continue; // ننتقل للإشعار التالي ولا نطبق شروط المدينة والفصيلة هنا
+                        }
 
-                        if (cleanMyCity.equals(cleanNotifCity)) {
-                            if (myBloodType != null && n.getBloodType() != null &&
-                                    myBloodType.trim().equalsIgnoreCase(n.getBloodType().trim())) {
+                        // -------------------------------------------------------
+                        // 2. الجزء الخاص بـ "طلبات الدم العاجلة" (كود الموظف)
+                        // -------------------------------------------------------
+                        // هذا الجزء يبقى كما هو لضمان وصول طلبات الموظف حسب الفصيلة والمدينة
+                        if ("urgent_request".equals(n.getType())) {
+                            String cleanMyCity = normalizeArabic(myCity);
+                            String cleanNotifCity = normalizeArabic(n.getCity());
 
-                                checkDonationEligibilityAndAdd(n, fourMonthsMillis, currentTime);
+                            if (cleanMyCity.equals(cleanNotifCity)) {
+                                // فحص مطابقة فصيلة الدم
+                                if (myBloodType != null && n.getBloodType() != null &&
+                                        myBloodType.trim().equalsIgnoreCase(n.getBloodType().trim())) {
+
+                                    // فحص أهلية المتبرع (مرور 4 شهور)
+                                    checkDonationEligibilityAndAdd(n, fourMonthsMillis, currentTime);
+                                }
                             }
                         }
+
                     } catch (Exception e) {
                         Log.e("VivaLink", "Donor Notif Error: " + e.getMessage());
                     }
                 }
-                // تحديث الواجهة في حال كانت القائمة فارغة
-                if (snapshot.getChildrenCount() == 0) {
-                    tvNoNotifications.setVisibility(View.VISIBLE);
-                    adapter.notifyDataSetChanged();
-                }
+                adapter.notifyDataSetChanged();
+                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
-
     // تم دمج الدالتين في دالة واحدة صحيحة لمنع تكرار الـ Error
     private void checkDonationEligibilityAndAdd(BloodBankNotificationModel n, long period, long now) {
-        dbRef.child("Donors").child(myId).child("lastDonationDate").addListenerForSingleValueEvent(new ValueEventListener() {
+        // استخدمنا lastDonation لأنه الحقل المعتمد في بيانات المتبرع عندك
+        dbRef.child("Donors").child(myId).child("lastDonation").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean isEligible = true;
+                String lastDateStr = snapshot.getValue(String.class);
 
-                Object value = snapshot.getValue();
-                if (value instanceof Long) {
-                    if (now - (Long) value < period) isEligible = false;
-                } else if (value instanceof String) {
-                    String dateStr = (String) value;
-                    if (!dateStr.isEmpty()) {
-                        // يمكنك هنا إضافة منطق لتحويل الـ String لـ Long إذا أردتِ
-                        // حالياً سنعتبره مؤهل إذا كان الحقل فارغاً
+                // إذا كان المتبرع قد تبرع سابقاً (الحقل ليس فارغاً وليس --)
+                if (lastDateStr != null && !lastDateStr.isEmpty() && !lastDateStr.equals("--")) {
+                    try {
+                        // تحويل النص إلى تاريخ لمقارنته
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.ENGLISH);
+                        // تنظيف النص من أي أرقام عربية أو رموز غريبة
+                        String cleanDate = lastDateStr.replace("٠","0").replace("١","1").replace("٢","2")
+                                .replace("٣","3").replace("٤","4").replace("٥","5")
+                                .replace("٦","6").replace("٧","7").replace("٨","8")
+                                .replace("٩","9").replace("-","/");
+
+                        java.util.Date lastDonationDate = sdf.parse(cleanDate);
+                        long diff = now - lastDonationDate.getTime();
+
+                        // إذا كان الفرق أصغر من 120 يوم (period) فهو غير مؤهل
+                        if (diff < period) {
+                            isEligible = false;
+                        }
+                    } catch (Exception e) {
+                        // في حال حدث خطأ في التاريخ، نعتبره مؤهل احتياطاً لكي لا يضيع عليه الطلب
+                        isEligible = true;
                     }
                 }
 
+                // إذا كان مؤهلاً (مر 4 شهور أو لم يتبرع أبداً) نُظهر الإشعار
                 if (isEligible) {
                     if (!list.contains(n)) {
                         list.add(0, n);
@@ -118,10 +153,11 @@ public class DonorNotificationActivity extends AppCompatActivity {
                 }
                 tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
-
     private String normalizeArabic(String text) {
         if (text == null) return "";
         return text.trim().replace(" ", "").replace("ة", "ه").replace("أ", "ا").replace("إ", "ا").replace("آ", "ا");

@@ -28,14 +28,17 @@ public class HospitalNotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_notification);
 
+        // ربط العناصر بالواجهة
         rv = findViewById(R.id.rvNotifications);
         tvNoNotifications = findViewById(R.id.tvNoNotifications);
 
         rv.setLayoutManager(new LinearLayoutManager(this));
 
+        // إعداد الأدابتر
         adapter = new BloodBankNotificationAdapter(list);
         rv.setAdapter(adapter);
 
+        // الحصول على معرف المستشفى الحالي
         currentHospitalId = FirebaseAuth.getInstance().getUid();
 
         if (currentHospitalId != null) {
@@ -45,30 +48,61 @@ public class HospitalNotificationActivity extends AppCompatActivity {
 
     private void loadHospitalNotifications() {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Notifications");
+
+        // استماع للتغييرات في جدول الإشعارات
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
-                if (currentHospitalId == null) return; // حماية من الكراش
+                if (currentHospitalId == null) return;
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     try {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
                         if (n == null) continue;
 
-                        // التأكد من أن الإشعار موجه للمسؤول (ADMIN) وأن الـ ID مطابق
-                        if ("ADMIN".equals(n.getTargetType()) &&
-                                currentHospitalId.equals(n.getTargetUserId())) {
-                            list.add(0, n);
+                        String type = n.getType(); // نوع الإشعار (طلب، قبول، رفض)
+                        String targetType = n.getTargetType(); // الفئة المستهدفة (HOSPITAL, ADMIN)
+                        String targetId = n.getTargetUserId(); // معرف الجهة المستهدفة
+
+                        // --- منطق الفلترة لضمان وصول الإشعارات الصحيحة للمستشفى ---
+
+                        // الشرط الأول: يجب أن يكون الإشعار موجهاً لهذا المستشفى تحديداً
+                        if (currentHospitalId.equals(targetId)) {
+
+                            // الشرط الثاني: فحص أنواع الإشعارات التي تهم إدارة المستشفى
+                            boolean isTransferAction = "blood_transfer_request".equals(type) ||
+                                    "blood_transfer_approved".equals(type) ||
+                                    "blood_transfer_rejected".equals(type);
+
+                            boolean isAdminNotif = "ADMIN".equals(targetType);
+
+                            if (isTransferAction || isAdminNotif) {
+                                // إضافة الإشعار في بداية القائمة (الأحدث أولاً)
+                                if (!list.contains(n)) {
+                                    list.add(0, n);
+                                }
+                            }
                         }
+
                     } catch (Exception e) {
                         Log.e("VivaLink", "Error parsing notification: " + e.getMessage());
                     }
                 }
+
+                // تحديث الواجهة
                 adapter.notifyDataSetChanged();
-                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+
+                // إظهار رسالة "لا توجد إشعارات" إذا كانت القائمة فارغة
+                if (tvNoNotifications != null) {
+                    tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                }
             }
-            @Override public void onCancelled(@NonNull DatabaseError error) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("VivaLink", "Database error: " + error.getMessage());
+            }
         });
     }
 }

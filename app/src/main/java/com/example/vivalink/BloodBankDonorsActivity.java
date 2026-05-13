@@ -217,10 +217,10 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
             filterTests(query);
         }
 
-    else if (position == 3) { // تاب السجل
+    else if (position == 3) {
             layoutBloodTypeFilters.setVisibility(View.GONE);
             layoutTestFilters.setVisibility(View.GONE);
-            filterHistory(query); // دالة رح ننشئها الآن
+            filterHistory(query);
         }
         adapter.notifyDataSetChanged();
     }
@@ -266,7 +266,7 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // تم إصلاح استدعاء الدوال هنا بتمرير الـ query
+
         findViewById(R.id.btnAll).setOnClickListener(v -> { selectedBloodType = "الكل"; applyCurrentTabFilter(); });
         findViewById(R.id.btnAPlus).setOnClickListener(v -> { selectedBloodType = "A+"; applyCurrentTabFilter(); });
         findViewById(R.id.btnAMinus).setOnClickListener(v -> { selectedBloodType = "A-"; applyCurrentTabFilter(); });
@@ -295,11 +295,13 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
     private void registerDonation(BloodBankDonorsModel d) {}
     private void showNoteDialog(BloodBankDonorsModel d) {}
 
+
+
     private void updateTestStatusInDB(BloodBankDonorsModel d, String status) {
+
         Map<String, Object> updates = new HashMap<>();
         updates.put("bloodTestStatus", status);
 
-        // إذا تم القبول، نحدث تاريخ الفحص لليوم ليتمكن من التبرع
         if ("مقبول".equals(status)) {
             String today = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(new Date());
             updates.put("lastBloodTest", today);
@@ -307,13 +309,14 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
 
         dbRef.child("Donors").child(d.getUid()).updateChildren(updates).addOnSuccessListener(aVoid -> {
 
-            // --- إرسال الإشعار للمتبرع ---
+
             DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
             String notifId = notifRef.getKey();
 
             if (notifId != null) {
                 HashMap<String, Object> notifData = new HashMap<>();
                 notifData.put("notificationId", notifId);
+
 
                 if ("مقبول".equals(status)) {
                     notifData.put("title", "✅ تم قبول فحص الدم");
@@ -323,15 +326,13 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
                     notifData.put("message", "نعتذر منك، تم رفض صورة الفحص المرفوعة. يرجى التأكد من وضوح الصورة وإعادة رفعها.");
                 }
 
+
                 notifData.put("type", "test_result");
                 notifData.put("targetType", "DONOR");
-
-                // ملاحظة: تأكدي أن كود المتبرع يقرأ الحقل باسم "userId" أو "targetUserId"
-                // حسب ما هو مبرمج في DonorNotificationActivity
-                notifData.put("userId", d.getUid());
-
+                notifData.put("targetUserId", d.getUid());
                 notifData.put("createdAt", System.currentTimeMillis());
                 notifData.put("isRead", false);
+
 
                 notifRef.setValue(notifData);
             }
@@ -340,19 +341,46 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
         });
     }
     private void filterHistory(String query) {
-        // جلب تاريخ اليوم بنفس الصيغة المخزنة بالداتابيز
-        String todayDate = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(new Date());
+
+        String todayDate = new SimpleDateFormat(
+                "dd/MM/yyyy",
+                Locale.ENGLISH
+        ).format(new Date());
+
+        filteredList.clear();
 
         for (BloodBankDonorsModel d : allDonors) {
-            // التحقق من الاسم
-            boolean matchesName = d.getDisplayName().toLowerCase().contains(query);
-            // التحقق إذا كان تاريخ آخر تبرع هو "اليوم"
-            boolean donatedToday = d.getLastDonation() != null && d.getLastDonation().equals(todayDate);
+
+            String donorName = d.getDisplayName() == null
+                    ? ""
+                    : d.getDisplayName().toLowerCase();
+
+            boolean matchesName =
+                    donorName.contains(query.toLowerCase());
+
+            boolean donatedToday =
+                    d.getLastDonation() != null &&
+                            d.getLastDonation().trim().equals(todayDate);
 
             if (matchesName && donatedToday) {
+
+                if (d.getPhone() == null)
+                    d.setPhone("غير متوفر");
+
+                if (d.getBloodType() == null)
+                    d.setBloodType("-");
+
+                if (d.getCity() == null)
+                    d.setCity("-");
+
+                if (d.getDonationCount() == null)
+                    d.setDonationCount("0");
+
                 filteredList.add(d);
             }
         }
+
+        adapter.notifyDataSetChanged();
     }
 
     private void confirmDeletion(BloodBankDonorsModel d) {

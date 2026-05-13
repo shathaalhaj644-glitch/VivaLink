@@ -2,6 +2,7 @@ package com.example.vivalink;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +27,7 @@ public class DonateActivity extends AppCompatActivity {
     private TextView tvBloodType, tvHospitalName, tvCity, tvDepartment, tvUnits, btnBack, tvRequestTime;
     private EditText etPhone, etMinutes;
     private Button btnConfirmDonation;
-    private String requestId, hospitalId, donorCity; // أضفنا hospitalId و donorCity
+    private String requestId, hospitalId, donorCity;
     private String userName = "متبرع";
 
     @Override
@@ -63,11 +64,9 @@ public class DonateActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
-                                // جلب الاسم
                                 if (snapshot.hasChild("fullName")) userName = snapshot.child("fullName").getValue(String.class);
                                 else if (snapshot.hasChild("name")) userName = snapshot.child("name").getValue(String.class);
 
-                                // جلب المدينة الخاصة بالمتبرع للفلترة لاحقاً
                                 donorCity = snapshot.child("city").getValue(String.class);
                             }
                         }
@@ -79,7 +78,6 @@ public class DonateActivity extends AppCompatActivity {
     private void displayPassedData() {
         if (getIntent() != null) {
             requestId = getIntent().getStringExtra("requestId");
-            // 🔥 مهم جداً: جلب الـ ID الخاص بالمستشفى الذي أرسل الطلب
             hospitalId = getIntent().getStringExtra("hospitalId");
 
             tvBloodType.setText(getIntent().getStringExtra("bloodType"));
@@ -104,14 +102,11 @@ public class DonateActivity extends AppCompatActivity {
         final String userId = FirebaseAuth.getInstance().getUid();
         if (userId == null) return;
 
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-        // 1. تجهيز البيانات لجدول القادمين
+        // 1. تجهيز بيانات جدول القادمين (IncomingDonations)
         Map<String, Object> incomingData = new HashMap<>();
-        incomingData.put("uid", userId);
         incomingData.put("donorId", userId);
         incomingData.put("requestId", requestId);
-        incomingData.put("hospitalId", hospitalId); // ربط التبرع بالمستشفى
+        incomingData.put("hospitalId", hospitalId);
         incomingData.put("displayName", userName);
         incomingData.put("phone", phone);
         incomingData.put("bloodType", getIntent().getStringExtra("bloodType"));
@@ -119,49 +114,83 @@ public class DonateActivity extends AppCompatActivity {
         incomingData.put("status", "قادم");
         incomingData.put("arrivalMinutes", selectedMinutes);
 
-        // 2. الحفظ في IncomingDonations
-        database.getReference("IncomingDonations").child(userId).setValue(incomingData)
+        FirebaseDatabase.getInstance().getReference("IncomingDonations").child(userId).setValue(incomingData)
                 .addOnSuccessListener(aVoid -> {
 
-                    // --- [إرسال الإشعار للموظف] ---
-                    DatabaseReference notifRef = database.getReference("Notifications").push();
-                    String notifId = notifRef.getKey();
+                    // 2. إرسال الإشعار الفوري لموظف المستشفى المعني فقط
+                    sendArrivalNotificationToStaff(selectedMinutes);
 
-                    if (notifId != null) {
-                        HashMap<String, Object> notifData = new HashMap<>();
-                        notifData.put("notificationId", notifId);
-                        notifData.put("title", "🏃 متبرع قيد الوصول");
-
-                        // الرسالة تشمل الاسم والدقائق كما طلبتِ
-                        notifData.put("message", "قام المتبرع (" + userName + ") بتأكيد الحضور. سيكون في المركز خلال " + selectedMinutes + " دقيقة.");
-
-                        // 🔥 الربط مع الموظف
-                        notifData.put("type", "donor_arrival"); // نستخدم النوع الذي عدلناه في صفحة الموظف
-                        notifData.put("targetType", "ADMIN");
-                        notifData.put("targetUserId", hospitalId); // توجيه لموظفي هذا المستشفى فقط
-                        notifData.put("city", getIntent().getStringExtra("city")); // الفلترة حسب المدينة
-
-                        notifData.put("donorId", userId);
-                        notifData.put("createdAt", System.currentTimeMillis());
-                        notifData.put("isRead", false);
-
-                        notifRef.setValue(notifData);
-                    }
-
-                    // 3. الانتقال لصفحة التايمر
+                    // 3. الانتقال لصفحة التايمر مع تمرير "كل" البيانات لضمان عدم ظهور Null
                     Intent intent = new Intent(DonateActivity.this, RequestsDetailsActivity.class);
-                    // تمرير البيانات للصفحة التالية
                     intent.putExtra("requestId", requestId);
                     intent.putExtra("minutes", selectedMinutes);
                     intent.putExtra("hospitalId", hospitalId);
+                    intent.putExtra("donorName", userName);
+
+                    // تمرير البيانات المفقودة التي كانت تسبب Null سابقاً
                     intent.putExtra("bloodType", getIntent().getStringExtra("bloodType"));
                     intent.putExtra("hospitalName", getIntent().getStringExtra("hospitalName"));
                     intent.putExtra("city", getIntent().getStringExtra("city"));
-                    intent.putExtra("hospitalId", hospitalId); // أو أي مسمى للـ ID في الـ Model عندك
+                    intent.putExtra("department", getIntent().getStringExtra("department"));
+                    intent.putExtra("units", getIntent().getStringExtra("units"));
+                    intent.putExtra("confirmedAt", getIntent().getStringExtra("confirmedAt"));
+
                     startActivity(intent);
                     Toast.makeText(DonateActivity.this, "تم تأكيد الذهاب، رافقتك السلامة ✅", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> Toast.makeText(DonateActivity.this, "خطأ: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-}
+
+    private void sendArrivalNotificationToStaff(int minutes) {
+
+        DatabaseReference notifRef =
+                FirebaseDatabase.getInstance()
+                        .getReference("Notifications")
+                        .push();
+
+        String notifId = notifRef.getKey();
+
+        if (notifId != null && hospitalId != null) {
+
+            HashMap<String, Object> notifData = new HashMap<>();
+
+            String bloodType = getIntent().getStringExtra("bloodType");
+            String department = getIntent().getStringExtra("department");
+
+            notifData.put("notificationId", notifId);
+
+            // عنوان الإشعار
+            notifData.put("title", "🏃 متبرع قيد الوصول");
+
+            // الرسالة
+            notifData.put(
+                    "message",
+                    "المتبرع " + userName +
+                            " سيصل خلال " + minutes +
+                            " دقيقة لقسم " + department +
+                            " لفصيلة " + bloodType
+            );
+
+            // نوع الإشعار
+            notifData.put("type", "donation_confirmed");
+
+            // مهم جداً 🔥🔥🔥
+            notifData.put("targetType", "ADMIN");
+
+            // المستشفى المستهدف
+            notifData.put("targetUserId", hospitalId);
+
+            notifData.put("requestId", requestId);
+
+            notifData.put("createdAt", System.currentTimeMillis());
+
+            notifData.put("isRead", false);
+
+            notifRef.setValue(notifData)
+                    .addOnSuccessListener(aVoid ->
+                            Log.d("VivaLink", "تم إرسال إشعار الوصول بنجاح"))
+                    .addOnFailureListener(e ->
+                            Log.e("VivaLink", "فشل إرسال الإشعار: " + e.getMessage()));
+        }
+    } }

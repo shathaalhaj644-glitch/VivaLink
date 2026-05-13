@@ -17,7 +17,7 @@ public class RequestsDetailsActivity extends AppCompatActivity {
 
     private TextView tvBlood, tvHospital, tvCity, tvDept, tvUnits, tvDate, tvTimer, btnBack;
     private CardView cardTimer, cardDonatedSuccess;
-    private String requestId;
+    private String requestId, hospitalId, donorName;
     private int minutesToArrive;
     private CountDownTimer countDownTimer;
 
@@ -47,17 +47,30 @@ public class RequestsDetailsActivity extends AppCompatActivity {
     }
 
     private void getDataAndDisplay() {
+        // استقبال البيانات الأساسية
         requestId = getIntent().getStringExtra("requestId");
+        hospitalId = getIntent().getStringExtra("hospitalId");
+        donorName = getIntent().getStringExtra("donorName");
         minutesToArrive = getIntent().getIntExtra("minutes", 0);
         boolean alreadyDonated = getIntent().getBooleanExtra("isDonated", false);
 
-        tvBlood.setText("🩸 فصيلة الدم: " + getIntent().getStringExtra("bloodType"));
-        tvHospital.setText("🏥 المستشفى: " + getIntent().getStringExtra("hospitalName"));
-        tvCity.setText("📍 المدينة: " + getIntent().getStringExtra("city"));
-        tvDept.setText("🏢 القسم: " + getIntent().getStringExtra("department"));
-        tvUnits.setText("🧪 الوحدات: " + getIntent().getStringExtra("units"));
-        tvDate.setText("📅 تاريخ الطلب: " + getIntent().getStringExtra("confirmedAt"));
+        // استقبال وعرض البيانات اللي كانت تطلع Null
+        String bloodType = getIntent().getStringExtra("bloodType");
+        String hospitalName = getIntent().getStringExtra("hospitalName");
+        String city = getIntent().getStringExtra("city");
+        String department = getIntent().getStringExtra("department");
+        String units = getIntent().getStringExtra("units");
+        String confirmedAt = getIntent().getStringExtra("confirmedAt");
 
+        // عرض البيانات في النصوص (مع التعامل مع حالة الـ Null احتياطاً)
+        tvBlood.setText("🩸 فصيلة الدم: " + (bloodType != null ? bloodType : "غير محدد"));
+        tvHospital.setText("🏥 المستشفى: " + (hospitalName != null ? hospitalName : "غير محدد"));
+        tvCity.setText("📍 المدينة: " + (city != null ? city : "غير محدد"));
+        tvDept.setText("🏢 القسم: " + (department != null ? department : "غير محدد"));
+        tvUnits.setText("🧪 الوحدات: " + (units != null ? units : "0"));
+        tvDate.setText("📅 تاريخ الطلب: " + (confirmedAt != null ? confirmedAt : "---"));
+
+        // منطق التايمر وحالة التبرع
         if (alreadyDonated) {
             showSuccessStatus();
         } else if (minutesToArrive > 0) {
@@ -71,6 +84,8 @@ public class RequestsDetailsActivity extends AppCompatActivity {
     }
 
     private void startCountdown(int minutes) {
+        if (countDownTimer != null) countDownTimer.cancel();
+
         countDownTimer = new CountDownTimer(minutes * 60000L, 1000) {
             public void onTick(long millisUntilFinished) {
                 long m = (millisUntilFinished / 1000) / 60;
@@ -103,25 +118,26 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         if (uid == null || requestId == null) return;
 
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-        String today = new java.text.SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).format(new java.util.Date());
 
-        // إنشاء كائن بيانات لإرساله لجدول "قيد الوصول"
+        // بيانات الإشعار للموظف
         java.util.Map<String, Object> arrivalData = new java.util.HashMap<>();
         arrivalData.put("donorId", uid);
         arrivalData.put("requestId", requestId);
-        arrivalData.put("status", "قادم"); // لكي يظهر عند الموظف في تاب "قيد الوصول"
-        arrivalData.put("displayName", getIntent().getStringExtra("donorName")); // تأكدي من تمريره في Intent
+        arrivalData.put("hospitalId", hospitalId);
+        arrivalData.put("status", "وصل المتبرع");
+        arrivalData.put("displayName", donorName != null ? donorName : "متبرع");
         arrivalData.put("bloodType", getIntent().getStringExtra("bloodType"));
 
-        // 1. الإضافة لجدول القادمين لكي يراه الموظف
+        // 1. تحديث جدول القادمين
         db.child("IncomingDonations").child(uid).setValue(arrivalData)
                 .addOnSuccessListener(aVoid -> {
-                    // 2. تحديث حالة الطلب العام (اختياري حسب منطق مشروعك)
-                    db.child("Requests").child(requestId).child("currentStatus").setValue("المتبرع في الموقع");
+                    // 2. تحديث حالة الطلب
+                    db.child("Requests").child(requestId).child("currentStatus").setValue("تم التبرع");
 
                     showSuccessStatus();
                     Toast.makeText(this, "تم إرسال إشعار للمستشفى بوجودك. شكراً لك! ✅", Toast.LENGTH_LONG).show();
-                });
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "خطأ في الاتصال: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void showSuccessStatus() {

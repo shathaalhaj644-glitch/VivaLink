@@ -33,13 +33,12 @@ public class BloodInventoryActivity extends AppCompatActivity {
         tabs.addTab(tabs.newTab().setText("المستشفيات"));
         tabs.addTab(tabs.newTab().setText("طلبات"));
 
-        // جلب معلومات المستشفى الحالية أولاً للهيدر
         db.child("Hospitals").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot s) {
                 hName = s.child("hospitalName").getValue(String.class);
                 hCity = s.child("city").getValue(String.class);
-                load(0); // التحميل الابتدائي بعد جلب البيانات
+                load(0);
             }
             @Override public void onCancelled(@NonNull DatabaseError e) {}
         });
@@ -101,20 +100,20 @@ public class BloodInventoryActivity extends AppCompatActivity {
                 @Override public void onCancelled(@NonNull DatabaseError e) {}
             });
         } else {
+            // تاب الطلبات - تم تعديله لكي لا تختفي الطلبات المقبولة/المرفوضة
             rv.setLayoutManager(new LinearLayoutManager(this));
             db.child("BloodTransferRequests").orderByChild("toHospitalId").equalTo(uid).addValueEventListener(new ValueEventListener() {
                 @Override public void onDataChange(@NonNull DataSnapshot s) {
                     list.clear();
                     for (DataSnapshot d : s.getChildren()) {
-                        if ("pending".equals(d.child("status").getValue())) {
-                            BloodInventoryModel m = d.getValue(BloodInventoryModel.class);
+                        BloodInventoryModel m = d.getValue(BloodInventoryModel.class);
+                        if (m != null) {
                             m.requestId = d.getKey();
-                            // جلب مدينة المستشفى الطالب للتاب الثالث
                             db.child("Hospitals").child(m.fromHospitalId != null ? m.fromHospitalId : "").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot s3) {
                                     m.city = s3.child("city").getValue(String.class);
-                                    list.add(m);
+                                    list.add(0, m);
                                     refresh(tab);
                                 }
                                 @Override public void onCancelled(@NonNull DatabaseError e) {}
@@ -144,59 +143,58 @@ public class BloodInventoryActivity extends AppCompatActivity {
 
             @Override
             public void onAccept(BloodInventoryModel m) {
-                // 1. تحديث حالة الطلب إلى "مقبول" في قاعدة بيانات طلبات النقل
                 if (m.requestId != null) {
                     db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مقبول")
                             .addOnSuccessListener(aVoid -> {
-
-                                // --- [بداية كود الإشعار الثالث: الموافقة على نقل الدم] ---
-
-                                // إنشاء مرجع جديد في نود الإشعارات
-                                DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
-                                String notifId = notifRef.getKey();
-
-                                if (notifId != null) {
-                                    HashMap<String, Object> notifData = new HashMap<>();
-                                    notifData.put("notificationId", notifId);
-                                    notifData.put("title", "✅ موافقة على طلب نقل دم");
-
-                                    // رسالة توضح اسم المستشفى المزوّد (أنتِ) والكمية والفصيلة
-                                    String msg = "وافق " + (hName != null ? hName : "بنك الدم") +
-                                            " على تزويدكم بـ " + m.requestedUnits +
-                                            " وحدة من فصيلة " + m.bloodType;
-
-                                    notifData.put("message", msg);
-                                    notifData.put("type", "blood_transfer_approved"); // النوع الخاص بأيقونة النقل
-                                    notifData.put("targetType", "HOSPITAL"); // الفئة المستهدفة هي المستشفيات
-                                    notifData.put("targetUserId", m.fromHospitalId); // إرسال الإشعار للمستشفى الذي طلب حصراً
-                                    notifData.put("createdAt", System.currentTimeMillis());
-                                    notifData.put("isRead", false);
-
-                                    // حفظ الإشعار في الفايربيس
-                                    notifRef.setValue(notifData);
-                                }
-
-                                // --- [نهاية كود الإشعار] ---
-
-                                Toast.makeText(BloodInventoryActivity.this, "تم قبول الطلب وإرسال إشعار للمستشفى ✅", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(BloodInventoryActivity.this, "فشل في تحديث الطلب: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                sendStatusNotification(m, "مقبول");
+                                Toast.makeText(BloodInventoryActivity.this, "تم قبول الطلب ✅", Toast.LENGTH_SHORT).show();
                             });
-                } else {
-                    Toast.makeText(BloodInventoryActivity.this, "خطأ: معرف الطلب غير موجود", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onReject(BloodInventoryModel m) {
-                // تحديث حالة الطلب إلى "مرفوض" في قاعدة البيانات
                 if (m.requestId != null) {
                     db.child("BloodTransferRequests").child(m.requestId).child("status").setValue("مرفوض")
-                            .addOnSuccessListener(aVoid -> Toast.makeText(BloodInventoryActivity.this, "تم رفض الطلب", Toast.LENGTH_SHORT).show());
+                            .addOnSuccessListener(aVoid -> {
+                                sendStatusNotification(m, "مرفوض");
+                                Toast.makeText(BloodInventoryActivity.this, "تم رفض الطلب ❌", Toast.LENGTH_SHORT).show();
+                            });
                 }
             }
         }));
+    }
+
+    private void sendStatusNotification(BloodInventoryModel m, String status) {
+        DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
+        HashMap<String, Object> notifData = new HashMap<>();
+        notifData.put("notificationId", notifRef.getKey());
+
+        // فحص ذكي لاسم المستشفى عشان ما يتكرر كلمة (مستشفى مستشفى)
+        String displayName = hName != null ? hName : "بنك الدم";
+        if (displayName.startsWith("مستشفى")) {
+            // إذا الاسم أصلاً فيه كلمة مستشفى، بنستخدمه زي ما هو
+        } else {
+            // إذا ما فيه، بنضيفها إحنا
+            displayName = "مستشفى " + displayName;
+        }
+
+        if (status.equals("مقبول")) {
+            notifData.put("title", "✅ موافقة على طلب نقل دم");
+            // التعديل هنا: استخدمنا displayName الجاهز
+            notifData.put("message", "وافق " + displayName + " على تزويدكم بـ " + m.requestedUnits + " وحدة من فصيلة " + m.bloodType);
+            notifData.put("type", "blood_transfer_approved");
+        } else {
+            notifData.put("title", "❌ تعذر تلبية طلب الدم");
+            notifData.put("message", "نعتذر، تم رفض طلبكم من قبل " + displayName);
+            notifData.put("type", "blood_transfer_rejected");
+        }
+
+        notifData.put("targetType", "HOSPITAL");
+        notifData.put("targetUserId", m.fromHospitalId);
+        notifData.put("createdAt", System.currentTimeMillis());
+        notifData.put("isRead", false);
+        notifRef.setValue(notifData);
     }
 
     private void openDialog(BloodInventoryModel m, boolean isMine) {
@@ -236,14 +234,28 @@ public class BloodInventoryActivity extends AppCompatActivity {
                 db.child("BloodInventory").child(uid).child(m.bloodType).child("units").setValue(Integer.parseInt(val));
                 db.child("BloodInventoryThresholds").child(uid).child(m.bloodType).setValue(Integer.parseInt(etR.getText().toString()));
             } else {
-                HashMap<String,Object> map = new HashMap<>();
+                HashMap<String, Object> map = new HashMap<>();
                 map.put("fromHospitalId", uid);
                 map.put("fromHospitalName", hName);
                 map.put("toHospitalId", m.hospitalId);
                 map.put("bloodType", m.bloodType);
                 map.put("requestedUnits", Integer.parseInt(val));
                 map.put("status", "pending");
-                db.child("BloodTransferRequests").push().setValue(map);
+
+                db.child("BloodTransferRequests").push().setValue(map).addOnSuccessListener(aVoid -> {
+                    DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
+                    HashMap<String, Object> notifData = new HashMap<>();
+                    notifData.put("notificationId", notifRef.getKey());
+                    notifData.put("title", "📦 طلب نقل دم جديد");
+                    notifData.put("message", "يرغب " + hName + " بطلب " + val + " وحدات من فصيلة " + m.bloodType);
+                    notifData.put("type", "blood_transfer_request");
+                    notifData.put("targetType", "HOSPITAL");
+                    notifData.put("targetUserId", m.hospitalId);
+                    notifData.put("createdAt", System.currentTimeMillis());
+                    notifData.put("isRead", false);
+                    notifRef.setValue(notifData);
+                    Toast.makeText(BloodInventoryActivity.this, "تم إرسال الطلب بنجاح ✅", Toast.LENGTH_SHORT).show();
+                });
             }
             d.dismiss();
         });

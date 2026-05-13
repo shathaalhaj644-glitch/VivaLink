@@ -5,15 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-
 import java.util.*;
 
 public class BloodBankNotificationActivity extends AppCompatActivity {
@@ -23,7 +20,6 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
     private RecyclerView rvIncoming;
     private EditText etMessage;
     private Button btnSend;
-
     private CheckBox cbAp, cbAn, cbBp, cbBn, cbOp, cbOn, cbABp, cbABn;
 
     private DatabaseReference dbRef;
@@ -31,10 +27,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
     private List<BloodBankNotificationModel> incomingList = new ArrayList<>();
 
     private String currentCity = "";
-    private String staffCity = "";
     private String hospitalName = "";
-
-    // 🔥 الجديد
     private String hospitalId = "";
 
     @Override
@@ -85,7 +78,6 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
 
     private void fetchCurrentHospitalOrStaffData() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
-
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         FirebaseDatabase.getInstance().getReference()
@@ -104,10 +96,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
                             hospitalName = hosp.child("hospitalName").getValue(String.class);
                             hospitalId = uid;
                         }
-
                         tvLocationInfo.setText("المدينة: " + currentCity + " | " + hospitalName);
-
-                        // 🔥 التعديل الجوهري: استدعاء الدالة هنا لضمان وجود hospitalId
                         loadIncomingNotifications();
                     }
                     @Override public void onCancelled(@NonNull DatabaseError error) {}
@@ -116,16 +105,9 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
 
     private void sendNotificationToDonors() {
         String msg = etMessage.getText().toString().trim();
+        String myUid = FirebaseAuth.getInstance().getUid();
 
-        if (msg.isEmpty() || currentCity == null || currentCity.isEmpty()) {
-            Toast.makeText(this, "يرجى كتابة الرسالة وانتظار تحميل الموقع", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (hospitalId == null || hospitalId.isEmpty()) {
-            Toast.makeText(this, "خطأ: لم يتم تحديد المستشفى", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (msg.isEmpty() || currentCity == null) return;
 
         List<String> selectedBloods = new ArrayList<>();
         if (cbAp.isChecked()) selectedBloods.add("A+");
@@ -142,45 +124,72 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
             return;
         }
 
-        // 🔥 الحل: إرسال كل فصيلة في طلب منفصل لضمان عدم اختلاط البيانات
         for (String blood : selectedBloods) {
-
-            // 1. إشعار للمستشفى (حصراً لمستشفى الموظف الحالي)
-            pushToFirebase(hospitalId, "ADMIN", blood, msg);
-
-            // 2. إشعار للمتبرعين (يصل لكل من يطابق الفصيلة والمدينة)
-            pushToFirebase(null, "DONOR", blood, msg);
+            // 1. للموظفين الزملاء (ADMIN) - نرسله بـ targetUserId محدد
+            pushToFirebase(hospitalId, "ADMIN", blood, msg, myUid);
+            // 2. للمتبرعين (DONOR) - نرسله بـ targetUserId = null لكي يصل للكل حسب المدينة والفصيلة
+            pushToFirebase(null, "DONOR", blood, msg, myUid);
         }
 
-        Toast.makeText(this, "تم إرسال " + selectedBloods.size() + " طلبات بنجاح", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "تم الإرسال بنجاح", Toast.LENGTH_SHORT).show();
         etMessage.setText("");
+        clearCheckboxes();
     }
 
-    private void pushToFirebase(String targetUserId, String targetType, String blood, String message) {
-        DatabaseReference newNotif = dbRef.push(); // إنشاء ID فريد لكل إشعار
+    private void pushToFirebase(String targetUserId, String targetType, String blood, String message, String senderId) {
+        DatabaseReference newNotif = dbRef.push();
+        String notifId = newNotif.getKey();
+
+        String title = "🚨 طلب دم عاجل: " + blood;
+        String fullMessage = "مطلوب فصيلة (" + blood + ") في " + hospitalName + "\n" + message;
 
         HashMap<String, Object> data = new HashMap<>();
-        data.put("notificationId", newNotif.getKey());
-        data.put("title", "🚨 طلب دم عاجل: " + blood); // الفصيلة في العنوان
-        data.put("message", "مطلوب فصيلة (" + blood + ") في " + hospitalName + "\n" + message);
-
+        data.put("notificationId", notifId);
+        data.put("title", title);
+        data.put("message", fullMessage);
         data.put("targetType", targetType);
-        data.put("targetUserId", targetUserId); // سيأخذ ID المستشفى في حالة ADMIN و null في حالة DONOR
-
-        data.put("bloodType", blood); // تأكد أن هذه القيمة هي blood الحالية في الـ Loop
+        data.put("targetUserId", targetUserId);
+        data.put("senderId", senderId);
+        data.put("type", "urgent_request");
+        data.put("bloodType", blood);
         data.put("city", currentCity);
         data.put("hospitalName", hospitalName);
         data.put("hospitalId", hospitalId);
-
         data.put("createdAt", System.currentTimeMillis());
         data.put("isRead", false);
-        data.put("type", "urgent_request");
 
-        newNotif.setValue(data);
+        // 1. تخزين في قاعدة البيانات (ليظهر داخل قائمة الإشعارات)
+        newNotif.setValue(data).addOnSuccessListener(aVoid -> {
+
+            // 2. إرسال التنبيه للخارج (ليظهر على شاشة التلفون)
+            if ("DONOR".equals(targetType)) {
+                // نرسل إشعار عام لكل المتبرعين المشتركين في "موضوع" (Topic) التبرع
+                sendFcmNotification("donors", title, fullMessage);
+            } else if ("ADMIN".equals(targetType) && targetUserId != null) {
+                // نرسل إشعار للموظف المسؤول (عن طريق موضوع خاص به أو ID)
+                sendFcmNotification("admin_" + targetUserId, title, fullMessage);
+            }
+        });
     }
-    // ابحثي عن هذه الدالة في BloodBankNotificationActivity
+
+    // 🔹 إضافة الدالة الناقصة لحل الإيرور (Cannot resolve method)
+    private void sendFcmNotification(String topic, String title, String body) {
+        // ملاحظة: لإرسال إشعار FCM حقيقي من داخل التطبيق (بدون سيرفر)،
+        // يفضل استخدام واجهة Firebase Console أو Cloud Functions.
+        // برمجياً، سنكتفي بطباعة السجل هنا أو استدعاء API خارجي إذا قمتِ بإعداده.
+        Log.d("FCM_LOG", "جاري إرسال تنبيه للموضوع: " + topic + " | العنوان: " + title);
+
+        // إذا كنتِ تريدين الإرسال البرمجي المجاني، يجب إعداد مكتبة HTTP لإرسال الطلب لـ https://fcm.googleapis.com/fcm/send
+    }
+
+    // دالة وهمية تشرح المنطق (لأن الإرسال الفعلي للخارج يحتاج FCM Server أو مكتبة بسيطة)
+    private void sendNotificationToExternal(String title, String message, String city, String blood) {
+        // هنا يتم استدعاء FCM لإرسال الإشعار
+        // لكي يعمل "من برة" مجاناً، أسهل طريقة هي إرسال طلب HTTP لـ Firebase
+        Log.d("FCM", "جاري إرسال إشعار خارجي لمتبرعي " + city + " فصيلة " + blood);
+    }
     private void loadIncomingNotifications() {
-        String myId = FirebaseAuth.getInstance().getUid();
+        final String myUid = FirebaseAuth.getInstance().getUid();
 
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -191,34 +200,52 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
                         if (n == null) continue;
 
-                        // 1. فحص إشعارات رفع الفحوصات الجديدة (حسب المدينة)
-                        if ("new_test_upload".equals(n.getType())) {
-                            // هنا نستخدم currentCity التي تم جلبها عند فتح الصفحة
-                            if (currentCity != null && !currentCity.isEmpty() && currentCity.equals(n.getCity())) {
+                        String type = n.getType();
+                        String targetType = n.getTargetType();
+                        String targetUserId = n.getTargetUserId();
+
+                        // 1. استقبال إشعار وصول المتبرع (Donor Arrival)
+                        // ابحثي عن هذا الجزء داخل loadIncomingNotifications وعدليه
+                        if ("donor_arrival".equals(type) || "donation_confirmed".equals(type)) {
+
+                            String notifHospitalId = n.getTargetUserId();
+
+                            if (hospitalId != null && notifHospitalId != null
+                                    && hospitalId.trim().equals(notifHospitalId.trim())) {
+
+                                incomingList.add(0, n);
+                            }
+                        }
+                        // 2. إشعارات الفحوصات (حسب المدينة)
+                        else if ("new_test_upload".equals(type)) {
+                            if (currentCity != null && currentCity.equals(n.getCity())) {
                                 incomingList.add(0, n);
                             }
                         }
 
-                        // 2. فحص الإشعارات الموجهة للموظف/المستشفى شخصياً (كطلبات الدم)
-                        else if ("ADMIN".equals(n.getTargetType())) {
-                            if (myId != null && myId.equals(n.getTargetUserId())) {
-                                incomingList.add(0, n);
+                        // 3. طلبات الدم العاجلة (من الموظفين الآخرين)
+                        else if ("urgent_request".equals(type) && "ADMIN".equals(targetType)) {
+                            String sId = ds.child("senderId").getValue(String.class);
+                            if (hospitalId != null && hospitalId.equals(targetUserId)) {
+                                // تظهر فقط إذا لم أكن أنا من أرسلها
+                                if (sId != null && !sId.equals(myUid)) {
+                                    incomingList.add(0, n);
+                                }
                             }
                         }
-                        else if ("donor_arrival".equals(n.getType())) {
-                            // الفلترة تتم بناءً على معرف المستشفى (hospitalId) الخاص بالموظف
-                            if (hospitalId != null && hospitalId.equals(n.getTargetUserId())) {
-                                incomingList.add(0, n);
-                            }
-                        }
-
                     } catch (Exception e) {
-                        Log.e("VivaLink", "Read Error: " + e.getMessage());
+                        Log.e("VivaLink", "خطأ في قراءة الإشعار: " + e.getMessage());
                     }
                 }
                 adapter.notifyDataSetChanged();
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
+    }
+    private void clearCheckboxes() {
+        cbAp.setChecked(false); cbAn.setChecked(false);
+        cbBp.setChecked(false); cbBn.setChecked(false);
+        cbOp.setChecked(false); cbOn.setChecked(false);
+        cbABp.setChecked(false); cbABn.setChecked(false);
     }
 }

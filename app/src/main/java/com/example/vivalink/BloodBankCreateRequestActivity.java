@@ -26,7 +26,7 @@ import java.util.Locale;
 
 public class BloodBankCreateRequestActivity extends AppCompatActivity {
 
-    // تأكدي أن هذه الأسماء تطابق الـ IDs في الـ XML
+
     TextView et_city, et_hospitalName, tvPageTitle;
     EditText et_units, et_department;
     Spinner sp_bloodType;
@@ -38,10 +38,10 @@ public class BloodBankCreateRequestActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // تأكدي أن اسم الملف في الـ layout هو activity_create_request
+
         setContentView(R.layout.activity_create_request);
 
-        // 1. ربط العناصر (تأكدي من مطابقة الـ IDs)
+
         tvPageTitle = findViewById(R.id.tvPageTitle);
         et_city = findViewById(R.id.et_city);
         et_hospitalName = findViewById(R.id.et_hospitalName);
@@ -50,17 +50,17 @@ public class BloodBankCreateRequestActivity extends AppCompatActivity {
         sp_bloodType = findViewById(R.id.sp_bloodType);
         btn_create_request = findViewById(R.id.btn_create_request);
 
-        // 2. إعداد قائمة فصائل الدم
+
         String[] bloodTypes = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, bloodTypes);
         sp_bloodType.setAdapter(adapter);
 
         db = FirebaseDatabase.getInstance().getReference("Requests");
 
-        // 3. جلب بيانات المستشفى
+
         fetchHospitalProfile();
 
-        // 4. فحص إذا كان "تعديل" أو "إنشاء"
+
         requestId = getIntent().getStringExtra("requestId");
         if (requestId != null) {
             if(tvPageTitle != null) tvPageTitle.setText("تعديل الطلب");
@@ -75,7 +75,7 @@ public class BloodBankCreateRequestActivity extends AppCompatActivity {
     private void fetchHospitalProfile() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid != null) {
-            // جلب البيانات من Hospitals (تأكدي أن الموظف مخزن هنا أيضاً)
+
             FirebaseDatabase.getInstance().getReference("Hospitals").child(uid)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -107,7 +107,7 @@ public class BloodBankCreateRequestActivity extends AppCompatActivity {
             return;
         }
 
-        // التنسيق الذي طلبته: 20:22-2026\04\22
+
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm-yyyy\\MM\\dd", Locale.ENGLISH);
         String currentTime = sdf.format(new Date());
 
