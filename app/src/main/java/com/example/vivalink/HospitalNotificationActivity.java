@@ -13,6 +13,7 @@ import com.google.firebase.database.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Log;
 
 public class HospitalNotificationActivity extends AppCompatActivity {
 
@@ -43,41 +44,31 @@ public class HospitalNotificationActivity extends AppCompatActivity {
     }
 
     private void loadHospitalNotifications() {
-
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Notifications");
-
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 list.clear();
+                if (currentHospitalId == null) return; // حماية من الكراش
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     try {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
-
                         if (n == null) continue;
 
-                        // ✅ فقط إشعارات موجهة للمستشفى
-                        if ("ADMIN".equals(n.getTargetType())
-                                && n.getTargetUserId() != null
-                                && n.getTargetUserId().equals(currentHospitalId)) {
-
+                        // التأكد من أن الإشعار موجه للمسؤول (ADMIN) وأن الـ ID مطابق
+                        if ("ADMIN".equals(n.getTargetType()) &&
+                                currentHospitalId.equals(n.getTargetUserId())) {
                             list.add(0, n);
                         }
-
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("VivaLink", "Error parsing notification: " + e.getMessage());
                     }
                 }
-
                 adapter.notifyDataSetChanged();
                 tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 }

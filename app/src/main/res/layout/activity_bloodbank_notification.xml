@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:layoutDirection="rtl"
     android:background="#F2F2F2">
 
+    <!-- التابات -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,7 +41,6 @@
             android:textColor="#757575"
             android:textStyle="bold"
             android:background="?attr/selectableItemBackground"/>
-
     </LinearLayout>
 
     <View
@@ -53,6 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- صفحة الإرسال -->
         <ScrollView
             android:id="@+id/layoutSend"
             android:layout_width="match_parent"
@@ -74,6 +74,7 @@
                     android:gravity="center"
                     android:layout_marginBottom="12dp"/>
 
+                <!-- صندوق التنبيه -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -95,9 +96,10 @@
                         android:text="جاري التحميل..."
                         android:textColor="#FFCDD2"
                         android:textSize="12sp" />
-
                 </LinearLayout>
 
+                <!-- الفصائل -->
+                <!-- الفصائل -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -105,74 +107,155 @@
                     android:layout_marginTop="15dp"
                     android:textStyle="bold"/>
 
-                <TableLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:stretchColumns="*"
-                    android:layout_marginTop="5dp">
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp">
 
-                    <TableRow>
-                        <CheckBox android:id="@+id/cbAp" android:text="A+" />
-                        <CheckBox android:id="@+id/cbAn" android:text="A-" />
-                        <CheckBox android:id="@+id/cbBp" android:text="B+" />
-                        <CheckBox android:id="@+id/cbBn" android:text="B-" />
-                    </TableRow>
+                    <!-- الصف الأول -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="4">
 
-                    <TableRow>
-                        <CheckBox android:id="@+id/cbOp" android:text="O+" />
-                        <CheckBox android:id="@+id/cbOn" android:text="O-" />
-                        <CheckBox android:id="@+id/cbABp" android:text="AB+" />
-                        <CheckBox android:id="@+id/cbABn" android:text="AB-" />
-                    </TableRow>
+                        <CheckBox
+                            android:id="@+id/cbAp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="A+"
+                            android:gravity="right|center_vertical"/>
 
-                </TableLayout>
+                        <CheckBox
+                            android:id="@+id/cbAn"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="A-"
+                            android:gravity="right|center_vertical"/>
 
+                        <CheckBox
+                            android:id="@+id/cbBp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="B+"
+                            android:gravity="right|center_vertical"/>
+
+                        <CheckBox
+                            android:id="@+id/cbBn"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="B-"
+                            android:gravity="right|center_vertical"/>
+                    </LinearLayout>
+
+                    <!-- الصف الثاني -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:weightSum="4">
+
+                        <CheckBox
+                            android:id="@+id/cbOp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="O+"
+                            android:gravity="right|center_vertical"/>
+
+                        <CheckBox
+                            android:id="@+id/cbOn"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="O-"
+                            android:gravity="right|center_vertical"/>
+
+                        <CheckBox
+                            android:id="@+id/cbABp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="AB+"
+                            android:gravity="right|center_vertical"/>
+
+                        <CheckBox
+                            android:id="@+id/cbABn"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="AB-"
+                            android:gravity="right|center_vertical"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- الأولوية -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="مستوى الأولوية"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="20dp"
                     android:textStyle="bold"/>
 
                 <RadioGroup
                     android:id="@+id/rgPriority"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <RadioButton android:id="@+id/rbUrgent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="عاجل" />
-                    <RadioButton android:id="@+id/rbNormal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="عادي" android:layout_marginRight="20dp"/>
+                    android:orientation="horizontal"
+                    android:layout_marginTop="5dp">
+
+                    <RadioButton
+                        android:id="@+id/rbUrgent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="عاجل"
+                        android:checked="true" />
+
+                    <RadioButton
+                        android:id="@+id/rbNormal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="عادي"
+                        android:layout_marginRight="30dp"/>
                 </RadioGroup>
 
+                <!-- الرسالة -->
                 <EditText
                     android:id="@+id/etMessage"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:layout_marginTop="10dp"
-                    android:background="#E0E0E0"
-                    android:gravity="top"
+                    android:layout_marginTop="15dp"
+                    android:background="@android:drawable/edit_text"
+                    android:gravity="top|right"
                     android:hint="اكتب نص الرسالة هنا..."
-                    android:padding="10dp" />
+                    android:padding="12dp" />
 
+                <!-- زر الإرسال -->
                 <Button
                     android:id="@+id/btnSendNotification"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="25dp"
                     android:backgroundTint="#D32F2F"
                     android:text="إرسال الإشعار"
                     android:textColor="#FFFFFF" />
-
             </LinearLayout>
-
         </ScrollView>
 
+        <!-- الإشعارات الواردة -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvIncomingAdmin"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            android:padding="5dp"/>
-
+            android:padding="8dp"/>
     </FrameLayout>
 
 </LinearLayout>

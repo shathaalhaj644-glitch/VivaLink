@@ -123,7 +123,7 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         }
 
         if (hospitalId == null || hospitalId.isEmpty()) {
-            Toast.makeText(this, "خطأ: لم يتم العثور على المستشفى", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "خطأ: لم يتم تحديد المستشفى", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -142,32 +142,35 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
             return;
         }
 
+        // 🔥 الحل: إرسال كل فصيلة في طلب منفصل لضمان عدم اختلاط البيانات
         for (String blood : selectedBloods) {
 
-            // ✅ إرسال للمستشفى الصحيح
+            // 1. إشعار للمستشفى (حصراً لمستشفى الموظف الحالي)
             pushToFirebase(hospitalId, "ADMIN", blood, msg);
 
-            // ✅ إرسال للمتبرعين
+            // 2. إشعار للمتبرعين (يصل لكل من يطابق الفصيلة والمدينة)
             pushToFirebase(null, "DONOR", blood, msg);
         }
 
-        Toast.makeText(this, "تم إرسال الطلب بنجاح", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "تم إرسال " + selectedBloods.size() + " طلبات بنجاح", Toast.LENGTH_LONG).show();
         etMessage.setText("");
     }
 
     private void pushToFirebase(String targetUserId, String targetType, String blood, String message) {
-        DatabaseReference newNotif = dbRef.push();
+        DatabaseReference newNotif = dbRef.push(); // إنشاء ID فريد لكل إشعار
 
         HashMap<String, Object> data = new HashMap<>();
         data.put("notificationId", newNotif.getKey());
-        data.put("title", "🚨 طلب دم عاجل: " + hospitalName);
-        data.put("message", "مطلوب فصيلة " + blood + " في " + currentCity + "\n" + message);
+        data.put("title", "🚨 طلب دم عاجل: " + blood); // الفصيلة في العنوان
+        data.put("message", "مطلوب فصيلة (" + blood + ") في " + hospitalName + "\n" + message);
 
         data.put("targetType", targetType);
-        data.put("targetUserId", targetUserId);
+        data.put("targetUserId", targetUserId); // سيأخذ ID المستشفى في حالة ADMIN و null في حالة DONOR
 
-        data.put("bloodType", blood);
+        data.put("bloodType", blood); // تأكد أن هذه القيمة هي blood الحالية في الـ Loop
         data.put("city", currentCity);
+        data.put("hospitalName", hospitalName);
+        data.put("hospitalId", hospitalId);
 
         data.put("createdAt", System.currentTimeMillis());
         data.put("isRead", false);
@@ -175,7 +178,6 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
 
         newNotif.setValue(data);
     }
-
     // ابحثي عن هذه الدالة في BloodBankNotificationActivity
     private void loadIncomingNotifications() {
         String myId = FirebaseAuth.getInstance().getUid();

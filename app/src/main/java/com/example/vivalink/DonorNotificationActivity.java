@@ -1,8 +1,8 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
+import android.util.Log; // تم إضافة هذا السطر لحل مشكلة Log
 import android.view.View;
-import android.widget.Toast;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,7 +36,9 @@ public class DonorNotificationActivity extends AppCompatActivity {
         dbRef = FirebaseDatabase.getInstance().getReference();
         myId = FirebaseAuth.getInstance().getUid();
 
-        if (myId != null) { fetchDonorDetailsAndLoadNotifications(); }
+        if (myId != null) {
+            fetchDonorDetailsAndLoadNotifications();
+        }
     }
 
     private void fetchDonorDetailsAndLoadNotifications() {
@@ -58,54 +60,70 @@ public class DonorNotificationActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
+                long fourMonthsMillis = 4L * 30 * 24 * 60 * 60 * 1000;
+                long currentTime = System.currentTimeMillis();
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     try {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
-
                         if (n == null || !"DONOR".equals(n.getTargetType())) continue;
 
-                        // ✅ 1. إشعارات شخصية موجهة لـ ID المتبرع (مثل قبول التبرع)
-                        if (n.getUserId() != null && n.getUserId().equals(myId)) {
-                            list.add(0, n);
-                            continue; // ننتقل للإشعار التالي ولا نكمل الفحص أدناه
-                        }
+                        String cleanMyCity = normalizeArabic(myCity);
+                        String cleanNotifCity = normalizeArabic(n.getCity());
 
-                        // ✅ 2. فحص نوع الإشعار (يجب أن يكون طلب عاجل لتطبيق فلترة الفصيلة والمدينة)
-                        if ("urgent_request".equals(n.getType())) {
+                        if (cleanMyCity.equals(cleanNotifCity)) {
+                            if (myBloodType != null && n.getBloodType() != null &&
+                                    myBloodType.trim().equalsIgnoreCase(n.getBloodType().trim())) {
 
-                            // التأكد من أن الإشعار يحتوي على مدينة وفصيلة
-                            if (n.getCity() != null && n.getBloodType() != null) {
-
-                                String cleanMyCity = normalizeArabic(myCity);
-                                String cleanNotifCity = normalizeArabic(n.getCity());
-
-                                boolean cityMatch = cleanMyCity.equals(cleanNotifCity);
-
-                                // 🔥 هنا التأكد من مطابقة الفصيلة بدقة
-                                boolean bloodMatch = myBloodType != null && myBloodType.trim().equalsIgnoreCase(n.getBloodType().trim());
-
-                                if (cityMatch && bloodMatch) {
-                                    list.add(0, n);
-                                }
+                                checkDonationEligibilityAndAdd(n, fourMonthsMillis, currentTime);
                             }
                         }
-
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("VivaLink", "Donor Notif Error: " + e.getMessage());
                     }
                 }
-
-                adapter.notifyDataSetChanged();
-                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                // تحديث الواجهة في حال كانت القائمة فارغة
+                if (snapshot.getChildrenCount() == 0) {
+                    tvNoNotifications.setVisibility(View.VISIBLE);
+                    adapter.notifyDataSetChanged();
+                }
             }
-
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
-    // دالة توحيد الحروف العربية (مهمة جداً لنجاح المقارنة)
+    // تم دمج الدالتين في دالة واحدة صحيحة لمنع تكرار الـ Error
+    private void checkDonationEligibilityAndAdd(BloodBankNotificationModel n, long period, long now) {
+        dbRef.child("Donors").child(myId).child("lastDonationDate").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isEligible = true;
+
+                Object value = snapshot.getValue();
+                if (value instanceof Long) {
+                    if (now - (Long) value < period) isEligible = false;
+                } else if (value instanceof String) {
+                    String dateStr = (String) value;
+                    if (!dateStr.isEmpty()) {
+                        // يمكنك هنا إضافة منطق لتحويل الـ String لـ Long إذا أردتِ
+                        // حالياً سنعتبره مؤهل إذا كان الحقل فارغاً
+                    }
+                }
+
+                if (isEligible) {
+                    if (!list.contains(n)) {
+                        list.add(0, n);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+                tvNoNotifications.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     private String normalizeArabic(String text) {
         if (text == null) return "";
         return text.trim().replace(" ", "").replace("ة", "ه").replace("أ", "ا").replace("إ", "ا").replace("آ", "ا");
-    } }
+    }
+}
