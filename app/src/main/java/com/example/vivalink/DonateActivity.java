@@ -102,6 +102,9 @@ public class DonateActivity extends AppCompatActivity {
         final String userId = FirebaseAuth.getInstance().getUid();
         if (userId == null) return;
 
+        // 🔥 التعديل الفوري: بنبعث الإشعار أول اشي عشان نضمن وصوله لقاعدة البيانات بدون تعليق
+        sendArrivalNotificationToStaff(selectedMinutes);
+
         // 1. تجهيز بيانات جدول القادمين (IncomingDonations)
         Map<String, Object> incomingData = new HashMap<>();
         incomingData.put("donorId", userId);
@@ -116,18 +119,13 @@ public class DonateActivity extends AppCompatActivity {
 
         FirebaseDatabase.getInstance().getReference("IncomingDonations").child(userId).setValue(incomingData)
                 .addOnSuccessListener(aVoid -> {
-
-                    // 2. إرسال الإشعار الفوري لموظف المستشفى المعني فقط
-                    sendArrivalNotificationToStaff(selectedMinutes);
-
-                    // 3. الانتقال لصفحة التايمر مع تمرير "كل" البيانات لضمان عدم ظهور Null
+                    // الانتقال لصفحة التايمر
                     Intent intent = new Intent(DonateActivity.this, RequestsDetailsActivity.class);
                     intent.putExtra("requestId", requestId);
                     intent.putExtra("minutes", selectedMinutes);
                     intent.putExtra("hospitalId", hospitalId);
                     intent.putExtra("donorName", userName);
 
-                    // تمرير البيانات المفقودة التي كانت تسبب Null سابقاً
                     intent.putExtra("bloodType", getIntent().getStringExtra("bloodType"));
                     intent.putExtra("hospitalName", getIntent().getStringExtra("hospitalName"));
                     intent.putExtra("city", getIntent().getStringExtra("city"));
@@ -139,58 +137,58 @@ public class DonateActivity extends AppCompatActivity {
                     Toast.makeText(DonateActivity.this, "تم تأكيد الذهاب، رافقتك السلامة ✅", Toast.LENGTH_SHORT).show();
                     finish();
                 })
-                .addOnFailureListener(e -> Toast.makeText(DonateActivity.this, "خطأ: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    // لو علق جدول القادمين، بنعرف شو السبب من التوست هاد، بس الإشعار بكون وصل!
+                    Log.e("VivaLink_Error", "فشل في جدول القادمين: " + e.getMessage());
+                    Toast.makeText(DonateActivity.this, "خطأ في تسجيل القادمين: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void sendArrivalNotificationToStaff(int minutes) {
+        Log.d("VivaLink_Debug", "تم استدعاء الدالة بنجاح. قيمة hospitalId الحالية هي: " + hospitalId);
 
-        DatabaseReference notifRef =
-                FirebaseDatabase.getInstance()
-                        .getReference("Notifications")
-                        .push();
+        if (hospitalId == null || hospitalId.trim().isEmpty()) {
+            Log.e("VivaLink_Debug", "❌ خلل قاتل: hospitalId قيمته null أو فارغة! الفايربيس يرفض الرفع بدون معرف المستشفى.");
+            Toast.makeText(this, "فشل إرسال الإشعار للمستشفى بسبب نقص البيانات", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
         String notifId = notifRef.getKey();
 
-        if (notifId != null && hospitalId != null) {
-
+        if (notifId != null) {
             HashMap<String, Object> notifData = new HashMap<>();
 
-            String bloodType = getIntent().getStringExtra("bloodType");
-            String department = getIntent().getStringExtra("department");
+            String actualDepartment = tvDepartment.getText() != null ? tvDepartment.getText().toString().trim() : "القسم المعني";
+            String bloodType = tvBloodType.getText() != null ? tvBloodType.getText().toString().trim() : "-";
+
+            // جلب اسم المستشفى الحالي من الواجهة بأمان
+            String actualHospitalName = tvHospitalName.getText() != null ? tvHospitalName.getText().toString().trim() : "";
 
             notifData.put("notificationId", notifId);
+            notifData.put("title", "متبرع في الطريق 🚒");
 
-            // عنوان الإشعار
-            notifData.put("title", "🏃 متبرع قيد الوصول");
+            String formattedMessage = "سيصل خلال " + minutes + " دقيقة لـ " + actualDepartment + " - " + userName + " متبرع بفصيلة " + bloodType + ".";
+            notifData.put("message", formattedMessage);
 
-            // الرسالة
-            notifData.put(
-                    "message",
-                    "المتبرع " + userName +
-                            " سيصل خلال " + minutes +
-                            " دقيقة لقسم " + department +
-                            " لفصيلة " + bloodType
-            );
-
-            // نوع الإشعار
             notifData.put("type", "donation_confirmed");
-
-            // مهم جداً 🔥🔥🔥
             notifData.put("targetType", "ADMIN");
+            notifData.put("targetUserId", hospitalId.trim());
 
-            // المستشفى المستهدف
-            notifData.put("targetUserId", hospitalId);
+            // 🔥 السطر السحري الجديد: بنرفع اسم المستشفى للإشعار عشان نمنع التداخل بين المستشفيات
+            notifData.put("hospitalName", actualHospitalName);
 
-            notifData.put("requestId", requestId);
-
+            notifData.put("requestId", requestId != null ? requestId : "");
             notifData.put("createdAt", System.currentTimeMillis());
-
             notifData.put("isRead", false);
+            notifData.put("city", tvCity.getText() != null ? tvCity.getText().toString().trim() : ""); // احتياطاً للمدينة أيضاً
 
             notifRef.setValue(notifData)
-                    .addOnSuccessListener(aVoid ->
-                            Log.d("VivaLink", "تم إرسال إشعار الوصول بنجاح"))
-                    .addOnFailureListener(e ->
-                            Log.e("VivaLink", "فشل إرسال الإشعار: " + e.getMessage()));
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("VivaLink_Debug", "✅ نجاح! تم رفع الإشعار بنجاح إلى Firebase بمفتاح: " + notifId);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("VivaLink_Debug", "❌ فشل الرفع إلى Firebase: " + e.getMessage());
+                    });
         }
     } }

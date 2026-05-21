@@ -71,34 +71,57 @@ public class BloodBankHomeActivity extends AppCompatActivity {
     }
 
     private void calculateStatistics() {
-        // إحصائيات المتبرعين في نفس المدينة
+        // 1️⃣ إحصائيات المتبرعين في نفس المدينة (شغال صح، صلحنا بس منطق الفحوصات المعلقة جواته)
         dbRef.child("Donors").orderByChild("city").equalTo(currentStaffCity)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot s) {
                         countDonorsCity.setText(String.valueOf(s.getChildrenCount()));
+
                         int pending = 0;
                         for (DataSnapshot ds : s.getChildren()) {
                             String status = ds.child("bloodTestStatus").getValue(String.class);
-                            if (status == null || status.isEmpty() || status.equals("معلق")) pending++;
+
+                            // 🔥 التصليح الجذري للفحوصات المعلقة: نعد فقط إذا كانت الحالة مكتوبة "معلق" صراحة بالفايربيس
+                            // هيك الـ null والـ empty مستحيل ينعدوا، والرقم 3 الوهمي رح يختفي ويصير 0!
+                            if ("معلق".equals(status)) {
+                                pending++;
+                            }
                         }
                         countPendingTests.setText(String.valueOf(pending));
                     }
                     @Override public void onCancelled(@NonNull DatabaseError e) {}
                 });
 
-        // إحصائيات تبرعات اليوم
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        dbRef.child("Donations").orderByChild("date").equalTo(today)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot s) {
-                        countTodayDonors.setText(String.valueOf(s.getChildrenCount()));
-                    }
-                    @Override public void onCancelled(@NonNull DatabaseError e) {}
-                });
+        // 2️⃣ إحصائيات تبرعات اليوم (🔥 تم تصليح الفلترة والتصفير التلقائي)
+        // الكود هان بيجيب تاريخ اليوم الحالي بالظبط وبقارنه بجدول Donations
+        // 2️⃣ إحصائيات تبرعات اليوم (🔥 التعديل الصحيح بناءً على قاعدة البيانات عندك)
+        // بيجيب تاريخ اليوم بالصيغة المخزنة (dd/MM/yyyy) ليتطابق مع lastDonation
+        String todayStr = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(new Date());
 
-        // إحصائيات الطلبات المفتوحة للمستشفى
+        dbRef.child("Donors").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot s) {
+                int todayDonationsCount = 0;
+
+                for (DataSnapshot ds : s.getChildren()) {
+                    String lastDonation = ds.child("lastDonation").getValue(String.class);
+                    String donorCity = ds.child("city").getValue(String.class);
+
+                    // الفحص: إذا كان المتبرع تبرع اليوم + وهو من نفس مدينة الموظف (طولكرم)
+                    if (lastDonation != null && donorCity != null) {
+                        if (lastDonation.trim().equals(todayStr) && donorCity.trim().equalsIgnoreCase(currentStaffCity.trim())) {
+                            todayDonationsCount++;
+                        }
+                    }
+                }
+
+                // عرض الرقم الصحيح وتصفيره تلقائياً إذا دخلنا بيوم جديد
+                countTodayDonors.setText(String.valueOf(todayDonationsCount));
+            }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        // 3️⃣ إحصائيات الطلبات المفتوحة للمستشفى (🚨 خليناها زي ما هي بدون أي تغيير)
         if (currentHospitalId != null) {
             dbRef.child("Requests").orderByChild("hospitalId").equalTo(currentHospitalId)
                     .addValueEventListener(new ValueEventListener() {

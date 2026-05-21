@@ -341,45 +341,30 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
         });
     }
     private void filterHistory(String query) {
-
-        String todayDate = new SimpleDateFormat(
-                "dd/MM/yyyy",
-                Locale.ENGLISH
-        ).format(new Date());
-
+        String todayDate = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(new Date());
         filteredList.clear();
 
         for (BloodBankDonorsModel d : allDonors) {
+            String donorName = d.getDisplayName() == null ? "" : d.getDisplayName().toLowerCase();
+            boolean matchesName = donorName.contains(query.toLowerCase());
 
-            String donorName = d.getDisplayName() == null
-                    ? ""
-                    : d.getDisplayName().toLowerCase();
-
-            boolean matchesName =
-                    donorName.contains(query.toLowerCase());
-
-            boolean donatedToday =
-                    d.getLastDonation() != null &&
-                            d.getLastDonation().trim().equals(todayDate);
+            // فحص المطابقة مع تاريخ اليوم مع إزالة الفراغات الزائدة احتياطاً
+            boolean donatedToday = d.getLastDonation() != null && d.getLastDonation().trim().equals(todayDate.trim());
 
             if (matchesName && donatedToday) {
+                // حماية الحقول من الـ Null لضمان استقرار العرض في الـ Adapter
+                if (d.getPhone() == null) d.setPhone("غير متوفر");
+                if (d.getBloodType() == null) d.setBloodType("-");
+                if (d.getCity() == null) d.setCity("-");
 
-                if (d.getPhone() == null)
-                    d.setPhone("غير متوفر");
-
-                if (d.getBloodType() == null)
-                    d.setBloodType("-");
-
-                if (d.getCity() == null)
-                    d.setCity("-");
-
-                if (d.getDonationCount() == null)
-                    d.setDonationCount("0");
+                // حماية الـ donationCount من اختلاف الأنواع (Long و String)
+                if (d.getDonationCount() == null) {
+                    d.setDonationCount("1"); // بما أنه تبرع اليوم، فالعدد بالتأكيد 1 أو أكثر
+                }
 
                 filteredList.add(d);
             }
         }
-
         adapter.notifyDataSetChanged();
     }
 

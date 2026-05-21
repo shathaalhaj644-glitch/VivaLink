@@ -45,7 +45,8 @@ public class DonorsHomeActivity extends AppCompatActivity {
     private String userId;
     private CardView btnNotificationsCard; // السطر المراد إضافته
     private String lastDonationDateFromDB, donorBloodType, donorCity, donorName;
-    private String hospitalName, bloodType, units, confirmedAt, department, city, requestId, currentStatus;
+    private String hospitalName, bloodType, units, confirmedAt, department, city, requestId, currentStatus , hospitalId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +85,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     String testStatus = snapshot.child("bloodTestStatus").getValue(String.class);
                     String lastTest = snapshot.child("lastBloodTest").getValue(String.class);
-                    String lastDonation = snapshot.child("lastDonation").getValue(String.class); // تأكدي من جلب هذا السطر
+                    String lastDonation = snapshot.child("lastDonation").getValue(String.class);
 
                     // أ- لو لسه الموظف ما وافق على الصورة
                     if ("معلق".equals(testStatus)) {
@@ -92,21 +93,14 @@ public class DonorsHomeActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // ب- لو الفحص الدوري منتهي (مر عليه 120 يوم فحص)
+                    // ب- لو الفحص الدوري منتهي
                     if (isTestExpired(lastTest)) {
                         showPeriodicTestDialog();
                         return;
                     }
 
-                    // ج- لو لسه ما صار له 4 شهور متبرع (هنا المنع الإضافي)
-                    if (isTooSoonToDonate(lastDonation)) {
-                        // استدعاء دالة التنبيه اللي بتعرض الأيام المتبقية
-                        checkDonationEligibility();
-                        return;
-                    }
-
-                    // د- لو تخطى كل الشروط بنجاح
-                    goToDonate();
+                    // 🔥 جـ- الفحص المباشر للأهلية وحساب الأيام المتبقية بدون تضارب
+                    checkDonationEligibility(lastDonation);
                 }
             });
         });
@@ -360,7 +354,11 @@ public class DonorsHomeActivity extends AppCompatActivity {
                                 reqCity.trim().equalsIgnoreCase(donorCity.trim())) {
                             if (status.equals("ملغي")) continue;
                             found = true;
+
+                            // 🛠️ التعديل السحري هنا:
                             requestId = data.getKey();
+                            hospitalId = data.getKey(); // 🔥 ربطنا الـ hospitalId بـ Key الموظف مباشرة
+
                             currentStatus = status;
                             hospitalName = data.child("hospitalName").getValue(String.class);
                             bloodType = reqBlood;
@@ -378,7 +376,6 @@ public class DonorsHomeActivity extends AppCompatActivity {
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
-
     private void updateRequestUI(boolean found, String status) {
         if (found) {
             layoutNoRequest.setVisibility(View.GONE);
@@ -406,9 +403,10 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
     }
 
-    private void checkDonationEligibility() {
+    // 🔥 تعديل السطر الأول فقط لتمرير المتغير (lastDonationDate)
+    private void checkDonationEligibility(String lastDonationDate) {
         // 1. التحقق إذا كان المتبرع لم يتبرع من قبل أبداً
-        if (lastDonationDateFromDB == null || lastDonationDateFromDB.equals("--") || lastDonationDateFromDB.isEmpty()) {
+        if (lastDonationDate == null || lastDonationDate.equals("--") || lastDonationDate.isEmpty()) {
             goToDonate();
             return;
         }
@@ -416,7 +414,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
         try {
             // 2. تحويل تاريخ آخر تبرع من نص إلى تاريخ (Date)
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
-            Date lastDate = sdf.parse(normalizeNumbers(lastDonationDateFromDB));
+            Date lastDate = sdf.parse(normalizeNumbers(lastDonationDate));
 
             // 3. حساب الفرق بالأيام بين اليوم وتاريخ آخر تبرع
             long diffInMillies = new Date().getTime() - lastDate.getTime();
@@ -427,15 +425,10 @@ public class DonorsHomeActivity extends AppCompatActivity {
                 showIneligibilityAlert(120 - daysPassed, lastDate);
             } else {
                 // الحالة ب: مر 120 يوم أو أكثر -> المتبرع بطل وجاهز!
-
-                // --- إرسال إشعار "أهلية التبرع" لقاعدة البيانات ---
                 sendEligibilityNotificationToFirebase();
-
-                // الانتقال لصفحة التبرع
                 goToDonate();
             }
         } catch (Exception e) {
-            // في حال حدوث خطأ في صيغة التاريخ، نسمح له بالدخول احتياطاً
             goToDonate();
         }
     }
@@ -464,6 +457,10 @@ public class DonorsHomeActivity extends AppCompatActivity {
         if (hospitalName == null) return;
         Intent intent = new Intent(this, DonateActivity.class);
         intent.putExtra("requestId", requestId);
+
+        // 🔥 السطر المفقود اللي ضفناه عشان يبعت الـ ID لصفحة التبرع
+        intent.putExtra("hospitalId", hospitalId);
+
         intent.putExtra("hospitalName", hospitalName);
         intent.putExtra("bloodType", bloodType);
         intent.putExtra("units", units);
@@ -472,7 +469,6 @@ public class DonorsHomeActivity extends AppCompatActivity {
         intent.putExtra("department", department);
         startActivity(intent);
     }
-
     private void goToDetails() {
         Intent intent = new Intent(this, RequestsDetailsActivity.class);
         intent.putExtra("requestId", requestId);
@@ -561,20 +557,35 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
     }
     private void startNotificationMonitoring() {
-        // هذا الهيلبر هو اللي بيظهر التنبيه أعلى الشاشة (Pop-up)
         NotificationsHelper helper = new NotificationsHelper();
+        final long activityStartTime = System.currentTimeMillis(); // 🔥 تسجيل وقت دخول المتبرع للصفحة حالياً
 
-        // مراقبة آخر إشعار مضاف للمتبرع الحالي
         dbRef.child("Notifications").orderByChild("userId").equalTo(userId).limitToLast(1)
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                        // تحويل البيانات لكلاس Notifications الموحد
                         Notifications n = snapshot.getValue(Notifications.class);
 
-                        // إذا كان الإشعار جديد وغير مقروء، أظهر تنبيه النظام
                         if (n != null && !n.isRead()) {
-                            helper.showSystemNotification(DonorsHomeActivity.this, n.getTitle(), n.getMessage());
+                            // جلب وقت إنشاء الإشعار بأمان (سواء كان مخزناً كـ String أو Long)
+                            long notifTime = 0;
+                            try {
+                                if (snapshot.hasChild("createdAt")) {
+                                    Object timeObj = snapshot.child("createdAt").getValue();
+                                    if (timeObj instanceof Long) {
+                                        notifTime = (Long) timeObj;
+                                    } else if (timeObj instanceof String) {
+                                        notifTime = Long.parseLong((String) timeObj);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                notifTime = 0;
+                            }
+
+                            // 🔥 التعديل السحري: التنبيه يظهر فقط إذا تم إنشاؤه *بعد* دخول المتبرع للصفحة (إشعار جديد فعلياً)
+                            if (notifTime > activityStartTime) {
+                                helper.showSystemNotification(DonorsHomeActivity.this, n.getTitle(), n.getMessage());
+                            }
                         }
                     }
                     @Override public void onChildChanged(@NonNull DataSnapshot s, @Nullable String p) {}
@@ -582,6 +593,4 @@ public class DonorsHomeActivity extends AppCompatActivity {
                     @Override public void onChildMoved(@NonNull DataSnapshot s, @Nullable String p) {}
                     @Override public void onCancelled(@NonNull DatabaseError e) {}
                 });
-    }
-
-}
+    } }

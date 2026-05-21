@@ -206,12 +206,16 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
 
                         // 1. استقبال إشعار وصول المتبرع (Donor Arrival)
                         // ابحثي عن هذا الجزء داخل loadIncomingNotifications وعدليه
+                        // 1. استقبال إشعار وصول المتبرع (Donor Arrival)
+                        // 1. استقبال إشعار وصول المتبرع (Donor Arrival) المطوّر
                         if ("donor_arrival".equals(type) || "donation_confirmed".equals(type)) {
 
-                            String notifHospitalId = n.getTargetUserId();
+                            // قراءة اسم المستشفى المكتوب داخل الإشعار المرفوع في Firebase
+                            String notifHospitalName = ds.child("hospitalName").getValue(String.class);
 
-                            if (hospitalId != null && notifHospitalId != null
-                                    && hospitalId.trim().equals(notifHospitalId.trim())) {
+                            // 🔥 القفل الذكي: الإشعار يظهر فقط إذا كان اسم مستشفى الإشعار مطابق تماماً لاسم مستشفى الموظف الحالي!
+                            if (hospitalName != null && notifHospitalName != null
+                                    && hospitalName.trim().equalsIgnoreCase(notifHospitalName.trim())) {
 
                                 incomingList.add(0, n);
                             }
