@@ -5,7 +5,7 @@ public class Donors {
     private String bloodLevel, bloodTestProofUrl, bloodTestSubmittedAt, bloodTestStatus;
     private String createdAt, diseaseDetails, diseaseName, donationCount, fullName;
     private String hasDisease, hasDiseases, lastBloodTest, uid;
-    private boolean isEligible; // الحقل الجديد
+    private boolean isEligible;
 
     public Donors() {}
 
@@ -20,7 +20,7 @@ public class Donors {
         this.role = role;
     }
 
-    // Getters
+
     public String getName() { return name; }
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
@@ -41,9 +41,9 @@ public class Donors {
     public String getHasDiseases() { return hasDiseases; }
     public String getLastBloodTest() { return lastBloodTest; }
     public String getUid() { return uid; }
-    public boolean isEligible() { return isEligible; } // getter الجديد
+    public boolean isEligible() { return isEligible; }
 
-    // Setters
+
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setPhone(String phone) { this.phone = phone; }
@@ -64,5 +64,5 @@ public class Donors {
     public void setHasDiseases(String hasDiseases) { this.hasDiseases = hasDiseases; }
     public void setLastBloodTest(String lastBloodTest) { this.lastBloodTest = lastBloodTest; }
     public void setUid(String uid) { this.uid = uid; }
-    public void setEligible(boolean eligible) { this.isEligible = eligible; } // setter الجديد
+    public void setEligible(boolean eligible) { this.isEligible = eligible; }
 }

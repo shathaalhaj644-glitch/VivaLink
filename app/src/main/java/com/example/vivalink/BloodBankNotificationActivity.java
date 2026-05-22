@@ -125,9 +125,9 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         }
 
         for (String blood : selectedBloods) {
-            // 1. للموظفين الزملاء (ADMIN) - نرسله بـ targetUserId محدد
+
             pushToFirebase(hospitalId, "ADMIN", blood, msg, myUid);
-            // 2. للمتبرعين (DONOR) - نرسله بـ targetUserId = null لكي يصل للكل حسب المدينة والفصيلة
+
             pushToFirebase(null, "DONOR", blood, msg, myUid);
         }
 
@@ -158,34 +158,32 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
         data.put("createdAt", System.currentTimeMillis());
         data.put("isRead", false);
 
-        // 1. تخزين في قاعدة البيانات (ليظهر داخل قائمة الإشعارات)
+
         newNotif.setValue(data).addOnSuccessListener(aVoid -> {
 
-            // 2. إرسال التنبيه للخارج (ليظهر على شاشة التلفون)
+
             if ("DONOR".equals(targetType)) {
-                // نرسل إشعار عام لكل المتبرعين المشتركين في "موضوع" (Topic) التبرع
+
                 sendFcmNotification("donors", title, fullMessage);
             } else if ("ADMIN".equals(targetType) && targetUserId != null) {
-                // نرسل إشعار للموظف المسؤول (عن طريق موضوع خاص به أو ID)
+
                 sendFcmNotification("admin_" + targetUserId, title, fullMessage);
             }
         });
     }
 
-    // 🔹 إضافة الدالة الناقصة لحل الإيرور (Cannot resolve method)
+
     private void sendFcmNotification(String topic, String title, String body) {
-        // ملاحظة: لإرسال إشعار FCM حقيقي من داخل التطبيق (بدون سيرفر)،
-        // يفضل استخدام واجهة Firebase Console أو Cloud Functions.
-        // برمجياً، سنكتفي بطباعة السجل هنا أو استدعاء API خارجي إذا قمتِ بإعداده.
+
+
         Log.d("FCM_LOG", "جاري إرسال تنبيه للموضوع: " + topic + " | العنوان: " + title);
 
-        // إذا كنتِ تريدين الإرسال البرمجي المجاني، يجب إعداد مكتبة HTTP لإرسال الطلب لـ https://fcm.googleapis.com/fcm/send
+
     }
 
-    // دالة وهمية تشرح المنطق (لأن الإرسال الفعلي للخارج يحتاج FCM Server أو مكتبة بسيطة)
+
     private void sendNotificationToExternal(String title, String message, String city, String blood) {
-        // هنا يتم استدعاء FCM لإرسال الإشعار
-        // لكي يعمل "من برة" مجاناً، أسهل طريقة هي إرسال طلب HTTP لـ Firebase
+
         Log.d("FCM", "جاري إرسال إشعار خارجي لمتبرعي " + city + " فصيلة " + blood);
     }
     private void loadIncomingNotifications() {
@@ -204,34 +202,31 @@ public class BloodBankNotificationActivity extends AppCompatActivity {
                         String targetType = n.getTargetType();
                         String targetUserId = n.getTargetUserId();
 
-                        // 1. استقبال إشعار وصول المتبرع (Donor Arrival)
-                        // ابحثي عن هذا الجزء داخل loadIncomingNotifications وعدليه
-                        // 1. استقبال إشعار وصول المتبرع (Donor Arrival)
-                        // 1. استقبال إشعار وصول المتبرع (Donor Arrival) المطوّر
+
                         if ("donor_arrival".equals(type) || "donation_confirmed".equals(type)) {
 
-                            // قراءة اسم المستشفى المكتوب داخل الإشعار المرفوع في Firebase
+
                             String notifHospitalName = ds.child("hospitalName").getValue(String.class);
 
-                            // 🔥 القفل الذكي: الإشعار يظهر فقط إذا كان اسم مستشفى الإشعار مطابق تماماً لاسم مستشفى الموظف الحالي!
+
                             if (hospitalName != null && notifHospitalName != null
                                     && hospitalName.trim().equalsIgnoreCase(notifHospitalName.trim())) {
 
                                 incomingList.add(0, n);
                             }
                         }
-                        // 2. إشعارات الفحوصات (حسب المدينة)
+
                         else if ("new_test_upload".equals(type)) {
                             if (currentCity != null && currentCity.equals(n.getCity())) {
                                 incomingList.add(0, n);
                             }
                         }
 
-                        // 3. طلبات الدم العاجلة (من الموظفين الآخرين)
+
                         else if ("urgent_request".equals(type) && "ADMIN".equals(targetType)) {
                             String sId = ds.child("senderId").getValue(String.class);
                             if (hospitalId != null && hospitalId.equals(targetUserId)) {
-                                // تظهر فقط إذا لم أكن أنا من أرسلها
+
                                 if (sId != null && !sId.equals(myUid)) {
                                     incomingList.add(0, n);
                                 }

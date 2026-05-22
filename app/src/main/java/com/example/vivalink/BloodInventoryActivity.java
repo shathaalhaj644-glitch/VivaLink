@@ -100,7 +100,7 @@ public class BloodInventoryActivity extends AppCompatActivity {
                 @Override public void onCancelled(@NonNull DatabaseError e) {}
             });
         } else {
-            // تاب الطلبات - تم تعديله لكي لا تختفي الطلبات المقبولة/المرفوضة
+
             rv.setLayoutManager(new LinearLayoutManager(this));
             db.child("BloodTransferRequests").orderByChild("toHospitalId").equalTo(uid).addValueEventListener(new ValueEventListener() {
                 @Override public void onDataChange(@NonNull DataSnapshot s) {
@@ -170,12 +170,12 @@ public class BloodInventoryActivity extends AppCompatActivity {
         HashMap<String, Object> notifData = new HashMap<>();
         notifData.put("notificationId", notifRef.getKey());
 
-        // فحص ذكي لاسم المستشفى عشان ما يتكرر كلمة (مستشفى مستشفى)
+
         String displayName = hName != null ? hName : "بنك الدم";
         if (displayName.startsWith("مستشفى")) {
-            // إذا الاسم أصلاً فيه كلمة مستشفى، بنستخدمه زي ما هو
+
         } else {
-            // إذا ما فيه، بنضيفها إحنا
+
             displayName = "مستشفى " + displayName;
         }
 

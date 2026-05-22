@@ -44,7 +44,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
     public void onBindViewHolder(@NonNull VH holder, int position) {
         HospitalRequestModel m = list.get(position);
 
-        // 1. عرض البيانات الأساسية
+
         holder.tvBloodType.setText("🩸 " + m.bloodType);
         holder.tvUnits.setText("🧪 عدد الوحدات: " + m.units);
         holder.tvDept.setText("🏢 القسم: " + m.department);
@@ -52,7 +52,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
         holder.tvStatusBadge.setText("الحالة: " + m.status);
         holder.tvDateTime.setText("🕒 " + m.getFormattedDate());
 
-        // 2. التحكم في ظهور علامة "تم التبرع"
+
         if ("مغلق".equals(m.status)) {
             holder.tvDonatedTag.setVisibility(View.VISIBLE);
             holder.tvDonatedTag.setText("تم التبرع ✅ (" + m.donatedCount + ")");
@@ -60,7 +60,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
             holder.tvDonatedTag.setVisibility(View.GONE);
         }
 
-        // 3. تغيير حالة الطلب والمنطق التلقائي (الباك إند الذكي)
+
         holder.btnChangeStatus.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(context, v);
             popup.getMenu().add("مفتوح");
@@ -71,13 +71,13 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
             popup.setOnMenuItemClickListener(item -> {
                 String newStatus = item.getTitle().toString();
 
-                // تحديث حالة الطلب في Firebase
+
                 FirebaseDatabase.getInstance().getReference("Requests")
                         .child(m.requestId).child("status").setValue(newStatus)
                         .addOnSuccessListener(aVoid -> {
                             Toast.makeText(context, "تم تحديث الحالة لـ " + newStatus, Toast.LENGTH_SHORT).show();
 
-                            // *** المنطق المثالي: إذا أغلق الموظف الطلب، نحدث بيانات المتبرع فوراً ***
+
                             if ("مغلق".equals(newStatus)) {
                                 if (m.donorId != null && !m.donorId.isEmpty() && !m.donorId.equals("null")) {
                                     updateDonorDataAutomatically(m.donorId);
@@ -91,7 +91,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
             popup.show();
         });
 
-        // 4. حذف الطلب
+
         holder.btnDelete.setOnClickListener(v -> {
             FirebaseDatabase.getInstance().getReference("Requests")
                     .child(m.requestId).removeValue()
@@ -99,7 +99,7 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
         });
     }
 
-    // دالة التحديث التلقائي (Backend Transaction)
+
     private void updateDonorDataAutomatically(String donorId) {
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).format(new Date());
         DatabaseReference donorRef = FirebaseDatabase.getInstance().getReference("Donors").child(donorId);
@@ -108,18 +108,18 @@ public class HospitalRequestsAdapter extends RecyclerView.Adapter<HospitalReques
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                // جلب العداد الحالي من قاعدة البيانات
+
                 String countStr = String.valueOf(mutableData.child("donationCount").getValue());
                 int currentCount = 0;
                 if (!countStr.equals("null") && !countStr.isEmpty()) {
                     currentCount = Integer.parseInt(countStr);
                 }
 
-                // تحديث البيانات تلقائياً في حساب المتبرع
-                mutableData.child("lastDonation").setValue(today); // تاريخ اليوم
-                mutableData.child("lastBloodTest").setValue(today); // تاريخ فحص اليوم
-                mutableData.child("donationCount").setValue(String.valueOf(currentCount + 1)); // زيادة العداد
-                mutableData.child("isEligible").setValue(false); // منعه من التبرع حالياً (لأنه تبرع للتو)
+
+                mutableData.child("lastDonation").setValue(today);
+                mutableData.child("lastBloodTest").setValue(today);
+                mutableData.child("donationCount").setValue(String.valueOf(currentCount + 1));
+                mutableData.child("isEligible").setValue(false);
 
                 return Transaction.success(mutableData);
             }

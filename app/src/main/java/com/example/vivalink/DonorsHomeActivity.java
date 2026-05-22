@@ -43,7 +43,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
     private DatabaseReference dbRef;
     private String userId;
-    private CardView btnNotificationsCard; // السطر المراد إضافته
+    private CardView btnNotificationsCard;
     private String lastDonationDateFromDB, donorBloodType, donorCity, donorName;
     private String hospitalName, bloodType, units, confirmedAt, department, city, requestId, currentStatus , hospitalId;
 
@@ -52,7 +52,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donors_home);
-        // طلب الإذن لأجهزة أندرويد 13 فما فوق
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != android.content.pm.PackageManager.PERMISSION_GRANTED) {
@@ -70,36 +70,35 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
 
         btnViewRequests.setOnClickListener(v -> startActivity(new Intent(this, RequestsActivity.class)));
-// فتح صفحة الإشعارات للمتبرع
+
         btnNotificationsCard.setOnClickListener(v ->
                 startActivity(new Intent(this, DonorNotificationActivity.class)));
         btnGoToDonate.setOnClickListener(v -> {
-            // 1. إذا كان طلب المستشفى أصلاً مغلق
+
             if ("مغلق".equals(currentStatus)) {
                 goToDetails();
                 return;
             }
 
-            // 2. فحص شروط المتبرع من Firebase
+
             dbRef.child("Donors").child(userId).get().addOnSuccessListener(snapshot -> {
                 if (snapshot.exists()) {
                     String testStatus = snapshot.child("bloodTestStatus").getValue(String.class);
                     String lastTest = snapshot.child("lastBloodTest").getValue(String.class);
                     String lastDonation = snapshot.child("lastDonation").getValue(String.class);
 
-                    // أ- لو لسه الموظف ما وافق على الصورة
+
                     if ("معلق".equals(testStatus)) {
                         Toast.makeText(this, "⏳ فحصك قيد المراجعة، لا يمكنك التبرع حالياً", Toast.LENGTH_LONG).show();
                         return;
                     }
 
-                    // ب- لو الفحص الدوري منتهي
+
                     if (isTestExpired(lastTest)) {
                         showPeriodicTestDialog();
                         return;
                     }
 
-                    // 🔥 جـ- الفحص المباشر للأهلية وحساب الأيام المتبقية بدون تضارب
                     checkDonationEligibility(lastDonation);
                 }
             });
@@ -107,7 +106,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         btnGoToProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
 
-        // تم تعديل هذا الزر ليفتح الاستوديو بدلاً من التحديث المباشر
+
         btnMarkBloodTest.setOnClickListener(v -> showPeriodicTestDialog());
     }
 
@@ -127,14 +126,14 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         tvDaysSinceLastTest = findViewById(R.id.tvDaysSinceLastTest);
         btnMarkBloodTest = findViewById(R.id.btnMarkBloodTest);
-        btnNotificationsCard = findViewById(R.id.btnNotificationsCard); // ربط الكارد بالـ ID
+        btnNotificationsCard = findViewById(R.id.btnNotificationsCard);
         btnViewRequests = findViewById(R.id.btnViewRequests);
         btnGoToDonate = findViewById(R.id.btnGoToDonate);
         btnGoToProfile = findViewById(R.id.btnGoToProfile);
     }
     private void showPeriodicTestDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        // تأكدي أن اسم الملف dialog_periodic_test مطابق للملف عندك في Layout
+
         View view = getLayoutInflater().inflate(R.layout.dialog_periodic_test, null);
 
         Button btnUploadNow = view.findViewById(R.id.btnUploadNow);
@@ -145,7 +144,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         btnUploadNow.setOnClickListener(v -> {
             dialog.dismiss();
-            showImageSourceOptions(); // هذه الدالة سنضيفها في التعديل القادم
+            showImageSourceOptions();
         });
 
         tvLater.setOnClickListener(v -> dialog.dismiss());
@@ -157,11 +156,11 @@ public class DonorsHomeActivity extends AppCompatActivity {
                 .setTitle("رفع صورة الفحص")
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) {
-                        // فتح الكاميرا
+
                         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         startActivityForResult(intent, CAMERA_REQUEST);
                     } else {
-                        // فتح الاستوديو
+
                         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         startActivityForResult(intent, PICK_IMAGE_REQUEST);
                     }
@@ -185,7 +184,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                     tvLastDonationDate.setText(lastDonationDateFromDB != null ? lastDonationDateFromDB : "--");
                     tvDonationCount.setText(countObj != null ? String.valueOf(countObj) : "0");
 
-                    // استدعاء منطق الفحص الدوري المطور
+
                     checkBloodTestInterval(lastBloodTest, bloodTestStatus);
 
                     if (donorCity != null && donorBloodType != null) {
@@ -198,7 +197,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
     }
 
     private void checkBloodTestInterval(String lastBloodTest, String status) {
-        // حالة "قيد المراجعة" (الصورة الثانية)
+
         if ("معلق".equals(status)) {
             cardBloodTestAlert.setVisibility(View.VISIBLE);
             cardBloodTestAlert.setCardBackgroundColor(Color.parseColor("#FFF3E0")); // برتقالي خفيف
@@ -207,7 +206,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
             return;
         }
 
-        // حالة مرور 4 شهور (الصورة الأولى)
+
         if (lastBloodTest != null && !lastBloodTest.equals("--") && !lastBloodTest.isEmpty()) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
@@ -228,7 +227,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                 cardBloodTestAlert.setVisibility(View.GONE);
             }
         } else {
-            // إذا لم يكن هناك فحص سابق أبداً
+
             cardBloodTestAlert.setVisibility(View.VISIBLE);
             tvDaysSinceLastTest.setText("يُرجى إجراء فحص دم دوري لضمان سلامتك.");
             btnMarkBloodTest.setText("رفع صورة الفحص");
@@ -250,21 +249,21 @@ public class DonorsHomeActivity extends AppCompatActivity {
             Bitmap bitmap = null;
             try {
                 if (requestCode == PICK_IMAGE_REQUEST && data.getData() != null) {
-                    // حالة 1: الصورة جاية من ألبوم الصور
+
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
                 } else if (requestCode == CAMERA_REQUEST && data.getExtras() != null) {
-                    // حالة 2: الصورة جاية من الكاميرا مباشرة
+
                     bitmap = (Bitmap) data.getExtras().get("data");
                 }
 
                 if (bitmap != null) {
-                    // تصغير حجم الصورة وضغطها عشان Base64 ما يكون طويل جداً
+
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, 600, 800, true);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     String base64Image = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
-                    // نرسل الصورة لـ Firebase
+
                     uploadTestData(base64Image);
                 }
             } catch (IOException e) {
@@ -285,7 +284,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
 
         dbRef.child("Donors").child(userId).updateChildren(updates).addOnSuccessListener(aVoid -> {
 
-            // --- إرسال إشعار لموظف بنك الدم ---
+
             DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
 
             HashMap<String, Object> notifData = new HashMap<>();
@@ -293,20 +292,18 @@ public class DonorsHomeActivity extends AppCompatActivity {
             notifData.put("title", "🔬 فحص دم جديد للمراجعة");
             notifData.put("message", "قام المتبرع (" + donorName + ") برفع صورة الفحص الدوري. رقم المرجع: " + refNum);
 
-            // التوجيه للموظف
+
             notifData.put("targetType", "ADMIN");
-            // نضع الـ targetUserId قيمة فارغة أو عامة ليراها جميع الموظفين في نفس المدينة،
-            // أو إذا كنتِ تريدين لموظف محدد يجب جلب الـ ID الخاص به.
-            // لكن الأفضل في مشروعك حالياً هو تركها لتظهر في تبويب الـ Receive عند الموظفين.
+
             notifData.put("targetUserId", "");
 
             notifData.put("type", "new_test_upload");
             notifData.put("createdAt", System.currentTimeMillis());
             notifData.put("isRead", false);
-            notifData.put("city", donorCity); // لفلترة الإشعار حسب مدينة الموظف
+            notifData.put("city", donorCity);
 
             notifRef.setValue(notifData);
-            // ---------------------------------------
+
 
             showSuccessDialog(refNum);
         }).addOnFailureListener(e -> {
@@ -355,10 +352,9 @@ public class DonorsHomeActivity extends AppCompatActivity {
                             if (status.equals("ملغي")) continue;
                             found = true;
 
-                            // 🛠️ التعديل السحري هنا:
-                            requestId = data.getKey();
-                            hospitalId = data.getKey(); // 🔥 ربطنا الـ hospitalId بـ Key الموظف مباشرة
 
+                            requestId = data.getKey();
+                            hospitalId = data.getKey();
                             currentStatus = status;
                             hospitalName = data.child("hospitalName").getValue(String.class);
                             bloodType = reqBlood;
@@ -403,28 +399,28 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
     }
 
-    // 🔥 تعديل السطر الأول فقط لتمرير المتغير (lastDonationDate)
+
     private void checkDonationEligibility(String lastDonationDate) {
-        // 1. التحقق إذا كان المتبرع لم يتبرع من قبل أبداً
+
         if (lastDonationDate == null || lastDonationDate.equals("--") || lastDonationDate.isEmpty()) {
             goToDonate();
             return;
         }
 
         try {
-            // 2. تحويل تاريخ آخر تبرع من نص إلى تاريخ (Date)
+
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
             Date lastDate = sdf.parse(normalizeNumbers(lastDonationDate));
 
-            // 3. حساب الفرق بالأيام بين اليوم وتاريخ آخر تبرع
+
             long diffInMillies = new Date().getTime() - lastDate.getTime();
             long daysPassed = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
 
             if (daysPassed < 120) {
-                // الحالة أ: لم يمر 4 شهور (120 يوم) -> عرض تنبيه بالأيام المتبقية
+
                 showIneligibilityAlert(120 - daysPassed, lastDate);
             } else {
-                // الحالة ب: مر 120 يوم أو أكثر -> المتبرع بطل وجاهز!
+
                 sendEligibilityNotificationToFirebase();
                 goToDonate();
             }
@@ -433,7 +429,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
     }
 
-    // دالة مساعدة لإرسال الإشعار (تأكدي من وجودها تحت الدالة السابقة)
+
     private void sendEligibilityNotificationToFirebase() {
         DatabaseReference notifRef = FirebaseDatabase.getInstance().getReference("Notifications").push();
         String id = notifRef.getKey();
@@ -443,9 +439,9 @@ public class DonorsHomeActivity extends AppCompatActivity {
             map.put("notificationId", id);
             map.put("title", "🌟 حان وقت إنقاذ الأرواح!");
             map.put("message", "لقد مر أكثر من 4 أشهر على تبرعك الأخير. يمكنك الآن التبرع مجدداً ومساعدة المرضى.");
-            map.put("type", "eligibility_reminder"); // هذا النوع يعطي انطباعاً مخصصاً في الأدابتر
+            map.put("type", "eligibility_reminder");
             map.put("targetType", "DONOR");
-            map.put("userId", userId); // المفتاح الموحد لضمان التوافق مع الأدابتر
+            map.put("userId", userId);
             map.put("createdAt", String.valueOf(System.currentTimeMillis()));
             map.put("isRead", false);
 
@@ -458,7 +454,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DonateActivity.class);
         intent.putExtra("requestId", requestId);
 
-        // 🔥 السطر المفقود اللي ضفناه عشان يبعت الـ ID لصفحة التبرع
+
         intent.putExtra("hospitalId", hospitalId);
 
         intent.putExtra("hospitalName", hospitalName);
@@ -509,7 +505,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                 .replace("٤","4").replace("٥","5").replace("٦","6").replace("٧","7")
                 .replace("٨","8").replace("٩","9").replace("-","/");
     }
-    // ... نهاية الدوال الأخرى ...
+
     private boolean isTestExpired(String lastBloodTest) {
         if (lastBloodTest == null || lastBloodTest.equals("--") || lastBloodTest.isEmpty()) return true;
         try {
@@ -522,7 +518,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
             return true;
         }
     }
-    // ضعيها هنا
+
     private boolean isTooSoonToDonate(String lastDonationDate) {
         if (lastDonationDate == null || lastDonationDate.equals("--") || lastDonationDate.isEmpty()) return false;
         try {
@@ -536,29 +532,29 @@ public class DonorsHomeActivity extends AppCompatActivity {
         }
     }
     private void sendTestNotificationToAdmin(String donorId, String donorName, String imageUri) {
-        // الوصول لنود الإشعارات في الفايربيس
+
         DatabaseReference notificationsRef = FirebaseDatabase.getInstance().getReference("Notifications");
         String notifId = notificationsRef.push().getKey();
 
-        // تجهيز البيانات (عشان تظهر في تاب الاستقبال عند الموظف)
+
         HashMap<String, Object> notificationData = new HashMap<>();
         notificationData.put("notificationId", notifId);
         notificationData.put("title", "فحص دوري جديد 🔬");
         notificationData.put("message", "قام المتبرع " + donorName + " برفع صورة فحص دم جديدة.");
-        notificationData.put("type", "new_test"); // النوع اللي بيعرض المجهر
-        notificationData.put("targetType", "ADMIN"); // عشان يوصل للموظف
+        notificationData.put("type", "new_test");
+        notificationData.put("targetType", "ADMIN");
         notificationData.put("donorId", donorId);
         notificationData.put("imageUrl", imageUri);
         notificationData.put("createdAt", System.currentTimeMillis());
 
-        // الحفظ الفعلي
+
         if (notifId != null) {
             notificationsRef.child(notifId).setValue(notificationData);
         }
     }
     private void startNotificationMonitoring() {
         NotificationsHelper helper = new NotificationsHelper();
-        final long activityStartTime = System.currentTimeMillis(); // 🔥 تسجيل وقت دخول المتبرع للصفحة حالياً
+        final long activityStartTime = System.currentTimeMillis();
 
         dbRef.child("Notifications").orderByChild("userId").equalTo(userId).limitToLast(1)
                 .addChildEventListener(new ChildEventListener() {
@@ -567,7 +563,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                         Notifications n = snapshot.getValue(Notifications.class);
 
                         if (n != null && !n.isRead()) {
-                            // جلب وقت إنشاء الإشعار بأمان (سواء كان مخزناً كـ String أو Long)
+
                             long notifTime = 0;
                             try {
                                 if (snapshot.hasChild("createdAt")) {
@@ -582,7 +578,7 @@ public class DonorsHomeActivity extends AppCompatActivity {
                                 notifTime = 0;
                             }
 
-                            // 🔥 التعديل السحري: التنبيه يظهر فقط إذا تم إنشاؤه *بعد* دخول المتبرع للصفحة (إشعار جديد فعلياً)
+
                             if (notifTime > activityStartTime) {
                                 helper.showSystemNotification(DonorsHomeActivity.this, n.getTitle(), n.getMessage());
                             }

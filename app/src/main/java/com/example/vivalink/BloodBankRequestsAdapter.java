@@ -21,7 +21,7 @@ public class BloodBankRequestsAdapter extends RecyclerView.Adapter<BloodBankRequ
     }
 
     @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
-        // تأكدي أن اسم الـ XML هو item_bloodbank_request
+
         return new VH(LayoutInflater.from(p.getContext()).inflate(R.layout.item_bloodbank_request, p, false));
     }
 
@@ -33,17 +33,17 @@ public class BloodBankRequestsAdapter extends RecyclerView.Adapter<BloodBankRequ
         h.tvUnits.setText("الوحدات: " + req.getUnits());
         h.tvDepartment.setText("القسم: " + req.getDepartment());
 
-        // 🔥 التعديل هنا: استخدام getConfirmedAt() بدلاً من getDate()
+
         h.tvDate.setText(req.getConfirmedAt());
 
         if ("مفتوح".equals(req.getStatus())) {
             h.tvStatus.setText("● مفتوح");
-            h.tvStatus.setBackgroundColor(0xFFFFF3E0); // برتقالي فاتح
+            h.tvStatus.setBackgroundColor(0xFFFFF3E0);
             h.tvStatus.setTextColor(0xFFEF6C00);
             h.btnCloseRequest.setVisibility(View.VISIBLE);
         } else {
             h.tvStatus.setText("✓ مغلق");
-            h.tvStatus.setBackgroundColor(0xFFE8F5E9); // أخضر فاتح
+            h.tvStatus.setBackgroundColor(0xFFE8F5E9);
             h.tvStatus.setTextColor(0xFF2E7D32);
             h.btnCloseRequest.setVisibility(View.GONE);
         }

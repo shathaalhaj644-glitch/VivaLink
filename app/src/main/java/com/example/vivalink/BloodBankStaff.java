@@ -1,19 +1,18 @@
 package com.example.vivalink;
 
 public class BloodBankStaff {
-    // الحقول كما هي في قاعدة البيانات تماماً
+
     private String name;
     private String email;
     private String phone;
     private String city;
     private String hospitalName;
-    private String hospitalId; // هاد اللي كان اسمه bankId أو hospitalID
-    private String role;       // اللي هو BankStaff
+    private String hospitalId;
+    private String role;
 
-    // 1. الـ Constructor الفاضي (إجباري للـ Firebase)
     public BloodBankStaff() {}
 
-    // 2. الـ Constructor الكامل (لتسهيل إضافة بيانات الموظف)
+
     public BloodBankStaff(String name, String email, String phone, String city,
                           String hospitalName, String hospitalId, String role) {
         this.name = name;
@@ -25,7 +24,7 @@ public class BloodBankStaff {
         this.role = role;
     }
 
-    // 3. الـ Getters والـ Setters (عشان الأندرويد يقدر يقرأ ويكتب الحقول)
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

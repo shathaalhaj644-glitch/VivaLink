@@ -4,28 +4,28 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 @IgnoreExtraProperties
 public class BloodBankDonorsModel {
-    private String uid; // معرف السجل
+    private String uid;
     private String name, fullName, phone, bloodType, city, lastDonation;
-    private Object donationCount; // لمنع الكراش
+    private Object donationCount;
     private String note;
 
-    // الحقول الخاصة بالفحوصات
+
     private String bloodTestStatus;
     private String bloodTestProofUrl;
     private String lastBloodTest;
 
-    // 🔥 الحقول الخاصة بتاب "قيد الوصول" والربط البرمجي
-    private String donorId;      // ID المتبرع (للوصول لبياناته في جدول Donors)
-    private String requestId;    // ID الطلب الأصلي (لإغلاق الطلب وتغيير حالته لـ مغلق)
-    private String status;       // حالة المتبرع (قادم)
+
+    private String donorId;
+    private String requestId;
+    private String status;
     private String hospitalId;
-    private String nextDonationDate; // 🔥 التاريخ الذي يسمح فيه بالتبرع مرة أخرى (بعد 4 أشهر)
+    private String nextDonationDate;
 
     public BloodBankDonorsModel() {
-        // ضروري لـ Firebase
+
     }
 
-    // دالة ذكية لجلب الاسم المتوفر
+
     public String getDisplayName() {
         if (fullName != null && !fullName.isEmpty() && !fullName.equals("null")) {
             return fullName;
@@ -33,7 +33,7 @@ public class BloodBankDonorsModel {
         return (name != null) ? name : "متبرع غير معروف";
     }
 
-    // --- Getters & Setters الأساسية ---
+
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 
@@ -65,7 +65,7 @@ public class BloodBankDonorsModel {
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
 
-    // --- Getters & Setters للفحوصات ---
+
     public String getBloodTestStatus() {
         return (bloodTestStatus == null || bloodTestStatus.isEmpty()) ? "غير متوفر" : bloodTestStatus;
     }
@@ -77,7 +77,7 @@ public class BloodBankDonorsModel {
     public String getLastBloodTest() { return lastBloodTest; }
     public void setLastBloodTest(String lastBloodTest) { this.lastBloodTest = lastBloodTest; }
 
-    // --- 🔥 Getters & Setters المضافة لحل الأخطاء وتطبيق الشروط ---
+
 
     public String getRequestId() { return requestId; }
     public void setRequestId(String requestId) { this.requestId = requestId; }

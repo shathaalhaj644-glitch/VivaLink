@@ -28,7 +28,7 @@ public class BloodBankNotificationAdapter extends RecyclerView.Adapter<BloodBank
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         BloodBankNotificationModel model = list.get(position);
         if (model != null) {
-            // حماية ضد الـ Null
+
             String title = model.getTitle() != null ? model.getTitle() : "إشعار جديد";
             String message = model.getMessage() != null ? model.getMessage() : "";
 

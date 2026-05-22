@@ -29,7 +29,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bloodbank_home);
 
-        // تعريف العناصر من الواجهة
+
         tvWelcomeMain = findViewById(R.id.tvWelcomeMain);
         tvSubLocation = findViewById(R.id.tvSubLocation);
         tvHospitalDetail = findViewById(R.id.tvHospitalDetail);
@@ -40,12 +40,12 @@ public class BloodBankHomeActivity extends AppCompatActivity {
 
         dbRef = FirebaseDatabase.getInstance().getReference();
 
-        // التأكد من تسجيل الدخول وجلب بيانات الموظف
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             loadStaffData(FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
 
-        // إعداد شريط التنقل السفلي
+
         setupNavigation();
     }
 
@@ -71,7 +71,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
     }
 
     private void calculateStatistics() {
-        // 1️⃣ إحصائيات المتبرعين في نفس المدينة (شغال صح، صلحنا بس منطق الفحوصات المعلقة جواته)
+
         dbRef.child("Donors").orderByChild("city").equalTo(currentStaffCity)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -82,8 +82,8 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                         for (DataSnapshot ds : s.getChildren()) {
                             String status = ds.child("bloodTestStatus").getValue(String.class);
 
-                            // 🔥 التصليح الجذري للفحوصات المعلقة: نعد فقط إذا كانت الحالة مكتوبة "معلق" صراحة بالفايربيس
-                            // هيك الـ null والـ empty مستحيل ينعدوا، والرقم 3 الوهمي رح يختفي ويصير 0!
+
+
                             if ("معلق".equals(status)) {
                                 pending++;
                             }
@@ -93,10 +93,6 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                     @Override public void onCancelled(@NonNull DatabaseError e) {}
                 });
 
-        // 2️⃣ إحصائيات تبرعات اليوم (🔥 تم تصليح الفلترة والتصفير التلقائي)
-        // الكود هان بيجيب تاريخ اليوم الحالي بالظبط وبقارنه بجدول Donations
-        // 2️⃣ إحصائيات تبرعات اليوم (🔥 التعديل الصحيح بناءً على قاعدة البيانات عندك)
-        // بيجيب تاريخ اليوم بالصيغة المخزنة (dd/MM/yyyy) ليتطابق مع lastDonation
         String todayStr = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(new Date());
 
         dbRef.child("Donors").addValueEventListener(new ValueEventListener() {
@@ -108,7 +104,7 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                     String lastDonation = ds.child("lastDonation").getValue(String.class);
                     String donorCity = ds.child("city").getValue(String.class);
 
-                    // الفحص: إذا كان المتبرع تبرع اليوم + وهو من نفس مدينة الموظف (طولكرم)
+
                     if (lastDonation != null && donorCity != null) {
                         if (lastDonation.trim().equals(todayStr) && donorCity.trim().equalsIgnoreCase(currentStaffCity.trim())) {
                             todayDonationsCount++;
@@ -116,12 +112,12 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                     }
                 }
 
-                // عرض الرقم الصحيح وتصفيره تلقائياً إذا دخلنا بيوم جديد
+
                 countTodayDonors.setText(String.valueOf(todayDonationsCount));
             }
             @Override public void onCancelled(@NonNull DatabaseError e) {}
         });
-        // 3️⃣ إحصائيات الطلبات المفتوحة للمستشفى (🚨 خليناها زي ما هي بدون أي تغيير)
+
         if (currentHospitalId != null) {
             dbRef.child("Requests").orderByChild("hospitalId").equalTo(currentHospitalId)
                     .addValueEventListener(new ValueEventListener() {
@@ -154,8 +150,8 @@ public class BloodBankHomeActivity extends AppCompatActivity {
                 startActivity(new Intent(BloodBankHomeActivity.this, BloodBankRequestsActivity.class));
                 return true;
             }
-            // 🔥 تفعيل زر الإشعارات هنا
-            else if (id == R.id.nav_notifications) { // تأكدي أن هذا الـ ID هو نفسه الموجود في ملف الـ menu
+
+            else if (id == R.id.nav_notifications) {
                 startActivity(new Intent(BloodBankHomeActivity.this, BloodBankNotificationActivity.class));
                 return true;
             }

@@ -348,11 +348,11 @@ public class BloodBankDonorsActivity extends AppCompatActivity {
             String donorName = d.getDisplayName() == null ? "" : d.getDisplayName().toLowerCase();
             boolean matchesName = donorName.contains(query.toLowerCase());
 
-            // فحص المطابقة مع تاريخ اليوم مع إزالة الفراغات الزائدة احتياطاً
+
             boolean donatedToday = d.getLastDonation() != null && d.getLastDonation().trim().equals(todayDate.trim());
 
             if (matchesName && donatedToday) {
-                // حماية الحقول من الـ Null لضمان استقرار العرض في الـ Adapter
+
                 if (d.getPhone() == null) d.setPhone("غير متوفر");
                 if (d.getBloodType() == null) d.setBloodType("-");
                 if (d.getCity() == null) d.setCity("-");

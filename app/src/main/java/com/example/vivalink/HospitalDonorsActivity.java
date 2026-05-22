@@ -209,7 +209,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
                     return;
                 }
 
-                tvHistory.setText(""); // مسح النص فوراً للبدء بالتحميل
+                tvHistory.setText("");
                 Set<String> hospitalNames = new HashSet<>();
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
@@ -264,7 +264,7 @@ public class HospitalDonorsActivity extends AppCompatActivity {
 
     private void updateUI(boolean isChecked, TextView tv) {
         if (isChecked) {
-            tv.setText("✅ مؤهل للتبرع");
+            tv.setText("");
             tv.setTextColor(Color.parseColor("#4CAF50"));
         } else {
             tv.setText("❌ غير مؤهل حالياً");

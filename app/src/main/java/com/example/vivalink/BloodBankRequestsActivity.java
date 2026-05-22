@@ -53,7 +53,7 @@ public class BloodBankRequestsActivity extends AppCompatActivity {
             return;
         }
 
-        // جلب بيانات الموظف - تأكدي من المسار BloodBankStaff
+
         dbRef.child("BloodBankStaff").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -63,11 +63,11 @@ public class BloodBankRequestsActivity extends AppCompatActivity {
                     if (currentHospitalId != null && !currentHospitalId.isEmpty()) {
                         fetchSpecificHospitalRequests();
                     } else {
-                        // إذا وصل هنا، يعني الموظف موجود بس حقل hospitalId مش موجود عنده
+
                         Toast.makeText(BloodBankRequestsActivity.this, "حسابك لا يحتوي على ID مستشفى", Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    // إذا وصل هنا، يعني الـ UID مش موجود في جدول BloodBankStaff
+
                     Toast.makeText(BloodBankRequestsActivity.this, "فشل الوصول لبيانات الموظف", Toast.LENGTH_LONG).show();
                 }
             }
@@ -76,14 +76,14 @@ public class BloodBankRequestsActivity extends AppCompatActivity {
     }
 
     private void fetchSpecificHospitalRequests() {
-        // جلب كل الطلبات وفلترتها يدوياً لضمان العمل (أكثر أماناً من orderByChild حالياً)
+
         dbRef.child("Requests").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 allRequests.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     BloodBankRequestsModel req = ds.getValue(BloodBankRequestsModel.class);
-                    // نتأكد أن الطلب ينتمي لنفس مستشفى الموظف
+
                     if (req != null && currentHospitalId.equals(req.getHospitalId())) {
                         allRequests.add(req);
                     }

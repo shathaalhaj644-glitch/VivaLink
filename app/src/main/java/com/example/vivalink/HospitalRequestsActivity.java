@@ -53,7 +53,7 @@ public class HospitalRequestsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hospital_requests);
 
 
-// التأكد من تسجيل الدخول وجلب الـ ID
+
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
 
@@ -101,7 +101,7 @@ public class HospitalRequestsActivity extends AppCompatActivity {
 
     private void loadRequests() {
 
-// فلترة الطلبات حسب الـ hospitalId الخاص بالمستشفى الحالي
+
 
         db.orderByChild("hospitalId").equalTo(hospitalId).addValueEventListener(new ValueEventListener() {
 
@@ -126,7 +126,7 @@ public class HospitalRequestsActivity extends AppCompatActivity {
                 }
 
 
-// تحسين: ترتيب القائمة لتظهر أحدث الطلبات في الأعلى
+
 
                 Collections.reverse(list);
 

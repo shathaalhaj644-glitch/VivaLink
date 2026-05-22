@@ -26,7 +26,7 @@ public class HospitalHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_home);
 
-        // ربط العناصر بالـ ID
+
         tvHospitalName = findViewById(R.id.tvHospitalName);
         tvHospitalLocation = findViewById(R.id.tvHospitalLocation);
         valTotalRequests = findViewById(R.id.valTotalRequests);
@@ -36,8 +36,8 @@ public class HospitalHomeActivity extends AppCompatActivity {
         btnCreateRequestCard = findViewById(R.id.btnCreateRequestCard);
         btnViewDonorsCard = findViewById(R.id.btnViewDonorsCard);
         btnSettingsCard = findViewById(R.id.btnSettingsCard);
-        btnInventoryCard = findViewById(R.id.btnInventoryCard); // ربط مخزون الدم
-        btnNotificationsCard = findViewById(R.id.btnNotificationsCard); // السطر المضاف: ربط زر الإشعارات
+        btnInventoryCard = findViewById(R.id.btnInventoryCard);
+        btnNotificationsCard = findViewById(R.id.btnNotificationsCard);
 
         currentHospitalUid = FirebaseAuth.getInstance().getUid();
         dbRef = FirebaseDatabase.getInstance().getReference();
@@ -46,13 +46,11 @@ public class HospitalHomeActivity extends AppCompatActivity {
             loadHospitalData();
         }
 
-        // إعداد المستمعات (Listeners) لفتح الصفحات
 
-        // فتح صفحة المخزون
         btnInventoryCard.setOnClickListener(v ->
                 startActivity(new Intent(this, BloodInventoryActivity.class)));
 
-        // السطر المضاف: فتح صفحة الإشعارات للمستشفى
+
         btnNotificationsCard.setOnClickListener(v ->
                 startActivity(new Intent(this, HospitalNotificationActivity.class)));
 

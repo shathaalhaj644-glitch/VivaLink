@@ -2,32 +2,30 @@ package com.example.vivalink;
 
 public class BloodBankNotificationModel {
 
-    // 🔹 الحقول الأساسية
+
     private String notificationId;
     private String title;
     private String message;
-    private String hospitalId; // 👈 المعرف الخاص بالمستشفى صاحب الطلب
+    private String hospitalId;
     private String type;
 
-    // 🔹 الفلترة والتحكم
-    private String targetType;      // DONOR أو ADMIN
-    private String targetUserId;    // للمستشفى (ADMIN)
-    private String userId;          // 🔥 للمستخدم (DONOR - إشعارات شخصية)
 
-    private String city;            // للإشعارات العامة
-    private String bloodType;       // للإشعارات العامة
+    private String targetType;
+    private String targetUserId;
+    private String userId;
+
+    private String city;
+    private String bloodType;
 
     private String hospitalName;
 
-    private long createdAt;         // وقت الإرسال
-    private boolean isRead;         // مقروء أو لا
+    private long createdAt;
+    private boolean isRead;
 
-    // 🔹 Constructor فارغ (مهم لـ Firebase)
+
     public BloodBankNotificationModel() {}
 
-    // =========================
-    // 🔹 Getters & Setters
-    // =========================
+
 
     public String getNotificationId() {
         return notificationId;
@@ -83,7 +81,7 @@ public class BloodBankNotificationModel {
         this.targetUserId = targetUserId;
     }
 
-    // 🔥 أهم إضافة (الإشعارات الشخصية)
+
     public String getUserId() {
         return userId;
     }

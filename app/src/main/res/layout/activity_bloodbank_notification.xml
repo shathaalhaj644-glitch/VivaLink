@@ -6,7 +6,7 @@
     android:layoutDirection="rtl"
     android:background="#F2F2F2">
 
-    <!-- التابات -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- صفحة الإرسال -->
+
         <ScrollView
             android:id="@+id/layoutSend"
             android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                     android:gravity="center"
                     android:layout_marginBottom="12dp"/>
 
-                <!-- صندوق التنبيه -->
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -98,8 +98,7 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- الفصائل -->
-                <!-- الفصائل -->
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -113,7 +112,7 @@
                     android:orientation="vertical"
                     android:layout_marginTop="10dp">
 
-                    <!-- الصف الأول -->
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -153,7 +152,7 @@
                             android:gravity="right|center_vertical"/>
                     </LinearLayout>
 
-                    <!-- الصف الثاني -->
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -196,7 +195,7 @@
 
                 </LinearLayout>
 
-                <!-- الأولوية -->
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -226,7 +225,7 @@
                         android:layout_marginRight="30dp"/>
                 </RadioGroup>
 
-                <!-- الرسالة -->
+
                 <EditText
                     android:id="@+id/etMessage"
                     android:layout_width="match_parent"
@@ -237,7 +236,7 @@
                     android:hint="اكتب نص الرسالة هنا..."
                     android:padding="12dp" />
 
-                <!-- زر الإرسال -->
+
                 <Button
                     android:id="@+id/btnSendNotification"
                     android:layout_width="match_parent"
@@ -249,7 +248,7 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- الإشعارات الواردة -->
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvIncomingAdmin"
             android:layout_width="match_parent"

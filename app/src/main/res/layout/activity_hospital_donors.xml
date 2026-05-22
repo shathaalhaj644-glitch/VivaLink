@@ -5,7 +5,7 @@
     android:background="#FFFFFF"
     android:layoutDirection="rtl">
 
-    <!-- الهيدر -->
+
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
-    <!-- مربع البحث -->
+
     <LinearLayout
         android:id="@+id/searchContainer"
         android:layout_width="match_parent"
@@ -54,7 +54,7 @@
             android:singleLine="true"/>
     </LinearLayout>
 
-    <!-- الفلاتر (زمرة الدم + الكل) -->
+
     <HorizontalScrollView
         android:id="@+id/filterContainer"
         android:layout_width="match_parent"
@@ -82,7 +82,7 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- قائمة المتبرعين -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvDonors"
         android:layout_width="match_parent"

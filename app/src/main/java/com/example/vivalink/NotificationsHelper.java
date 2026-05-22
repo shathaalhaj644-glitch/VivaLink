@@ -19,22 +19,22 @@ public class NotificationsHelper {
         dbRef = FirebaseDatabase.getInstance().getReference("Notifications");
     }
 
-    // إضافة إشعار جديد
+
     public Task<Void> addNotification(Notifications notification) {
         return dbRef.child(notification.getNotificationId()).setValue(notification);
     }
 
-    // تحويل الحالة لمقروء
+
     public Task<Void> markAsRead(String notificationId) {
         return dbRef.child(notificationId).child("isRead").setValue(true);
     }
 
-    // نص الحالة (مقروء/غير مقروء) بدون صور
+
     public String getReadStatusLabel(boolean isRead) {
         return isRead ? "Status: Read" : "Status: Unread";
     }
 
-    // إظهار الإشعار باستخدام أيقونة النظام الافتراضية
+
     public void showSystemNotification(Context context, String title, String message) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -52,7 +52,7 @@ public class NotificationsHelper {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                // استخدام أيقونة النظام الافتراضية لتجنب خطأ Drawable
+
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)

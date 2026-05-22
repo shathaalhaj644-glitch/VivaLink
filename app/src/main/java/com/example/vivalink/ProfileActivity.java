@@ -51,7 +51,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                     String count = String.valueOf(snapshot.child("donationCount").getValue());
 
-                    // ✅ بيانات أساسية
+
                     tvTopName.setText(name);
                     tvTopBlood.setText("🩸 فصيلة الدم: " + blood);
                     tvTopCity.setText("📍 " + city);

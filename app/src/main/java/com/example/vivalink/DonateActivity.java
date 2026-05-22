@@ -102,10 +102,10 @@ public class DonateActivity extends AppCompatActivity {
         final String userId = FirebaseAuth.getInstance().getUid();
         if (userId == null) return;
 
-        // 🔥 التعديل الفوري: بنبعث الإشعار أول اشي عشان نضمن وصوله لقاعدة البيانات بدون تعليق
+
         sendArrivalNotificationToStaff(selectedMinutes);
 
-        // 1. تجهيز بيانات جدول القادمين (IncomingDonations)
+
         Map<String, Object> incomingData = new HashMap<>();
         incomingData.put("donorId", userId);
         incomingData.put("requestId", requestId);
@@ -119,7 +119,7 @@ public class DonateActivity extends AppCompatActivity {
 
         FirebaseDatabase.getInstance().getReference("IncomingDonations").child(userId).setValue(incomingData)
                 .addOnSuccessListener(aVoid -> {
-                    // الانتقال لصفحة التايمر
+
                     Intent intent = new Intent(DonateActivity.this, RequestsDetailsActivity.class);
                     intent.putExtra("requestId", requestId);
                     intent.putExtra("minutes", selectedMinutes);
@@ -138,7 +138,7 @@ public class DonateActivity extends AppCompatActivity {
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    // لو علق جدول القادمين، بنعرف شو السبب من التوست هاد، بس الإشعار بكون وصل!
+
                     Log.e("VivaLink_Error", "فشل في جدول القادمين: " + e.getMessage());
                     Toast.makeText(DonateActivity.this, "خطأ في تسجيل القادمين: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
@@ -162,7 +162,7 @@ public class DonateActivity extends AppCompatActivity {
             String actualDepartment = tvDepartment.getText() != null ? tvDepartment.getText().toString().trim() : "القسم المعني";
             String bloodType = tvBloodType.getText() != null ? tvBloodType.getText().toString().trim() : "-";
 
-            // جلب اسم المستشفى الحالي من الواجهة بأمان
+
             String actualHospitalName = tvHospitalName.getText() != null ? tvHospitalName.getText().toString().trim() : "";
 
             notifData.put("notificationId", notifId);
@@ -175,13 +175,13 @@ public class DonateActivity extends AppCompatActivity {
             notifData.put("targetType", "ADMIN");
             notifData.put("targetUserId", hospitalId.trim());
 
-            // 🔥 السطر السحري الجديد: بنرفع اسم المستشفى للإشعار عشان نمنع التداخل بين المستشفيات
+
             notifData.put("hospitalName", actualHospitalName);
 
             notifData.put("requestId", requestId != null ? requestId : "");
             notifData.put("createdAt", System.currentTimeMillis());
             notifData.put("isRead", false);
-            notifData.put("city", tvCity.getText() != null ? tvCity.getText().toString().trim() : ""); // احتياطاً للمدينة أيضاً
+            notifData.put("city", tvCity.getText() != null ? tvCity.getText().toString().trim() : "");
 
             notifRef.setValue(notifData)
                     .addOnSuccessListener(aVoid -> {

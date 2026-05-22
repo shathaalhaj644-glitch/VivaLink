@@ -11,7 +11,7 @@ public class HospitalDonorsModel {
     private String diseaseName;
     private String hospitalName;
 
-    // الحقول الجديدة من قاعدة البيانات
+
     private Integer donationCount;
     private boolean hasDisease;
     private String bloodLevel;
@@ -23,7 +23,7 @@ public class HospitalDonorsModel {
 
     public HospitalDonorsModel() {}
 
-    // Getters & Setters
+
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 

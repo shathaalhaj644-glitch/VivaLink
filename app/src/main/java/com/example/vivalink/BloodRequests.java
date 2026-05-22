@@ -14,7 +14,7 @@ public class BloodRequests {
 
     public BloodRequests() {}
 
-    // Getters
+
     public String getBloodType() { return bloodType; }
     public String getHospitalName() { return hospitalName; }
     public String getCity() { return city; }
@@ -35,15 +35,15 @@ public class BloodRequests {
     public String getRole() { return role; }
     public String getStaffConfirmedAt() { return staffConfirmedAt; }
 
-    // Getter لإرجاع التاريخ والوقت بشكل "ساعة:دقيقة يوم/شهر/سنة"
+
     public String getFormattedRequestDate() {
         try {
             if (confirmedAt != null && !confirmedAt.isEmpty()) {
-                // صيغة ISO: yyyy/MM/dd'T'HH:mm:ss.SSS
+
                 SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy/MM/dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
                 Date dateObj = isoFormat.parse(confirmedAt);
 
-                // نعرضها بالشكل المطلوب: ساعة:دقيقة يوم/شهر/سنة
+
                 SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.ENGLISH);
                 return outputFormat.format(dateObj);
             } else {

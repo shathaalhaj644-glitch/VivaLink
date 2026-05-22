@@ -1,25 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="300dp" android:layout_height="wrap_content"
-    android:orientation="vertical" android:padding="20dp" android:layoutDirection="rtl">
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layoutDirection="rtl">
 
-    <TextView android:id="@+id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:textSize="18sp" android:textStyle="bold" android:textColor="#D32F2F" android:layout_marginBottom="10dp"/>
+    <TextView android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#D32F2F"
+        android:layout_marginBottom="10dp"/>
 
-    <TextView android:id="@+id/tv_dialog_details" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp" android:textColor="#555" android:visibility="gone"/>
+    <TextView android:id="@+id/tv_dialog_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:textColor="#555"
+        android:visibility="gone"/>
 
-    <EditText android:id="@+id/et_units" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:hint="العدد" android:inputType="number" android:layout_marginBottom="10dp"/>
+    <EditText android:id="@+id/et_units"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="العدد"
+        android:inputType="number"
+        android:imeOptions="actionNext"
+        android:layout_marginBottom="10dp"/>
 
-    <EditText android:id="@+id/et_reserve" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:hint="الاحتياطي" android:inputType="number" android:visibility="gone"/>
+    <EditText android:id="@+id/et_reserve"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="الاحتياطي"
+        android:inputType="number"
+        android:imeOptions="actionDone"
+        android:layout_marginBottom="15dp"
+        android:visibility="gone"/>
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-        <Button android:id="@+id/btn_ok" android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:backgroundTint="#D32F2F" android:textColor="#FFF" android:layout_marginStart="5dp"/>
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <Button android:id="@+id/btn_cancel" android:layout_width="0dp" android:layout_height="wrap_content"
-            android:layout_weight="1" android:text="إلغاء الطلب" android:backgroundTint="#9E9E9E" android:textColor="#FFF"/>
+        <Button android:id="@+id/btn_ok"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#D32F2F"
+            android:textColor="#FFF"
+            android:layout_marginStart="5dp"/>
+
+        <Button android:id="@+id/btn_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="إلغاء الطلب"
+            android:backgroundTint="#9E9E9E"
+            android:textColor="#FFF"/>
     </LinearLayout>
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.example.vivalink;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,12 +21,19 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
     private List<BloodBankDonorsModel> list;
     private OnDonorActionListener listener;
 
+    // متغير لحفظ الفلتر الحالي
+    private String currentTabFilter = "الكل";
+
+    public void setCurrentTabFilter(String filter) {
+        this.currentTabFilter = filter;
+        notifyDataSetChanged();
+    }
+
     public interface OnDonorActionListener {
         void onRegisterDonation(BloodBankDonorsModel d);
         void onAddNote(BloodBankDonorsModel d);
         void onUpdateTestStatus(BloodBankDonorsModel d, String status);
         void onDeleteTest(BloodBankDonorsModel d);
-
         void onConfirmArrival(BloodBankDonorsModel d);
     }
 
@@ -41,7 +49,7 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
     @Override public void onBindViewHolder(@NonNull VH h, int p) {
         BloodBankDonorsModel d = list.get(p);
 
-
+        // ربط البيانات الأساسية للمتبرع
         h.tvName.setText(d.getDisplayName());
         h.tvPhone.setText(d.getPhone());
         h.tvBloodType.setText(d.getBloodType());
@@ -49,22 +57,30 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
         h.tvDonationCount.setText(d.getDonationCount());
         h.tvCity.setText(d.getCity());
 
-
+        // جلب التاب الرئيسي
         TabLayout tabLayout = ((BloodBankDonorsActivity) h.itemView.getContext()).findViewById(R.id.tabLayout);
         int selectedTab = tabLayout.getSelectedTabPosition();
 
-
+        // 🔹 إعادة ضبط الرؤية الافتراضية لمنع تداخل السطور أثناء الـ Scroll
         h.layoutTestSection.setVisibility(View.GONE);
         h.layoutIncomingSection.setVisibility(View.GONE);
         h.expandLayout.setVisibility(View.GONE);
         h.btnExpand.setVisibility(View.VISIBLE);
 
+        h.btnAcceptTest.setVisibility(View.GONE);
+        h.btnRejectTest.setVisibility(View.GONE);
+        h.tvStatusText.setVisibility(View.GONE);
+        h.btnDeleteTest.setVisibility(View.GONE);
 
+        // 1️⃣ حالة تاب الفحوصات الرئيسي (Tab رقم 2)
+        // 1️⃣ حالة تاب الفحوصات الرئيسي (Tab رقم 2)
+        // 1️⃣ حالة تاب الفحوصات الرئيسي (Tab رقم 2)
+        // 1️⃣ حالة تاب الفحوصات الرئيسي (Tab رقم 2)
         if (selectedTab == 2) {
-
             h.layoutTestSection.setVisibility(View.VISIBLE);
             h.btnExpand.setVisibility(View.GONE);
 
+            // عرض صورة الفحص وفك تشفيرها
             if (d.getBloodTestProofUrl() != null && !d.getBloodTestProofUrl().isEmpty()) {
                 try {
                     byte[] decodedString = Base64.decode(d.getBloodTestProofUrl(), Base64.DEFAULT);
@@ -75,31 +91,77 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
                 }
             }
 
-            h.btnAcceptTest.setOnClickListener(v -> listener.onUpdateTestStatus(d, "مقبول"));
-            h.btnRejectTest.setOnClickListener(v -> listener.onUpdateTestStatus(d, "مرفوض"));
+            String testStatus = d.getBloodTestStatus(); // جلب حالة الفحص من الفايربيس
 
-            if ("مرفوض".equals(d.getBloodTestStatus())) {
-                h.btnDeleteTest.setVisibility(View.VISIBLE);
-            } else {
+            // 🔥 اللوجيك الذكي والمضمون اللي بيعتمد على حالة الفحص الصافية لتظهر الأزرار فوراً 🔥
+            if ("الكل".equals(currentTabFilter)) {
+                if ("معلق".equals(testStatus)) {
+                    h.btnAcceptTest.setVisibility(View.VISIBLE);
+                    h.btnRejectTest.setVisibility(View.VISIBLE);
+                    h.tvStatusText.setVisibility(View.GONE);
+                } else if ("مقبول".equals(testStatus)) {
+                    h.btnAcceptTest.setVisibility(View.GONE);
+                    h.btnRejectTest.setVisibility(View.GONE);
+                    h.tvStatusText.setVisibility(View.VISIBLE);
+                    h.tvStatusText.setText("تم قبول هذا الفحص");
+                    h.tvStatusText.setTextColor(Color.parseColor("#4CAF50")); // أخضر
+                } else if ("مرفوض".equals(testStatus)) {
+                    h.btnAcceptTest.setVisibility(View.GONE);
+                    h.btnRejectTest.setVisibility(View.GONE);
+                    h.tvStatusText.setVisibility(View.VISIBLE);
+                    h.tvStatusText.setText("تم رفض هذا الفحص ❌");
+                    h.tvStatusText.setTextColor(Color.RED); // أحمر
+                }
+                h.btnDeleteTest.setVisibility(View.VISIBLE); // زر الحذف يظهر دائماً عند فلتر الكل
+            }
+            else {
+                // اللوجيك الافتراضي لباقي الفلاتر (مقبول / مرفوض / معلق)
+                if ("معلق".equals(testStatus)) {
+                    h.btnAcceptTest.setVisibility(View.VISIBLE);
+                    h.btnRejectTest.setVisibility(View.VISIBLE);
+                    h.tvStatusText.setVisibility(View.GONE);
+                } else if ("مقبول".equals(testStatus)) {
+                    h.tvStatusText.setVisibility(View.VISIBLE);
+                    h.tvStatusText.setText("تم قبول هذا الفحص");
+                    h.tvStatusText.setTextColor(Color.parseColor("#4CAF50"));
+                } else if ("مرفوض".equals(testStatus)) {
+                    h.tvStatusText.setVisibility(View.VISIBLE);
+                    h.tvStatusText.setText("تم رفض هذا الفحص ❌");
+                    h.tvStatusText.setTextColor(Color.RED);
+                }
                 h.btnDeleteTest.setVisibility(View.GONE);
             }
-            h.btnDeleteTest.setOnClickListener(v -> listener.onDeleteTest(d));
 
-        } else if (selectedTab == 1) {
+            // تفعيل كبسات الأزرار
+            h.btnAcceptTest.setOnClickListener(v -> {
+                if (listener != null) listener.onUpdateTestStatus(d, "مقبول");
+            });
 
+            h.btnRejectTest.setOnClickListener(v -> {
+                if (listener != null) listener.onUpdateTestStatus(d, "مرفوض");
+            });
+
+            h.btnDeleteTest.setOnClickListener(v -> {
+                if (listener != null) listener.onDeleteTest(d);
+            });
+        }
+        // 2️⃣ حالة تاب قيد الوصول (Tab رقم 1)
+        else if (selectedTab == 1) {
             h.layoutIncomingSection.setVisibility(View.VISIBLE);
             h.btnExpand.setVisibility(View.GONE);
             h.btnConfirmArrival.setOnClickListener(v -> listener.onConfirmArrival(d));
 
-        } else if (selectedTab == 3) {
-
+        }
+        // 3️⃣ حالة تاب السجل (Tab رقم 3)
+        else if (selectedTab == 3) {
             h.btnExpand.setVisibility(View.GONE);
             h.layoutTestSection.setVisibility(View.GONE);
             h.layoutIncomingSection.setVisibility(View.GONE);
             h.expandLayout.setVisibility(View.GONE);
 
-        } else {
-
+        }
+        // 4️⃣ حالة تاب المتبرعون الافتراضية (Tab رقم 0)
+        else {
             h.btnExpand.setVisibility(View.VISIBLE);
             h.btnExpand.setOnClickListener(v -> {
                 h.expandLayout.setVisibility(h.expandLayout.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
@@ -110,10 +172,11 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             h.btnNote.setOnClickListener(v -> listener.onAddNote(d));
         }
     }
+
     @Override public int getItemCount() { return list.size(); }
 
     class VH extends RecyclerView.ViewHolder {
-        TextView tvName, tvPhone, tvBloodType, tvLastDonation, tvDonationCount, tvCity;
+        TextView tvName, tvPhone, tvBloodType, tvLastDonation, tvDonationCount, tvCity, tvStatusText;
         ImageButton btnExpand;
         LinearLayout expandLayout, layoutTestSection, layoutIncomingSection;
         Button btnRegister, btnNote, btnAcceptTest, btnRejectTest, btnDeleteTest, btnConfirmArrival;
@@ -127,9 +190,9 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             tvLastDonation = v.findViewById(R.id.tvLastDonation);
             tvDonationCount = v.findViewById(R.id.tvDonationCount);
             tvCity = v.findViewById(R.id.tvCity);
+            tvStatusText = v.findViewById(R.id.tvStatusText);
             btnExpand = v.findViewById(R.id.btnExpand);
             expandLayout = v.findViewById(R.id.expandLayout);
-
             layoutTestSection = v.findViewById(R.id.layoutTestSection);
             layoutIncomingSection = v.findViewById(R.id.layoutIncomingSection);
             imgTestProof = v.findViewById(R.id.imgTestProof);
@@ -137,7 +200,6 @@ public class BloodBankDonorsAdapter extends RecyclerView.Adapter<BloodBankDonors
             btnRejectTest = v.findViewById(R.id.btnRejectTest);
             btnDeleteTest = v.findViewById(R.id.btnDeleteTest);
             btnConfirmArrival = v.findViewById(R.id.btnConfirmArrival);
-
             btnRegister = v.findViewById(R.id.btnRegister);
             btnNote = v.findViewById(R.id.btnNote);
         }

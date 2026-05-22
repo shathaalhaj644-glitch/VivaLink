@@ -47,14 +47,14 @@ public class RequestsDetailsActivity extends AppCompatActivity {
     }
 
     private void getDataAndDisplay() {
-        // استقبال البيانات الأساسية
+
         requestId = getIntent().getStringExtra("requestId");
         hospitalId = getIntent().getStringExtra("hospitalId");
         donorName = getIntent().getStringExtra("donorName");
         minutesToArrive = getIntent().getIntExtra("minutes", 0);
         boolean alreadyDonated = getIntent().getBooleanExtra("isDonated", false);
 
-        // استقبال وعرض البيانات اللي كانت تطلع Null
+
         String bloodType = getIntent().getStringExtra("bloodType");
         String hospitalName = getIntent().getStringExtra("hospitalName");
         String city = getIntent().getStringExtra("city");
@@ -62,7 +62,7 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         String units = getIntent().getStringExtra("units");
         String confirmedAt = getIntent().getStringExtra("confirmedAt");
 
-        // عرض البيانات في النصوص (مع التعامل مع حالة الـ Null احتياطاً)
+
         tvBlood.setText("🩸 فصيلة الدم: " + (bloodType != null ? bloodType : "غير محدد"));
         tvHospital.setText("🏥 المستشفى: " + (hospitalName != null ? hospitalName : "غير محدد"));
         tvCity.setText("📍 المدينة: " + (city != null ? city : "غير محدد"));
@@ -70,7 +70,7 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         tvUnits.setText("🧪 الوحدات: " + (units != null ? units : "0"));
         tvDate.setText("📅 تاريخ الطلب: " + (confirmedAt != null ? confirmedAt : "---"));
 
-        // منطق التايمر وحالة التبرع
+
         if (alreadyDonated) {
             showSuccessStatus();
         } else if (minutesToArrive > 0) {
@@ -119,7 +119,7 @@ public class RequestsDetailsActivity extends AppCompatActivity {
 
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
 
-        // بيانات الإشعار للموظف
+
         java.util.Map<String, Object> arrivalData = new java.util.HashMap<>();
         arrivalData.put("donorId", uid);
         arrivalData.put("requestId", requestId);
@@ -128,10 +128,10 @@ public class RequestsDetailsActivity extends AppCompatActivity {
         arrivalData.put("displayName", donorName != null ? donorName : "متبرع");
         arrivalData.put("bloodType", getIntent().getStringExtra("bloodType"));
 
-        // 1. تحديث جدول القادمين
+
         db.child("IncomingDonations").child(uid).setValue(arrivalData)
                 .addOnSuccessListener(aVoid -> {
-                    // 2. تحديث حالة الطلب
+
                     db.child("Requests").child(requestId).child("currentStatus").setValue("تم التبرع");
 
                     showSuccessStatus();

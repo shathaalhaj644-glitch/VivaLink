@@ -2,10 +2,10 @@ package com.example.vivalink;
 
 public class Notifications {
     private String notificationId, title, message, type, targetType, userId;
-    private Object createdAt; // Object عشان يقبل String أو Long بدون ما يطفي التطبيق
+    private Object createdAt;
     private boolean isRead;
 
-    public Notifications() {} // ضروري جداً
+    public Notifications() {}
 
     public String getNotificationId() { return notificationId; }
     public String getTitle() { return title; }

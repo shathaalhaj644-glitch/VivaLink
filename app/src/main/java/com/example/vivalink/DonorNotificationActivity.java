@@ -1,7 +1,7 @@
 package com.example.vivalink;
 
 import android.os.Bundle;
-import android.util.Log; // تم إضافة هذا السطر لحل مشكلة Log
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -69,33 +69,28 @@ public class DonorNotificationActivity extends AppCompatActivity {
                         BloodBankNotificationModel n = ds.getValue(BloodBankNotificationModel.class);
                         if (n == null || !"DONOR".equals(n.getTargetType())) continue;
 
-                        // -------------------------------------------------------
-                        // 1. الجزء الخاص بإشعارات "نتائج الفحص" (قبول/رفض)
-                        // -------------------------------------------------------
+
                         if ("test_result".equals(n.getType())) {
-                            // يظهر فقط للمتبرع المعني (صاحب الفحص)
+
                             if (myId != null && myId.equals(n.getTargetUserId())) {
                                 if (!list.contains(n)) {
                                     list.add(0, n);
                                 }
                             }
-                            continue; // ننتقل للإشعار التالي ولا نطبق شروط المدينة والفصيلة هنا
+                            continue;
                         }
 
-                        // -------------------------------------------------------
-                        // 2. الجزء الخاص بـ "طلبات الدم العاجلة" (كود الموظف)
-                        // -------------------------------------------------------
-                        // هذا الجزء يبقى كما هو لضمان وصول طلبات الموظف حسب الفصيلة والمدينة
+
                         if ("urgent_request".equals(n.getType())) {
                             String cleanMyCity = normalizeArabic(myCity);
                             String cleanNotifCity = normalizeArabic(n.getCity());
 
                             if (cleanMyCity.equals(cleanNotifCity)) {
-                                // فحص مطابقة فصيلة الدم
+
                                 if (myBloodType != null && n.getBloodType() != null &&
                                         myBloodType.trim().equalsIgnoreCase(n.getBloodType().trim())) {
 
-                                    // فحص أهلية المتبرع (مرور 4 شهور)
+
                                     checkDonationEligibilityAndAdd(n, fourMonthsMillis, currentTime);
                                 }
                             }
@@ -111,21 +106,21 @@ public class DonorNotificationActivity extends AppCompatActivity {
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
-    // تم دمج الدالتين في دالة واحدة صحيحة لمنع تكرار الـ Error
+
     private void checkDonationEligibilityAndAdd(BloodBankNotificationModel n, long period, long now) {
-        // استخدمنا lastDonation لأنه الحقل المعتمد في بيانات المتبرع عندك
+
         dbRef.child("Donors").child(myId).child("lastDonation").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean isEligible = true;
                 String lastDateStr = snapshot.getValue(String.class);
 
-                // إذا كان المتبرع قد تبرع سابقاً (الحقل ليس فارغاً وليس --)
+
                 if (lastDateStr != null && !lastDateStr.isEmpty() && !lastDateStr.equals("--")) {
                     try {
-                        // تحويل النص إلى تاريخ لمقارنته
+
                         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.ENGLISH);
-                        // تنظيف النص من أي أرقام عربية أو رموز غريبة
+
                         String cleanDate = lastDateStr.replace("٠","0").replace("١","1").replace("٢","2")
                                 .replace("٣","3").replace("٤","4").replace("٥","5")
                                 .replace("٦","6").replace("٧","7").replace("٨","8")
@@ -134,17 +129,17 @@ public class DonorNotificationActivity extends AppCompatActivity {
                         java.util.Date lastDonationDate = sdf.parse(cleanDate);
                         long diff = now - lastDonationDate.getTime();
 
-                        // إذا كان الفرق أصغر من 120 يوم (period) فهو غير مؤهل
+
                         if (diff < period) {
                             isEligible = false;
                         }
                     } catch (Exception e) {
-                        // في حال حدث خطأ في التاريخ، نعتبره مؤهل احتياطاً لكي لا يضيع عليه الطلب
+
                         isEligible = true;
                     }
                 }
 
-                // إذا كان مؤهلاً (مر 4 شهور أو لم يتبرع أبداً) نُظهر الإشعار
+
                 if (isEligible) {
                     if (!list.contains(n)) {
                         list.add(0, n);

@@ -29,7 +29,7 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        // وقت تشغيل الخدمة لمنع الإشعارات القديمة
+
         serviceStartTime = System.currentTimeMillis();
     }
 
@@ -59,7 +59,7 @@ public class NotificationService extends Service {
                         String targetUserId =
                                 snapshot.child("targetUserId").getValue(String.class);
 
-                        // فقط الإشعارات الجديدة وغير المقروءة
+
                         if (isRead != null
                                 && !isRead
                                 && createdAt != null
@@ -67,18 +67,14 @@ public class NotificationService extends Service {
 
                             boolean shouldShow = false;
 
-                            // ==================================================
-                            // 1. إشعارات الموظف / المستشفى
-                            // ==================================================
+
 
                             if (uid.equals(targetUserId)) {
 
                                 shouldShow = true;
                             }
 
-                            // ==================================================
-                            // 2. إشعارات المتبرعين
-                            // ==================================================
+
 
                             else if ("DONOR".equals(targetType)
                                     && (targetUserId == null
@@ -150,9 +146,6 @@ public class NotificationService extends Service {
                                                 });
                             }
 
-                            // ==================================================
-                            // إشعارات الموظفين فقط
-                            // ==================================================
 
                             if (shouldShow) {
 
@@ -208,9 +201,7 @@ public class NotificationService extends Service {
                 RingtoneManager.getDefaultUri(
                         RingtoneManager.TYPE_NOTIFICATION);
 
-        // ==================================================
-        // Android 8+
-        // ==================================================
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -238,9 +229,7 @@ public class NotificationService extends Service {
             manager.createNotificationChannel(channel);
         }
 
-        // ==================================================
-        // فتح التطبيق عند الضغط على الإشعار
-        // ==================================================
+
 
         Intent intent = new Intent(this, LoginActivity.class);
 

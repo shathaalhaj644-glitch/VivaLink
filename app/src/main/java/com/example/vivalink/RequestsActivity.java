@@ -80,19 +80,18 @@ public class RequestsActivity extends AppCompatActivity {
                             if (req != null) {
                                 String status = data.child("status").getValue(String.class);
 
-                                // 1. إذا كان ملغي، نتخطى الطلب تماماً ولا نضيفه للقائمة
+
                                 if ("ملغي".equals(status)) {
                                     continue;
                                 }
 
                                 req.setRequestId(data.getKey());
 
-                                // 2. فحص هل الطلب مغلق أو أن المستخدم تبرع له سابقاً
-                                // إذا كانت الحالة "مغلق" في الفايربيس، نجعل الكارد يظهر عليه "تم التبرع"
+
                                 boolean isClosed = "مغلق".equals(status);
                                 boolean isUserDonated = donorSnapshot.child("myDonations").hasChild(data.getKey());
 
-                                // إذا تحقق أحد الشرطين، نعتبره "تم التبرع" في التصميم
+
                                 req.setDonated(isClosed || isUserDonated);
 
                                 requestList.add(req);

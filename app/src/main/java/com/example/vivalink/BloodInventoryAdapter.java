@@ -76,7 +76,7 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             ItemVH v = (ItemVH) holder;
             v.reset();
 
-            if (tab == 0) { // تاب مخزوني
+            if (tab == 0) {
                 v.type.setText(m.bloodType);
                 v.units.setVisibility(View.VISIBLE);
                 v.units.setText("الوحدات: " + (m.units + m.threshold));
@@ -86,7 +86,7 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     if (listener != null) listener.onMyClick(m);
                 });
 
-            } else if (tab == 1) { // تاب المستشفيات
+            } else if (tab == 1) {
                 v.layoutInfo.setVisibility(View.VISIBLE);
                 v.btn.setVisibility(View.VISIBLE);
                 v.name.setText(m.hospitalName);
@@ -97,45 +97,45 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     if (listener != null) listener.onRequest(m);
                 });
 
-            } else { // تاب الطلبات
+            } else {
                 v.layoutInfo.setVisibility(View.VISIBLE);
                 v.name.setText("طلب من: " + m.fromHospitalName);
                 v.city.setText("المدينة: " + (m.city != null ? m.city : "جاري التحميل.."));
                 v.type.setText(m.bloodType);
                 v.units.setText("الكمية المطلوبة: " + m.requestedUnits);
 
-                // التحقق من حالة الطلب المخزنة في Firebase
-                if ("مقبول".equals(m.status)) {
-                    // حالة القبول:
-                    v.layoutActions.setVisibility(View.VISIBLE); // نبقي الحاوية ظاهرة
-                    v.accept.setVisibility(View.VISIBLE);        // نبقي زر القبول
-                    v.reject.setVisibility(View.GONE);           // نخفي زر الرفض نهائياً
 
-                    // تغيير شكل زر القبول ليصبح مجرد ملصق (Label)
+                if ("مقبول".equals(m.status)) {
+
+                    v.layoutActions.setVisibility(View.VISIBLE);
+                    v.accept.setVisibility(View.VISIBLE);
+                    v.reject.setVisibility(View.GONE);
+
+
                     v.accept.setText("تم قبول هذا الطلب");
-                    v.accept.setBackgroundColor(Color.parseColor("#4CAF50")); // لون أخضر
-                    v.accept.setEnabled(false); // نجعله غير قابل للضغط
+                    v.accept.setBackgroundColor(Color.parseColor("#4CAF50"));
+                    v.accept.setEnabled(false);
                     v.accept.setTextColor(Color.WHITE);
 
                 } else if ("مرفوض".equals(m.status)) {
-                    // حالة الرفض:
-                    v.layoutActions.setVisibility(View.VISIBLE);
-                    v.accept.setVisibility(View.GONE);           // نخفي زر القبول نهائياً
-                    v.reject.setVisibility(View.VISIBLE);        // نبقي زر الرفض
 
-                    // تغيير شكل زر الرفض ليصبح ملصق
+                    v.layoutActions.setVisibility(View.VISIBLE);
+                    v.accept.setVisibility(View.GONE);
+                    v.reject.setVisibility(View.VISIBLE);
+
+
                     v.reject.setText("تم رفض هذا الطلب");
-                    v.reject.setBackgroundColor(Color.parseColor("#F44336")); // لون أحمر
-                    v.reject.setEnabled(false); // نجعله غير قابل للضغط
+                    v.reject.setBackgroundColor(Color.parseColor("#F44336"));
+                    v.reject.setEnabled(false);
                     v.reject.setTextColor(Color.WHITE);
 
                 } else {
-                    // الحالة الافتراضية (Pending): إظهار الزرين بشكل طبيعي وتفعيلهما
+
                     v.layoutActions.setVisibility(View.VISIBLE);
                     v.accept.setVisibility(View.VISIBLE);
                     v.reject.setVisibility(View.VISIBLE);
 
-                    // إعادة النصوص والألوان الأصلية (لأن الـ ViewHolder يُعاد استخدامه)
+
                     v.accept.setText("قبول");
                     v.accept.setBackgroundColor(Color.parseColor("#4CAF50"));
                     v.accept.setEnabled(true);
@@ -144,7 +144,7 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     v.reject.setBackgroundColor(Color.parseColor("#D32F2F"));
                     v.reject.setEnabled(true);
 
-                    // ربط الأحداث بالليسنر
+
                     v.accept.setOnClickListener(x -> {
                         if (listener != null) listener.onAccept(m);
                     });
@@ -187,7 +187,7 @@ public class BloodInventoryAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             layoutInfo.setVisibility(View.GONE);
             btn.setVisibility(View.GONE);
             layoutActions.setVisibility(View.GONE);
-            units.setTextColor(Color.BLACK); // إعادة اللون الافتراضي
+            units.setTextColor(Color.BLACK);
         }
     }
 }
